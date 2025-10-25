@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import WaveBackground from "@/components/WaveBackground";
-import DolphinSwim from "@/components/DolphinSwim";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -75,7 +74,6 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <WaveBackground />
-      <DolphinSwim />
       
       <Card className="w-full max-w-md mx-4 shadow-float animate-float z-10">
         <CardHeader className="text-center">
