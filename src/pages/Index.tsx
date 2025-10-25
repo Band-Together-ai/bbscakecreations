@@ -17,6 +17,10 @@ import cake6 from "@/assets/cake-6.jpg";
 const Index = () => {
   const navigate = useNavigate();
   const [featuredCakes, setFeaturedCakes] = useState<any[]>([]);
+  const [profileImage, setProfileImage] = useState(brandiaProfile);
+  const [profileBio, setProfileBio] = useState(
+    "Hi! I'm Brandia, the baker behind every scratch-made creation you see here. From ocean-inspired ombres to delicate herb-adorned layers, I believe every cake should tell a story—your story. Whether you need gluten-free magic or a classic from-scratch masterpiece, I'm here to bring your vision to life."
+  );
 
   const defaultCakes = [
     {
@@ -53,7 +57,21 @@ const Index = () => {
 
   useEffect(() => {
     fetchFeaturedRecipes();
+    fetchProfileSettings();
   }, []);
+
+  const fetchProfileSettings = async () => {
+    const { data } = await supabase
+      .from("profile_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      if (data.profile_image_url) setProfileImage(data.profile_image_url);
+      if (data.bio_text) setProfileBio(data.bio_text);
+    }
+  };
 
   const fetchFeaturedRecipes = async () => {
     const { data } = await supabase
@@ -210,7 +228,7 @@ const Index = () => {
               <div className="shrink-0">
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
                   <img
-                    src={brandiaProfile}
+                    src={profileImage}
                     alt="Brandia - Cake Artist and Creator"
                     className="w-full h-full object-cover"
                   />
@@ -223,10 +241,7 @@ const Index = () => {
                   Meet Brandia
                 </h2>
                 <p className="text-lg text-ocean-deep font-quicksand leading-relaxed">
-                  Hi! I'm Brandia, the baker behind every scratch-made creation you see here. 
-                  From ocean-inspired ombres to delicate herb-adorned layers, I believe every cake 
-                  should tell a story—your story. Whether you need gluten-free magic or a classic 
-                  from-scratch masterpiece, I'm here to bring your vision to life.
+                  {profileBio}
                 </p>
                 <Button
                   onClick={() => navigate("/about")}

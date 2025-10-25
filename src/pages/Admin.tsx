@@ -39,12 +39,19 @@ const Admin = () => {
   const [selectedPhotoUrl, setSelectedPhotoUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Profile settings state
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [bioText, setBioText] = useState("");
+  const [profileSettingsId, setProfileSettingsId] = useState<string | null>(null);
+  const profileFileInputRef = useRef<HTMLInputElement>(null);
+
   // TEMPORARILY DISABLED FOR TESTING
   useEffect(() => {
     // Skip auth check for testing
     setLoading(false);
     setIsAdmin(true);
     fetchUploadedPhotos();
+    fetchProfileSettings();
   }, []);
 
   const fetchUploadedPhotos = async () => {
@@ -63,6 +70,25 @@ const Admin = () => {
         url: supabase.storage.from('recipe-photos').getPublicUrl(file.name).data.publicUrl
       }));
       setUploadedPhotos(photosWithUrls);
+    }
+  };
+
+  const fetchProfileSettings = async () => {
+    const { data, error } = await supabase
+      .from("profile_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching profile settings:", error);
+      return;
+    }
+
+    if (data) {
+      setProfileSettingsId(data.id);
+      setProfileImageUrl(data.profile_image_url || "");
+      setBioText(data.bio_text || "");
     }
   };
 
@@ -218,6 +244,73 @@ const Admin = () => {
       console.error("Error transcribing audio:", error);
       toast.error("Failed to process audio");
     }
+  };
+
+  const handleProfilePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `profile_${Date.now()}.${fileExt}`;
+
+    toast.info("Uploading profile photo...");
+
+    const { error: uploadError, data } = await supabase.storage
+      .from('recipe-photos')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      toast.error("Failed to upload photo");
+      return;
+    }
+
+    const publicUrl = supabase.storage.from('recipe-photos').getPublicUrl(fileName).data.publicUrl;
+    setProfileImageUrl(publicUrl);
+    toast.success("Photo uploaded!");
+  };
+
+  const handleSaveProfileSettings = async () => {
+    if (!bioText.trim()) {
+      toast.error("Please add a bio description");
+      return;
+    }
+
+    const profileData = {
+      profile_image_url: profileImageUrl,
+      bio_text: bioText,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (profileSettingsId) {
+      // Update existing
+      const result = await supabase
+        .from("profile_settings")
+        .update(profileData)
+        .eq("id", profileSettingsId);
+      error = result.error;
+    } else {
+      // Insert new
+      const result = await supabase
+        .from("profile_settings")
+        .insert(profileData)
+        .select()
+        .single();
+      error = result.error;
+      if (!error && result.data) {
+        setProfileSettingsId(result.data.id);
+      }
+    }
+
+    if (error) {
+      toast.error("Failed to save profile settings");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Profile settings saved successfully!");
   };
 
   if (loading) {
@@ -567,6 +660,68 @@ const Admin = () => {
           {/* SETTINGS TAB */}
           <TabsContent value="settings">
             <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-fredoka">Profile Settings</CardTitle>
+                  <CardDescription>
+                    Edit your profile photo and about me section that appears on the homepage
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="profile-photo">Profile Photo</Label>
+                    <input
+                      ref={profileFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePhotoUpload}
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-6">
+                      {profileImageUrl && (
+                        <div className="w-32 h-32 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
+                          <img
+                            src={profileImageUrl}
+                            alt="Profile preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <Button 
+                        variant="outline"
+                        onClick={() => profileFileInputRef.current?.click()}
+                        className="gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {profileImageUrl ? "Change Photo" : "Upload Photo"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bio-text">About Me</Label>
+                    <Textarea
+                      id="bio-text"
+                      placeholder="Hi! I'm Brandia, the baker behind every scratch-made creation..."
+                      value={bioText}
+                      onChange={(e) => setBioText(e.target.value)}
+                      rows={4}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      This will appear in the "Meet Brandia" section at the bottom of the homepage
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleSaveProfileSettings}
+                    className="w-full gradient-ocean text-primary-foreground"
+                    size="lg"
+                  >
+                    Save Profile Settings
+                  </Button>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="font-fredoka">Collaborators</CardTitle>

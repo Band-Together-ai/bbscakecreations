@@ -118,6 +118,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_settings: {
+        Row: {
+          bio_text: string | null
+          created_at: string | null
+          id: string
+          profile_image_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bio_text?: string | null
+          created_at?: string | null
+          id?: string
+          profile_image_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bio_text?: string | null
+          created_at?: string | null
+          id?: string
+          profile_image_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
