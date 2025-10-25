@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
 import { ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import heroCake from "@/assets/hero-cake.jpg";
 import cake1 from "@/assets/cake-1.jpg";
 import cake2 from "@/assets/cake-2.jpg";
@@ -13,8 +15,9 @@ import cake6 from "@/assets/cake-6.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [featuredCakes, setFeaturedCakes] = useState<any[]>([]);
 
-  const cakes = [
+  const defaultCakes = [
     {
       image: cake1,
       title: "Herb Garden Dream",
@@ -46,6 +49,30 @@ const Index = () => {
       description: "Velvety cocoa layers with tangy cream cheese—pure from-scratch love",
     },
   ];
+
+  useEffect(() => {
+    fetchFeaturedRecipes();
+  }, []);
+
+  const fetchFeaturedRecipes = async () => {
+    const { data } = await supabase
+      .from("recipes")
+      .select("*")
+      .eq("is_featured", true)
+      .eq("is_public", true)
+      .order("created_at", { ascending: false })
+      .limit(6);
+
+    if (data && data.length > 0) {
+      setFeaturedCakes(data.map(recipe => ({
+        image: recipe.image_url || cake1,
+        title: recipe.title,
+        description: recipe.description || "",
+      })));
+    }
+  };
+
+  const cakes = featuredCakes.length > 0 ? featuredCakes : defaultCakes;
 
   return (
     <div className="min-h-screen relative overflow-hidden">

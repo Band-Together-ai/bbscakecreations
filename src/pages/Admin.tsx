@@ -27,6 +27,7 @@ const Admin = () => {
   const [recipeTags, setRecipeTags] = useState("");
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
   
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -108,6 +109,7 @@ const Admin = () => {
       image_url: selectedPhotoUrl || null,
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
+      is_featured: isFeatured,
     });
 
     if (error) {
@@ -124,6 +126,9 @@ const Admin = () => {
     setRecipeTags("");
     setRecipeLink("");
     setSelectedPhotoUrl("");
+    setIsGlutenFree(false);
+    setIsPublic(false);
+    setIsFeatured(false);
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,7 +404,17 @@ const Admin = () => {
                       id="public-recipe"
                     />
                     <Label htmlFor="public-recipe" className="cursor-pointer">
-                      Make Public (Show teaser only until subscribed)
+                      Make Public
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={isFeatured}
+                      onCheckedChange={setIsFeatured}
+                      id="featured-recipe"
+                    />
+                    <Label htmlFor="featured-recipe" className="cursor-pointer">
+                      Feature on Home Page
                     </Label>
                   </div>
                 </div>
