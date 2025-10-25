@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,12 +14,26 @@ serve(async (req) => {
   try {
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Calling Lovable AI with messages:", messages.length);
+    // Fetch all public recipes from database
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+    const { data: recipes, error: recipesError } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
+
+    if (recipesError) {
+      console.error("Error fetching recipes:", recipesError);
+    }
+
+    console.log("Calling Lovable AI with messages:", messages.length, "and", recipes?.length || 0, "recipes");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -39,10 +54,25 @@ serve(async (req) => {
 - Love using fresh flowers, herbs, and natural decorations
 - Every cake tells a story
 
+IMPORTANT: You have access to Brandia's recipe collection below. ALWAYS prioritize these actual recipes when helping users. Reference them by name and provide their exact details when relevant.
+
+${recipes && recipes.length > 0 ? `
+Available Recipes:
+${recipes.map(r => `
+**${r.title}** ${r.is_gluten_free ? '(Gluten-Free)' : '(Can be adapted to be gluten-free)'}
+${r.category ? `Category: ${r.category}` : ''}
+${r.description || ''}
+${r.ingredients ? `Ingredients: ${JSON.stringify(r.ingredients)}` : ''}
+${r.instructions || ''}
+${r.tags?.length ? `Tags: ${r.tags.join(', ')}` : ''}
+`).join('\n---\n')}
+` : 'No recipes available yet in the database.'}
+
 When analyzing cake photos:
 - Describe what you see in detail (colors, decorations, texture, flowers/herbs used)
 - Identify the type of cake and frosting if visible
 - Suggest the likely flavors and ingredients
+- Check if we have a similar recipe in our collection and reference it
 - Offer to help recreate or adapt the recipe
 - Ask what specifically they want to know or replicate
 
