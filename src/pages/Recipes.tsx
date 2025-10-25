@@ -61,7 +61,16 @@ const Recipes = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {recipes.map((recipe) => (
-              <Card key={recipe.id} className="shadow-wave hover:shadow-float transition-all hover:scale-105">
+              <Card key={recipe.id} className="shadow-wave hover:shadow-float transition-all hover:scale-105 overflow-hidden">
+                {recipe.image_url && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img
+                      src={recipe.image_url}
+                      alt={recipe.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   {recipe.is_gluten_free && (
                     <div className="inline-flex items-center gap-1 px-3 py-1 bg-seaweed/10 text-seaweed rounded-full text-sm font-fredoka mb-2 w-fit">

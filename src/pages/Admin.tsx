@@ -32,13 +32,38 @@ const Admin = () => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  
+  // Photo upload state
+  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([]);
+  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // TEMPORARILY DISABLED FOR TESTING
   useEffect(() => {
     // Skip auth check for testing
     setLoading(false);
     setIsAdmin(true);
+    fetchUploadedPhotos();
   }, []);
+
+  const fetchUploadedPhotos = async () => {
+    const { data, error } = await supabase.storage
+      .from('recipe-photos')
+      .list('', { sortBy: { column: 'created_at', order: 'desc' } });
+
+    if (error) {
+      console.error("Error fetching photos:", error);
+      return;
+    }
+
+    if (data) {
+      const photosWithUrls = data.map(file => ({
+        name: file.name,
+        url: supabase.storage.from('recipe-photos').getPublicUrl(file.name).data.publicUrl
+      }));
+      setUploadedPhotos(photosWithUrls);
+    }
+  };
 
   // const checkAuth = async () => {
   //   const { data: { session } } = await supabase.auth.getSession();
@@ -74,12 +99,13 @@ const Admin = () => {
     }
 
     const { error } = await supabase.from("recipes").insert({
-      user_id: user.id,
+      user_id: user?.id || null,
       title: recipeTitle,
       description: recipeDescription,
       instructions: recipeInstructions,
       category: recipeCategory || null,
       tags: recipeTags ? recipeTags.split(',').map(t => t.trim()) : null,
+      image_url: selectedPhotoUrl || null,
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
     });
@@ -97,6 +123,32 @@ const Admin = () => {
     setRecipeCategory("");
     setRecipeTags("");
     setRecipeLink("");
+    setSelectedPhotoUrl("");
+  };
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    toast.info("Uploading photos...");
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('recipe-photos')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+
+    toast.success("Photos uploaded successfully!");
+    fetchUploadedPhotos();
   };
 
   const handleVoiceRecording = async () => {
@@ -213,6 +265,31 @@ const Admin = () => {
                     onChange={(e) => setRecipeTitle(e.target.value)}
                   />
                 </div>
+
+                {uploadedPhotos.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Select a Photo for this Recipe</Label>
+                    <div className="grid grid-cols-4 gap-3 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                      {uploadedPhotos.map((photo) => (
+                        <div
+                          key={photo.name}
+                          onClick={() => setSelectedPhotoUrl(photo.url)}
+                          className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                            selectedPhotoUrl === photo.url
+                              ? 'border-ocean-wave ring-2 ring-ocean-wave'
+                              : 'border-transparent hover:border-ocean-wave/50'
+                          }`}
+                        >
+                          <img
+                            src={photo.url}
+                            alt={photo.name}
+                            className="w-full h-20 object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="recipe-desc">Description (The Vibe)</Label>
@@ -344,11 +421,22 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle className="font-fredoka">Photo Gallery Manager</CardTitle>
                 <CardDescription>
-                  Drag and drop your cake photos—auto-tags date, size, floral details
+                  Upload your cake photos and link them to recipes
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="border-2 border-dashed border-ocean-wave/30 rounded-3xl p-12 text-center hover:border-ocean-wave transition-colors cursor-pointer">
+              <CardContent className="space-y-6">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-ocean-wave/30 rounded-3xl p-12 text-center hover:border-ocean-wave transition-colors cursor-pointer"
+                >
                   <Upload className="w-12 h-12 text-ocean-wave mx-auto mb-4" />
                   <h3 className="font-fredoka text-xl text-ocean-deep mb-2">
                     Drop your gorgeous cake photos here
@@ -358,9 +446,28 @@ const Admin = () => {
                   </p>
                   <Button variant="outline">Browse Files</Button>
                 </div>
-                <p className="text-sm text-muted-foreground mt-4 text-center">
-                  Coming soon: Sasha will analyze each photo for texture, flavors, and decorations
-                </p>
+
+                {uploadedPhotos.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-fredoka text-lg">Uploaded Photos ({uploadedPhotos.length})</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {uploadedPhotos.map((photo) => (
+                        <div key={photo.name} className="relative group">
+                          <img
+                            src={photo.url}
+                            alt={photo.name}
+                            className="w-full aspect-square object-cover rounded-lg"
+                          />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <p className="text-white text-xs p-2 text-center break-all">
+                              {photo.name}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
