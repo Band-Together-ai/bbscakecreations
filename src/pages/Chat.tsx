@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,18 +8,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
-import { Send, Upload, Link as LinkIcon, Mic } from "lucide-react";
+import { Send, Upload, Link as LinkIcon, Mic, X } from "lucide-react";
 
 const Chat = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([
+  const [messages, setMessages] = useState<Array<{ role: string; content: string; image?: string }>>([
     {
       role: "assistant",
       content: "Hey sugar, let's bake something alive—what's the vibe today? 🌊✨",
     },
   ]);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // TEMPORARILY DISABLED FOR TESTING
   // useEffect(() => {
@@ -44,13 +50,98 @@ const Chat = () => {
   //   return () => subscription.unsubscribe();
   // }, [navigate]);
 
+  const handlePhotoUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result as string);
+        toast.success("Photo uploaded! Add your message and send.");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVoiceRecording = async () => {
+    if (isRecording) {
+      // Stop recording
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      // Start recording
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunksRef.current.push(event.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          await transcribeAudio(audioBlob);
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+        toast.info("Recording... Click again to stop.");
+      } catch (error) {
+        console.error("Error accessing microphone:", error);
+        toast.error("Could not access microphone. Please check permissions.");
+      }
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Audio = (reader.result as string).split(',')[1];
+        
+        const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+          body: { audio: base64Audio },
+        });
+
+        if (error) throw error;
+
+        if (data?.text) {
+          setMessage((prev) => prev + (prev ? ' ' : '') + data.text);
+          toast.success("Voice transcribed!");
+        }
+      };
+      reader.readAsDataURL(audioBlob);
+    } catch (error) {
+      console.error("Transcription error:", error);
+      toast.error("Failed to transcribe audio. Please try again.");
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() && !uploadedImage) return;
 
-    const userMessage = { role: "user", content: message };
+    const userMessage: { role: string; content: string; image?: string } = {
+      role: "user",
+      content: message,
+    };
+
+    if (uploadedImage) {
+      userMessage.image = uploadedImage;
+    }
+
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
+    setUploadedImage(null);
 
     // Simulate AI response (in a real implementation, this would call your AI backend)
     setTimeout(() => {
@@ -96,6 +187,13 @@ const Chat = () => {
                           : "bg-ocean-foam text-ocean-deep"
                       }`}
                     >
+                      {msg.image && (
+                        <img 
+                          src={msg.image} 
+                          alt="Uploaded" 
+                          className="rounded-lg mb-2 max-w-full h-auto"
+                        />
+                      )}
                       <p className="text-sm">{msg.content}</p>
                     </div>
                   </div>
@@ -104,8 +202,38 @@ const Chat = () => {
             </ScrollArea>
 
             <div className="mt-4 space-y-4">
+              {uploadedImage && (
+                <div className="relative inline-block">
+                  <img 
+                    src={uploadedImage} 
+                    alt="Preview" 
+                    className="rounded-lg max-h-32 border-2 border-ocean-wave"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                    onClick={() => setUploadedImage(null)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
               <div className="flex gap-2 justify-center">
-                <Button variant="outline" size="sm" className="gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={handlePhotoUpload}
+                >
                   <Upload className="w-4 h-4" />
                   Photo
                 </Button>
@@ -113,9 +241,15 @@ const Chat = () => {
                   <LinkIcon className="w-4 h-4" />
                   Recipe Link
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`gap-2 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
+                  onClick={handleVoiceRecording}
+                  disabled={isTranscribing}
+                >
                   <Mic className="w-4 h-4" />
-                  Voice
+                  {isRecording ? 'Stop' : isTranscribing ? 'Processing...' : 'Voice'}
                 </Button>
               </div>
               
@@ -130,6 +264,7 @@ const Chat = () => {
                   type="submit"
                   size="icon"
                   className="gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
+                  disabled={!message.trim() && !uploadedImage}
                 >
                   <Send className="w-4 h-4" />
                 </Button>
