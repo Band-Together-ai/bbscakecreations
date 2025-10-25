@@ -2,12 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings } from "lucide-react";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X } from "lucide-react";
 
 const Navigation = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // TEMPORARILY DISABLED FOR TESTING
   // useEffect(() => {
@@ -52,11 +53,12 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate("/")}
-            className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+            className="text-2xl font-fredoka text-ocean-deep hover:opacity-80 transition-opacity"
           >
             CakeWhisperer
           </button>
 
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             <button
               onClick={() => navigate("/")}
@@ -95,8 +97,8 @@ const Navigation = () => {
             </button>
           </nav>
 
-          <div className="flex items-center gap-4">
-            {/* TEMPORARILY SHOWING ALL BUTTONS FOR TESTING */}
+          {/* Desktop Action Buttons */}
+          <div className="hidden md:flex items-center gap-4">
             <Button
               variant="outline"
               size="sm"
@@ -116,7 +118,97 @@ const Navigation = () => {
               Admin
             </Button>
           </div>
+
+          {/* Mobile Menu Buttons */}
+          <div className="flex md:hidden items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Home
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 space-y-2 border-t border-border pt-4">
+            <button
+              onClick={() => {
+                navigate("/recipes");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+            >
+              <BookOpen className="w-4 h-4" />
+              Recipes
+            </button>
+            <button
+              onClick={() => {
+                navigate("/blog");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Blog
+            </button>
+            <button
+              onClick={() => {
+                navigate("/community");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+            >
+              <Users className="w-4 h-4" />
+              Community
+            </button>
+            <button
+              onClick={() => {
+                navigate("/about");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+            >
+              <User className="w-4 h-4" />
+              About
+            </button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigate("/chat");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full gap-2 justify-start"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Chat with Sasha
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigate("/admin");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full gap-2 justify-start border-coral text-coral hover:bg-coral hover:text-white"
+            >
+              <Settings className="w-4 h-4" />
+              Admin
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );
