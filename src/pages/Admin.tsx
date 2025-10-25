@@ -23,6 +23,8 @@ const Admin = () => {
   const [recipeDescription, setRecipeDescription] = useState("");
   const [recipeLink, setRecipeLink] = useState("");
   const [recipeInstructions, setRecipeInstructions] = useState("");
+  const [recipeCategory, setRecipeCategory] = useState("");
+  const [recipeTags, setRecipeTags] = useState("");
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
 
@@ -71,6 +73,8 @@ const Admin = () => {
       title: recipeTitle,
       description: recipeDescription,
       instructions: recipeInstructions,
+      category: recipeCategory || null,
+      tags: recipeTags ? recipeTags.split(',').map(t => t.trim()) : null,
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
     });
@@ -85,6 +89,8 @@ const Admin = () => {
     setRecipeTitle("");
     setRecipeDescription("");
     setRecipeInstructions("");
+    setRecipeCategory("");
+    setRecipeTags("");
     setRecipeLink("");
   };
 
@@ -148,6 +154,27 @@ const Admin = () => {
                     onChange={(e) => setRecipeDescription(e.target.value)}
                     rows={3}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="recipe-category">Category</Label>
+                    <Input
+                      id="recipe-category"
+                      placeholder="e.g., Base Recipe, Variation, Wedding Cake"
+                      value={recipeCategory}
+                      onChange={(e) => setRecipeCategory(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="recipe-tags">Tags (comma-separated)</Label>
+                    <Input
+                      id="recipe-tags"
+                      placeholder="chocolate, vanilla, birthday"
+                      value={recipeTags}
+                      onChange={(e) => setRecipeTags(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
