@@ -268,18 +268,46 @@ const Admin = () => {
 
     const publicUrl = supabase.storage.from('recipe-photos').getPublicUrl(fileName).data.publicUrl;
     setProfileImageUrl(publicUrl);
-    toast.success("Photo uploaded!");
-  };
 
-  const handleSaveProfileSettings = async () => {
-    if (!bioText.trim()) {
-      toast.error("Please add a bio description");
+    // Auto-save to database
+    const profileData = {
+      profile_image_url: publicUrl,
+      bio_text: bioText || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (profileSettingsId) {
+      const result = await supabase
+        .from("profile_settings")
+        .update(profileData)
+        .eq("id", profileSettingsId);
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("profile_settings")
+        .insert(profileData)
+        .select()
+        .single();
+      error = result.error;
+      if (!error && result.data) {
+        setProfileSettingsId(result.data.id);
+      }
+    }
+
+    if (error) {
+      console.error("Save error:", error);
+      toast.error("Photo uploaded but failed to save");
       return;
     }
 
+    toast.success("Profile photo updated!");
+  };
+
+  const handleSaveProfileSettings = async () => {
     const profileData = {
       profile_image_url: profileImageUrl,
-      bio_text: bioText,
+      bio_text: bioText || null,
       updated_at: new Date().toISOString(),
     };
 
