@@ -9,25 +9,26 @@ const Navigation = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminStatus(session.user.id);
-      }
-    });
+  // TEMPORARILY DISABLED FOR TESTING
+  // useEffect(() => {
+  //   supabase.auth.getSession().then(({ data: { session } }) => {
+  //     setUser(session?.user ?? null);
+  //     if (session?.user) {
+  //       checkAdminStatus(session.user.id);
+  //     }
+  //   });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminStatus(session.user.id);
-      }
-    });
+  //   const {
+  //     data: { subscription },
+  //   } = supabase.auth.onAuthStateChange((event, session) => {
+  //     setUser(session?.user ?? null);
+  //     if (session?.user) {
+  //       checkAdminStatus(session.user.id);
+  //     }
+  //   });
 
-    return () => subscription.unsubscribe();
-  }, []);
+  //   return () => subscription.unsubscribe();
+  // }, []);
 
   const checkAdminStatus = async (userId: string) => {
     const { data } = await supabase
@@ -39,10 +40,11 @@ const Navigation = () => {
     setIsAdmin(data?.is_admin || false);
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
+  // TEMPORARILY DISABLED FOR TESTING
+  // const handleSignOut = async () => {
+  //   await supabase.auth.signOut();
+  //   navigate("/");
+  // };
 
   return (
     <header className="relative z-20 border-b border-border bg-card/80 backdrop-blur-sm">
@@ -94,41 +96,25 @@ const Navigation = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/chat")}
-                  className="gap-2"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Chat with Sasha
-                </Button>
-                {isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate("/admin")}
-                    className="gap-2 border-coral text-coral hover:bg-coral hover:text-white"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Admin
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <Button
-                onClick={() => navigate("/auth")}
-                className="gradient-ocean text-primary-foreground"
-              >
-                Sign In
-              </Button>
-            )}
+            {/* TEMPORARILY SHOWING ALL BUTTONS FOR TESTING */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/chat")}
+              className="gap-2"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Chat with Sasha
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/admin")}
+              className="gap-2 border-coral text-coral hover:bg-coral hover:text-white"
+            >
+              <Settings className="w-4 h-4" />
+              Admin
+            </Button>
           </div>
         </div>
       </div>

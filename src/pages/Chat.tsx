@@ -21,27 +21,28 @@ const Chat = () => {
     },
   ]);
 
-  useEffect(() => {
-    // Check authentication
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-      }
-    });
+  // TEMPORARILY DISABLED FOR TESTING
+  // useEffect(() => {
+  //   // Check authentication
+  //   supabase.auth.getSession().then(({ data: { session } }) => {
+  //     if (!session) {
+  //       navigate("/auth");
+  //     } else {
+  //       setUser(session.user);
+  //     }
+  //   });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/auth");
-      }
-      setUser(session?.user ?? null);
-    });
+  //   const {
+  //     data: { subscription },
+  //   } = supabase.auth.onAuthStateChange((event, session) => {
+  //     if (event === "SIGNED_OUT") {
+  //       navigate("/auth");
+  //     }
+  //     setUser(session?.user ?? null);
+  //   });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  //   return () => subscription.unsubscribe();
+  // }, [navigate]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
