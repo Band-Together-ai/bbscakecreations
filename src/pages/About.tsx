@@ -42,7 +42,7 @@ const About = () => {
                 </p>
                 <p>
                   I never use box mixes or fondant. Why? Because shortcuts rob cakes of their soul. 
-                  Instead, I craft gluten-free recipes that don't compromise on texture—almond flour 
+                  Instead, I craft recipes that can be adapted to be gluten-free without compromising texture—almond flour 
                   that creates the dreamiest sponge, xanthan gum for that perfect crumb.
                 </p>
                 <p>
@@ -72,10 +72,10 @@ const About = () => {
               <CardContent className="p-8">
                 <Sprout className="w-12 h-12 text-seaweed mx-auto mb-4" />
                 <h3 className="font-fredoka text-xl text-ocean-deep mb-3">
-                  Gluten-Free by Heart
+                  Gluten-Free Adaptable
                 </h3>
                 <p className="text-muted-foreground">
-                  Everyone deserves cake. My gluten-free recipes create the fluffiest, moistest crumb.
+                  Everyone deserves cake. Most recipes can be made gluten-free or low-gluten for the fluffiest, moistest crumb.
                 </p>
               </CardContent>
             </Card>

@@ -48,7 +48,7 @@ const Recipes = () => {
             Brandia's Recipe Collection
           </h1>
           <p className="text-xl text-dolphin max-w-2xl mx-auto">
-            From-scratch recipes with gluten-free magic. Teasers are free—full recipes unlock with subscription.
+            From-scratch recipes—many can be made gluten-free. Teasers are free—full recipes unlock with subscription.
           </p>
         </div>
 

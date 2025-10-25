@@ -148,7 +148,7 @@ const Chat = () => {
       const aiResponse = {
         role: "assistant",
         content:
-          "That sounds delicious! Let me help you craft that recipe from scratch—no box mixes, always gluten-free friendly. Tell me more about the flavors you're craving? 🍰",
+          "That sounds delicious! Let me help you craft that recipe from scratch—no box mixes, and we can adapt it to be gluten-free or low-gluten if needed. Tell me more about the flavors you're craving? 🍰",
       };
       setMessages((prev) => [...prev, aiResponse]);
     }, 1000);

@@ -23,7 +23,7 @@ const Admin = () => {
   const [recipeDescription, setRecipeDescription] = useState("");
   const [recipeLink, setRecipeLink] = useState("");
   const [recipeInstructions, setRecipeInstructions] = useState("");
-  const [isGlutenFree, setIsGlutenFree] = useState(true);
+  const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
 
   // TEMPORARILY DISABLED FOR TESTING
@@ -143,7 +143,7 @@ const Admin = () => {
                   <Label htmlFor="recipe-desc">Description (The Vibe)</Label>
                   <Textarea
                     id="recipe-desc"
-                    placeholder="Velvety vanilla waves with a hidden mint surprise and real herb crown—gluten-free magic!"
+                    placeholder="Velvety vanilla waves with a hidden mint surprise and real herb crown—can be made gluten-free!"
                     value={recipeDescription}
                     onChange={(e) => setRecipeDescription(e.target.value)}
                     rows={3}
@@ -197,7 +197,7 @@ const Admin = () => {
                       id="gluten-free"
                     />
                     <Label htmlFor="gluten-free" className="cursor-pointer">
-                      Gluten-Free
+                      Gluten-Free (or Low-Gluten)
                     </Label>
                   </div>
                   <div className="flex items-center gap-3">

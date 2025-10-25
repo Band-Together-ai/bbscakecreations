@@ -18,7 +18,7 @@ const Index = () => {
     {
       image: cake1,
       title: "Herb Garden Dream",
-      description: "Fluffy vanilla with fresh mint and edible flowers—gluten-free magic that melts hearts",
+      description: "Fluffy vanilla with fresh mint and edible flowers—can be made gluten-free without compromising texture",
     },
     {
       image: cake2,
@@ -62,9 +62,9 @@ const Index = () => {
                 Brandia's<br />CakeWhisperer
               </h1>
               <p className="text-xl text-ocean-deep font-quicksand max-w-xl">
-                Where every cake is baked from scratch with love, gluten-free by default, 
-                adorned with live flowers, and crafted to tell your story. No box mixes. 
-                No fondant. Just pure magic.
+                Where every cake is baked from scratch with love, 
+                adorned with live flowers, and crafted to tell your story. Most cakes can be made 
+                gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
               </p>
               <div className="pt-4">
                 <p className="text-lg font-fredoka text-dolphin mb-4">
@@ -104,7 +104,7 @@ const Index = () => {
               Signature Creations
             </h2>
             <p className="text-xl text-dolphin font-quicksand max-w-2xl mx-auto">
-              Every cake is a love letter baked from scratch—gluten-free friendly, 
+              Every cake is a love letter baked from scratch—can be adapted to be gluten-free or low-gluten, 
               never using box mixes or fondant. Just real ingredients and real stories.
             </p>
           </div>
@@ -149,9 +149,9 @@ const Index = () => {
                 starts with real ingredients—almond flour, farm-fresh eggs, pure vanilla. Never a box mix.
               </p>
               <p>
-                <strong className="font-fredoka text-xl">Gluten-free by heart.</strong> I believe everyone 
-                deserves cake that doesn't compromise on texture or taste. My gluten-free swaps create 
-                the dreamiest crumb.
+                <strong className="font-fredoka text-xl">Gluten-free adaptable.</strong> Most cakes can 
+                be made gluten-free or low-gluten without compromising on texture or taste. My gluten-free 
+                swaps create the dreamiest crumb when you need them.
               </p>
               <p>
                 <strong className="font-fredoka text-xl">Live flowers, real stories.</strong> Lavender, 
