@@ -47,16 +47,19 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        ocean: {
+          deep: "hsl(var(--ocean-deep))",
+          wave: "hsl(var(--ocean-wave))",
+          foam: "hsl(var(--ocean-foam))",
+          shore: "hsl(var(--ocean-shore))",
         },
+        dolphin: "hsl(var(--dolphin-grey))",
+        coral: "hsl(var(--coral-pink))",
+        seaweed: "hsl(var(--seaweed-green))",
+      },
+      fontFamily: {
+        fredoka: ['Fredoka', 'sans-serif'],
+        quicksand: ['Quicksand', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
