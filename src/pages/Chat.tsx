@@ -14,7 +14,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Array<{ role: string; content: string; image?: string }>>([
+  const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
       role: "assistant",
       content: "Hey sugar, let's bake something alive—what's the vibe today? 🌊✨",
@@ -130,28 +130,77 @@ const Chat = () => {
     e.preventDefault();
     if (!message.trim() && !uploadedImage) return;
 
-    const userMessage: { role: string; content: string; image?: string } = {
+    // Build the user message with text and/or image
+    const userMessage: { role: string; content: string | Array<any>; image?: string } = {
       role: "user",
       content: message,
     };
 
+    // If there's an image, format it for the AI (multimodal)
+    let apiMessages = [...messages];
+    
     if (uploadedImage) {
       userMessage.image = uploadedImage;
+      // Format for AI: array with text and image_url
+      const contentArray: Array<any> = [];
+      if (message.trim()) {
+        contentArray.push({ type: "text", text: message });
+      }
+      contentArray.push({
+        type: "image_url",
+        image_url: { url: uploadedImage }
+      });
+      
+      apiMessages.push({
+        role: "user",
+        content: contentArray
+      });
+    } else {
+      apiMessages.push({
+        role: "user",
+        content: message
+      });
     }
 
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setUploadedImage(null);
 
-    // Simulate AI response (in a real implementation, this would call your AI backend)
-    setTimeout(() => {
+    // Add a loading message
+    const loadingMessage = { role: "assistant", content: "..." };
+    setMessages((prev) => [...prev, loadingMessage]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-with-sasha', {
+        body: { messages: apiMessages },
+      });
+
+      if (error) {
+        console.error("Error calling Sasha:", error);
+        toast.error("Failed to get response from Sasha. Please try again.");
+        // Remove loading message
+        setMessages((prev) => prev.slice(0, -1));
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        setMessages((prev) => prev.slice(0, -1));
+        return;
+      }
+
+      // Replace loading message with actual response
       const aiResponse = {
         role: "assistant",
-        content:
-          "That sounds delicious! Let me help you craft that recipe from scratch—no box mixes, and we can adapt it to be gluten-free or low-gluten if needed. Tell me more about the flavors you're craving? 🍰",
+        content: data.message || "I'm sorry, I couldn't process that. Please try again.",
       };
-      setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
+      
+      setMessages((prev) => [...prev.slice(0, -1), aiResponse]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Something went wrong. Please try again.");
+      setMessages((prev) => prev.slice(0, -1));
+    }
   };
 
   return (
@@ -194,7 +243,12 @@ const Chat = () => {
                           className="rounded-lg mb-2 max-w-full h-auto"
                         />
                       )}
-                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap">
+                        {typeof msg.content === 'string' ? msg.content : 
+                         Array.isArray(msg.content) ? 
+                           msg.content.find(c => c.type === 'text')?.text || '' : 
+                           ''}
+                      </p>
                     </div>
                   </div>
                 ))}
