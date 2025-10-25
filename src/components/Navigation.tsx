@@ -49,17 +49,17 @@ const Navigation = () => {
 
   return (
     <header className="relative z-20 border-b border-border bg-card/80 backdrop-blur-sm">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <div className="w-full px-3 py-3 md:px-4 md:py-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
-            className="text-2xl font-fredoka text-ocean-deep hover:opacity-80 transition-opacity"
+            className="text-lg md:text-2xl font-fredoka text-ocean-deep hover:opacity-80 transition-opacity shrink-0"
           >
             CakeWhisperer
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6 ml-auto">
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
@@ -119,36 +119,36 @@ const Navigation = () => {
             </Button>
           </div>
 
-          {/* Mobile Menu Buttons */}
-          <div className="flex md:hidden items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/")}
-              className="gap-2"
-            >
-              <Home className="w-4 h-4" />
-              Home
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
-          </div>
+          {/* Mobile Menu Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden ml-auto shrink-0"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
         </div>
 
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-2 border-t border-border pt-4">
+          <div className="md:hidden mt-3 pb-2 space-y-1.5 border-t border-border pt-3">
+            <button
+              onClick={() => {
+                navigate("/");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
+            >
+              <Home className="w-4 h-4" />
+              Home
+            </button>
             <button
               onClick={() => {
                 navigate("/recipes");
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
             >
               <BookOpen className="w-4 h-4" />
               Recipes
@@ -158,7 +158,7 @@ const Navigation = () => {
                 navigate("/blog");
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
             >
               <MessageSquare className="w-4 h-4" />
               Blog
@@ -168,7 +168,7 @@ const Navigation = () => {
                 navigate("/community");
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
             >
               <Users className="w-4 h-4" />
               Community
@@ -178,7 +178,7 @@ const Navigation = () => {
                 navigate("/about");
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2"
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
             >
               <User className="w-4 h-4" />
               About
