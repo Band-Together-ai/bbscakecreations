@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import WaveBackground from "@/components/WaveBackground";
-import { LogOut, Send } from "lucide-react";
+import Navigation from "@/components/Navigation";
+import { Send, Upload, Link as LinkIcon, Mic } from "lucide-react";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -42,11 +43,6 @@ const Chat = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully. Happy baking! 🧁");
-  };
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -68,28 +64,8 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <Navigation />
       <WaveBackground />
-
-      {/* Header */}
-      <header className="relative z-10 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent">
-            CakeWhisperer
-          </h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{user?.email}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              className="gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
 
       {/* Main chat area */}
       <div className="flex-1 container mx-auto px-4 py-8 flex flex-col relative z-10">
@@ -99,7 +75,7 @@ const Chat = () => {
               Chat with Sasha
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Your AI baking companion—warm, wise, and whimsical
+              Upload photos • Paste recipe links • Use voice • Get Brandia's magic
             </p>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col">
@@ -126,21 +102,38 @@ const Chat = () => {
               </div>
             </ScrollArea>
 
-            <form onSubmit={handleSendMessage} className="mt-4 flex gap-2">
-              <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Tell Sasha what you want to bake..."
-                className="flex-1"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </form>
+            <div className="mt-4 space-y-4">
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Upload className="w-4 h-4" />
+                  Photo
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LinkIcon className="w-4 h-4" />
+                  Recipe Link
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Mic className="w-4 h-4" />
+                  Voice
+                </Button>
+              </div>
+              
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Ask Sasha anything about baking..."
+                  className="flex-1"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </form>
+            </div>
           </CardContent>
         </Card>
       </div>

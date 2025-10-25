@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
+import Navigation from "@/components/Navigation";
 import { ArrowRight } from "lucide-react";
 import heroCake from "@/assets/hero-cake.jpg";
 import cake1 from "@/assets/cake-1.jpg";
@@ -48,6 +49,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <Navigation />
       <WaveBackground />
 
       {/* Hero Section */}
