@@ -258,7 +258,7 @@ const Admin = () => {
     toast.info("Uploading profile photo...");
 
     const { error: uploadError, data } = await supabase.storage
-      .from('recipe-photos')
+      .from('profile-photos')
       .upload(fileName, file);
 
     if (uploadError) {
@@ -267,7 +267,7 @@ const Admin = () => {
       return;
     }
 
-    const publicUrl = supabase.storage.from('recipe-photos').getPublicUrl(fileName).data.publicUrl;
+    const publicUrl = supabase.storage.from('profile-photos').getPublicUrl(fileName).data.publicUrl;
     setProfileImageUrl(publicUrl);
 
     // Auto-save to database
