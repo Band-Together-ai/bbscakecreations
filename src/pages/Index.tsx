@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroCake from "@/assets/hero-cake.jpg";
+import brandiaProfile from "@/assets/brandia-profile.jpg";
 import cake1 from "@/assets/cake-1.jpg";
 import cake2 from "@/assets/cake-2.jpg";
 import cake3 from "@/assets/cake-3.jpg";
@@ -79,8 +80,49 @@ const Index = () => {
       <Navigation />
       <WaveBackground />
 
+      {/* Meet Brandia Section */}
+      <section className="relative z-10 pt-20 pb-12 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-float">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* Profile Image */}
+              <div className="shrink-0">
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
+                  <img
+                    src={brandiaProfile}
+                    alt="Brandia - Cake Artist and Creator"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* Bio Content */}
+              <div className="flex-1 text-center md:text-left space-y-4">
+                <h2 className="text-3xl md:text-4xl font-fredoka gradient-ocean bg-clip-text text-transparent">
+                  Meet Brandia
+                </h2>
+                <p className="text-lg text-ocean-deep font-quicksand leading-relaxed">
+                  Hi! I'm Brandia, the baker behind every scratch-made creation you see here. 
+                  From ocean-inspired ombres to delicate herb-adorned layers, I believe every cake 
+                  should tell a story—your story. Whether you need gluten-free magic or a classic 
+                  from-scratch masterpiece, I'm here to bring your vision to life.
+                </p>
+                <Button
+                  onClick={() => navigate("/about")}
+                  variant="outline"
+                  className="border-ocean-wave text-ocean-deep hover:bg-ocean-wave hover:text-white transition-all"
+                >
+                  Read My Full Story
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center">
+      <section className="relative z-10 py-20 flex items-center">
         <div className="container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Text */}
