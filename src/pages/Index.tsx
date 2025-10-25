@@ -64,6 +64,7 @@ const Index = () => {
     const { data } = await supabase
       .from("profile_settings")
       .select("*")
+      .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
