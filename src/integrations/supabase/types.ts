@@ -169,6 +169,41 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_photos: {
+        Row: {
+          created_at: string
+          id: string
+          is_headline: boolean
+          photo_url: string
+          recipe_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_headline?: boolean
+          photo_url: string
+          recipe_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_headline?: boolean
+          photo_url?: string
+          recipe_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_photos_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           category: string | null

@@ -28,12 +28,13 @@ const Admin = () => {
   const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Recipe-per-photo workflow
-  const [selectedPhoto, setSelectedPhoto] = useState<any | null>(null);
+  // Recipe workflow with multi-photo support
+  const [selectedPhotos, setSelectedPhotos] = useState<any[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);
+  const [recipePhotos, setRecipePhotos] = useState<any[]>([]);
   const [editingRecipe, setEditingRecipe] = useState<any | null>(null);
   
-  // Current recipe form (tied to selected photo)
+  // Current recipe form
   const [recipeTitle, setRecipeTitle] = useState("");
   const [recipeDescription, setRecipeDescription] = useState("");
   const [recipeLink, setRecipeLink] = useState("");
@@ -58,6 +59,7 @@ const Admin = () => {
     fetchUploadedPhotos();
     fetchProfileSettings();
     fetchRecipes();
+    fetchRecipePhotos();
   }, []);
 
   const fetchUploadedPhotos = async () => {
@@ -113,6 +115,28 @@ const Admin = () => {
     setRecipes(data || []);
   };
 
+  const fetchRecipePhotos = async () => {
+    const { data, error } = await supabase
+      .from("recipe_photos")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching recipe photos:", error);
+      return;
+    }
+
+    setRecipePhotos(data || []);
+  };
+
+  const getRecipePhotos = (recipeId: string) => {
+    return recipePhotos.filter(p => p.recipe_id === recipeId);
+  };
+
+  const getHeadlinePhoto = (recipeId: string) => {
+    return recipePhotos.find(p => p.recipe_id === recipeId && p.is_headline);
+  };
+
   // const checkAuth = async () => {
   //   const { data: { session } } = await supabase.auth.getSession();
   //   
@@ -146,8 +170,8 @@ const Admin = () => {
       return;
     }
 
-    if (!selectedPhoto) {
-      toast.error("Please select a photo for this recipe");
+    if (selectedPhotos.length === 0 && !editingRecipe) {
+      toast.error("Please select at least one photo for this recipe");
       return;
     }
 
@@ -158,30 +182,52 @@ const Admin = () => {
       instructions: recipeInstructions + (recipeLink ? `\n\nBase recipe link: ${recipeLink}` : ''),
       category: recipeCategory || null,
       tags: recipeTags ? recipeTags.split(',').map(t => t.trim()) : null,
-      image_url: selectedPhoto.url,
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
       is_featured: isFeatured,
     };
 
-    let error;
+    let recipeId = editingRecipe?.id;
+
     if (editingRecipe) {
-      const result = await supabase.from("recipes").update(recipeData).eq("id", editingRecipe.id);
-      error = result.error;
+      const { error } = await supabase.from("recipes").update(recipeData).eq("id", editingRecipe.id);
+      if (error) {
+        toast.error("Failed to update recipe");
+        console.error(error);
+        return;
+      }
     } else {
-      const result = await supabase.from("recipes").insert(recipeData);
-      error = result.error;
+      const { data, error } = await supabase.from("recipes").insert(recipeData).select().single();
+      if (error) {
+        toast.error("Failed to save recipe");
+        console.error(error);
+        return;
+      }
+      recipeId = data.id;
     }
 
-    if (error) {
-      toast.error("Failed to save recipe");
-      console.error(error);
-      return;
+    // Add new photos to recipe_photos table
+    if (selectedPhotos.length > 0 && recipeId) {
+      const existingPhotos = recipePhotos.filter(p => p.recipe_id === recipeId);
+      const isFirstPhoto = existingPhotos.length === 0;
+
+      const photosData = selectedPhotos.map((photo, index) => ({
+        recipe_id: recipeId,
+        photo_url: photo.url,
+        is_headline: isFirstPhoto && index === 0, // First photo is headline by default
+      }));
+
+      const { error: photosError } = await supabase.from("recipe_photos").insert(photosData);
+      if (photosError) {
+        toast.error("Recipe saved but failed to add photos");
+        console.error(photosError);
+      }
     }
 
     toast.success(editingRecipe ? "Recipe updated!" : "Recipe saved successfully!");
     clearRecipeForm();
     fetchRecipes();
+    fetchRecipePhotos();
   };
 
   const clearRecipeForm = () => {
@@ -194,7 +240,7 @@ const Admin = () => {
     setIsGlutenFree(false);
     setIsPublic(false);
     setIsFeatured(false);
-    setSelectedPhoto(null);
+    setSelectedPhotos([]);
     setEditingRecipe(null);
   };
 
@@ -218,14 +264,13 @@ const Admin = () => {
       setRecipeLink("");
     }
     
-    // Find the photo
-    const photo = uploadedPhotos.find(p => p.url === recipe.image_url);
-    setSelectedPhoto(photo || null);
+    setSelectedPhotos([]); // Clear selected photos when editing
   };
 
   const handleDeleteRecipe = async (recipeId: string) => {
-    if (!confirm("Are you sure you want to delete this recipe?")) return;
+    if (!confirm("Are you sure you want to delete this recipe and all its photos?")) return;
 
+    // Delete recipe_photos first (will cascade delete due to foreign key)
     const { error } = await supabase.from("recipes").delete().eq("id", recipeId);
 
     if (error) {
@@ -236,6 +281,7 @@ const Admin = () => {
 
     toast.success("Recipe deleted!");
     fetchRecipes();
+    fetchRecipePhotos();
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -263,35 +309,70 @@ const Admin = () => {
     fetchUploadedPhotos();
   };
 
-  const handleDeletePhoto = async (fileName: string, photoUrl: string) => {
-    if (!confirm("Delete this photo? This will also delete any recipe using it.")) return;
+  const handleDeletePhoto = async (fileName: string) => {
+    if (!confirm("Delete this photo from storage?")) return;
 
-    // Delete associated recipes
-    const { error: recipeError } = await supabase
-      .from("recipes")
-      .delete()
-      .eq("image_url", photoUrl);
-
-    if (recipeError) {
-      console.error("Error deleting recipes:", recipeError);
-    }
-
-    // Delete the photo from storage
-    const { error: storageError } = await supabase.storage
+    const { error } = await supabase.storage
       .from('recipe-photos')
       .remove([fileName]);
 
-    if (storageError) {
+    if (error) {
       toast.error("Failed to delete photo");
-      console.error(storageError);
+      console.error(error);
       return;
     }
 
-    toast.success("Photo and associated recipes deleted!");
+    toast.success("Photo deleted!");
     fetchUploadedPhotos();
-    fetchRecipes();
-    if (selectedPhoto?.name === fileName) {
-      clearRecipeForm();
+  };
+
+  const handleDeleteRecipePhoto = async (photoId: string) => {
+    if (!confirm("Remove this photo from the recipe?")) return;
+
+    const { error } = await supabase
+      .from("recipe_photos")
+      .delete()
+      .eq("id", photoId);
+
+    if (error) {
+      toast.error("Failed to delete photo");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Photo removed from recipe!");
+    fetchRecipePhotos();
+  };
+
+  const handleSetHeadlinePhoto = async (photoId: string, recipeId: string) => {
+    // First, unset all headline photos for this recipe
+    await supabase
+      .from("recipe_photos")
+      .update({ is_headline: false })
+      .eq("recipe_id", recipeId);
+
+    // Then set this photo as headline
+    const { error } = await supabase
+      .from("recipe_photos")
+      .update({ is_headline: true })
+      .eq("id", photoId);
+
+    if (error) {
+      toast.error("Failed to set headline photo");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Headline photo updated!");
+    fetchRecipePhotos();
+  };
+
+  const togglePhotoSelection = (photo: any) => {
+    const isSelected = selectedPhotos.some(p => p.name === photo.name);
+    if (isSelected) {
+      setSelectedPhotos(selectedPhotos.filter(p => p.name !== photo.name));
+    } else {
+      setSelectedPhotos([...selectedPhotos, photo]);
     }
   };
 
@@ -495,22 +576,25 @@ const Admin = () => {
                     {editingRecipe ? "Edit Recipe" : "Add Recipe"}
                   </CardTitle>
                   <CardDescription>
-                    {selectedPhoto 
-                      ? "Fill in details for this photo" 
-                      : "Select a photo from your gallery first"}
+                    {editingRecipe 
+                      ? "Update recipe details or add more photos" 
+                      : selectedPhotos.length > 0
+                        ? `${selectedPhotos.length} photo(s) selected - add details below`
+                        : "Select photos from your gallery first"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {uploadedPhotos.length > 0 && (
                     <div className="space-y-2">
-                      <Label>1. Select Photo for This Recipe</Label>
+                      <Label>1. Select Photos for This Recipe</Label>
+                      <p className="text-xs text-muted-foreground">Click to select multiple photos</p>
                       <div className="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto p-2 border rounded-lg">
                         {uploadedPhotos.map((photo) => (
                           <div
                             key={photo.name}
-                            onClick={() => setSelectedPhoto(photo)}
+                            onClick={() => togglePhotoSelection(photo)}
                             className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                              selectedPhoto?.name === photo.name
+                              selectedPhotos.some(p => p.name === photo.name)
                                 ? 'border-ocean-wave ring-2 ring-ocean-wave'
                                 : 'border-transparent hover:border-ocean-wave/50'
                             }`}
@@ -520,12 +604,17 @@ const Admin = () => {
                               alt={photo.name}
                               className="w-full h-20 object-cover"
                             />
+                            {selectedPhotos.some(p => p.name === photo.name) && (
+                              <div className="absolute top-1 right-1 bg-ocean-wave text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                ✓
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
-                      {selectedPhoto && (
+                      {selectedPhotos.length > 0 && (
                         <p className="text-xs text-muted-foreground">
-                          Selected: {selectedPhoto.name}
+                          Selected: {selectedPhotos.length} photo(s)
                         </p>
                       )}
                     </div>
@@ -539,7 +628,7 @@ const Admin = () => {
                     </div>
                   )}
 
-                  {selectedPhoto && (
+                  {(selectedPhotos.length > 0 || editingRecipe) && (
                     <>
                       <div className="space-y-2">
                         <Label htmlFor="recipe-title">2. Recipe Title</Label>
@@ -698,58 +787,124 @@ const Admin = () => {
                       </p>
                     ) : (
                       <div className="space-y-4">
-                        {recipes.map((recipe) => (
-                          <Card key={recipe.id} className="overflow-hidden">
-                            <div className="flex gap-4 p-4">
-                              {recipe.image_url && (
-                                <img
-                                  src={recipe.image_url}
-                                  alt={recipe.title}
-                                  className="w-24 h-24 object-cover rounded-lg"
-                                />
-                              )}
-                              <div className="flex-1 space-y-2">
-                                <h3 className="font-fredoka text-lg">{recipe.title}</h3>
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                  {recipe.description}
-                                </p>
-                                <div className="flex gap-2 flex-wrap">
-                                  {recipe.is_public && (
-                                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
-                                      Public
-                                    </span>
+                        {recipes.map((recipe) => {
+                          const recipePhotosData = getRecipePhotos(recipe.id);
+                          const headlinePhoto = getHeadlinePhoto(recipe.id);
+                          
+                          return (
+                            <Card key={recipe.id} className="overflow-hidden">
+                              <div className="p-4 space-y-4">
+                                {/* Recipe Header */}
+                                <div className="flex gap-4">
+                                  {headlinePhoto && (
+                                    <img
+                                      src={headlinePhoto.photo_url}
+                                      alt={recipe.title}
+                                      className="w-24 h-24 object-cover rounded-lg"
+                                    />
                                   )}
-                                  {recipe.is_gluten_free && (
-                                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                                      GF
-                                    </span>
-                                  )}
-                                  {recipe.is_featured && (
-                                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
-                                      Featured
-                                    </span>
-                                  )}
+                                  <div className="flex-1 space-y-2">
+                                    <h3 className="font-fredoka text-lg">{recipe.title}</h3>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">
+                                      {recipe.description}
+                                    </p>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {recipe.is_public && (
+                                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
+                                          Public
+                                        </span>
+                                      )}
+                                      {recipe.is_gluten_free && (
+                                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                                          GF
+                                        </span>
+                                      )}
+                                      {recipe.is_featured && (
+                                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
+                                          Featured
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
+
+                                {/* Photo Gallery */}
+                                {recipePhotosData.length > 0 && (
+                                  <div className="space-y-2">
+                                    <Label className="text-xs">Photo Gallery ({recipePhotosData.length})</Label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                      {recipePhotosData.map((photo) => (
+                                        <div key={photo.id} className="relative group">
+                                          <img
+                                            src={photo.photo_url}
+                                            alt="Recipe photo"
+                                            className="w-full aspect-square object-cover rounded border-2"
+                                            style={{
+                                              borderColor: photo.is_headline ? 'rgb(59, 130, 246)' : 'transparent'
+                                            }}
+                                          />
+                                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex flex-col items-center justify-center gap-1">
+                                            {!photo.is_headline && (
+                                              <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                className="text-xs h-6 px-2"
+                                                onClick={() => handleSetHeadlinePhoto(photo.id, recipe.id)}
+                                              >
+                                                Set Headline
+                                              </Button>
+                                            )}
+                                            {photo.is_headline && (
+                                              <span className="text-xs text-white bg-blue-500 px-2 py-1 rounded">
+                                                Headline
+                                              </span>
+                                            )}
+                                            <Button
+                                              size="sm"
+                                              variant="destructive"
+                                              className="text-xs h-6 px-2"
+                                              onClick={() => handleDeleteRecipePhoto(photo.id)}
+                                            >
+                                              Remove
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Action Buttons */}
                                 <div className="flex gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => handleEditRecipe(recipe)}
                                   >
-                                    Edit
+                                    Edit Details
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingRecipe(recipe);
+                                      setSelectedPhotos([]);
+                                    }}
+                                  >
+                                    + Add Photos
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="destructive"
                                     onClick={() => handleDeleteRecipe(recipe.id)}
                                   >
-                                    Delete
+                                    Delete Recipe
                                   </Button>
                                 </div>
                               </div>
-                            </div>
-                          </Card>
-                        ))}
+                            </Card>
+                          );
+                        })}
                       </div>
                     )}
                   </ScrollArea>
@@ -805,7 +960,7 @@ const Admin = () => {
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => handleDeletePhoto(photo.name, photo.url)}
+                              onClick={() => handleDeletePhoto(photo.name)}
                             >
                               Delete
                             </Button>
