@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square } from "lucide-react";
+import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2 } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -18,7 +19,21 @@ const Admin = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Recipe form state
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  
+  // Photo upload state
+  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Recipe-per-photo workflow
+  const [selectedPhoto, setSelectedPhoto] = useState<any | null>(null);
+  const [recipes, setRecipes] = useState<any[]>([]);
+  const [editingRecipe, setEditingRecipe] = useState<any | null>(null);
+  
+  // Current recipe form (tied to selected photo)
   const [recipeTitle, setRecipeTitle] = useState("");
   const [recipeDescription, setRecipeDescription] = useState("");
   const [recipeLink, setRecipeLink] = useState("");
@@ -28,16 +43,6 @@ const Admin = () => {
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
-  
-  // Voice recording state
-  const [isRecording, setIsRecording] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  
-  // Photo upload state
-  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([]);
-  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile settings state
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -52,6 +57,7 @@ const Admin = () => {
     setIsAdmin(true);
     fetchUploadedPhotos();
     fetchProfileSettings();
+    fetchRecipes();
   }, []);
 
   const fetchUploadedPhotos = async () => {
@@ -93,6 +99,20 @@ const Admin = () => {
     }
   };
 
+  const fetchRecipes = async () => {
+    const { data, error } = await supabase
+      .from("recipes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching recipes:", error);
+      return;
+    }
+
+    setRecipes(data || []);
+  };
+
   // const checkAuth = async () => {
   //   const { data: { session } } = await supabase.auth.getSession();
   //   
@@ -126,18 +146,32 @@ const Admin = () => {
       return;
     }
 
-    const { error } = await supabase.from("recipes").insert({
+    if (!selectedPhoto) {
+      toast.error("Please select a photo for this recipe");
+      return;
+    }
+
+    const recipeData = {
       user_id: user?.id || null,
       title: recipeTitle,
       description: recipeDescription,
-      instructions: recipeInstructions,
+      instructions: recipeInstructions + (recipeLink ? `\n\nBase recipe link: ${recipeLink}` : ''),
       category: recipeCategory || null,
       tags: recipeTags ? recipeTags.split(',').map(t => t.trim()) : null,
-      image_url: selectedPhotoUrl || null,
+      image_url: selectedPhoto.url,
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
       is_featured: isFeatured,
-    });
+    };
+
+    let error;
+    if (editingRecipe) {
+      const result = await supabase.from("recipes").update(recipeData).eq("id", editingRecipe.id);
+      error = result.error;
+    } else {
+      const result = await supabase.from("recipes").insert(recipeData);
+      error = result.error;
+    }
 
     if (error) {
       toast.error("Failed to save recipe");
@@ -145,17 +179,63 @@ const Admin = () => {
       return;
     }
 
-    toast.success("Recipe saved successfully!");
+    toast.success(editingRecipe ? "Recipe updated!" : "Recipe saved successfully!");
+    clearRecipeForm();
+    fetchRecipes();
+  };
+
+  const clearRecipeForm = () => {
     setRecipeTitle("");
     setRecipeDescription("");
     setRecipeInstructions("");
     setRecipeCategory("");
     setRecipeTags("");
     setRecipeLink("");
-    setSelectedPhotoUrl("");
     setIsGlutenFree(false);
     setIsPublic(false);
     setIsFeatured(false);
+    setSelectedPhoto(null);
+    setEditingRecipe(null);
+  };
+
+  const handleEditRecipe = (recipe: any) => {
+    setEditingRecipe(recipe);
+    setRecipeTitle(recipe.title);
+    setRecipeDescription(recipe.description || "");
+    setRecipeCategory(recipe.category || "");
+    setRecipeTags(recipe.tags?.join(', ') || "");
+    setIsGlutenFree(recipe.is_gluten_free || false);
+    setIsPublic(recipe.is_public || false);
+    setIsFeatured(recipe.is_featured || false);
+    
+    // Extract link from instructions if present
+    const linkMatch = recipe.instructions?.match(/Base recipe link: (.+)/);
+    if (linkMatch) {
+      setRecipeLink(linkMatch[1]);
+      setRecipeInstructions(recipe.instructions.replace(/\n\nBase recipe link: .+/, ''));
+    } else {
+      setRecipeInstructions(recipe.instructions || "");
+      setRecipeLink("");
+    }
+    
+    // Find the photo
+    const photo = uploadedPhotos.find(p => p.url === recipe.image_url);
+    setSelectedPhoto(photo || null);
+  };
+
+  const handleDeleteRecipe = async (recipeId: string) => {
+    if (!confirm("Are you sure you want to delete this recipe?")) return;
+
+    const { error } = await supabase.from("recipes").delete().eq("id", recipeId);
+
+    if (error) {
+      toast.error("Failed to delete recipe");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Recipe deleted!");
+    fetchRecipes();
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,6 +261,38 @@ const Admin = () => {
 
     toast.success("Photos uploaded successfully!");
     fetchUploadedPhotos();
+  };
+
+  const handleDeletePhoto = async (fileName: string, photoUrl: string) => {
+    if (!confirm("Delete this photo? This will also delete any recipe using it.")) return;
+
+    // Delete associated recipes
+    const { error: recipeError } = await supabase
+      .from("recipes")
+      .delete()
+      .eq("image_url", photoUrl);
+
+    if (recipeError) {
+      console.error("Error deleting recipes:", recipeError);
+    }
+
+    // Delete the photo from storage
+    const { error: storageError } = await supabase.storage
+      .from('recipe-photos')
+      .remove([fileName]);
+
+    if (storageError) {
+      toast.error("Failed to delete photo");
+      console.error(storageError);
+      return;
+    }
+
+    toast.success("Photo and associated recipes deleted!");
+    fetchUploadedPhotos();
+    fetchRecipes();
+    if (selectedPhoto?.name === fileName) {
+      clearRecipeForm();
+    }
   };
 
   const handleVoiceRecording = async () => {
@@ -375,181 +487,275 @@ const Admin = () => {
 
           {/* RECIPES TAB */}
           <TabsContent value="recipes">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-fredoka">Add/Edit Recipe</CardTitle>
-                <CardDescription>
-                  Drag photos, paste links, or dictate—Sasha will help capture your magic
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="recipe-title">Recipe Title</Label>
-                  <Input
-                    id="recipe-title"
-                    placeholder="e.g., Ocean Ombre Lavender Dream"
-                    value={recipeTitle}
-                    onChange={(e) => setRecipeTitle(e.target.value)}
-                  />
-                </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Left: Recipe Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-fredoka">
+                    {editingRecipe ? "Edit Recipe" : "Add Recipe"}
+                  </CardTitle>
+                  <CardDescription>
+                    {selectedPhoto 
+                      ? "Fill in details for this photo" 
+                      : "Select a photo from your gallery first"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {uploadedPhotos.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>1. Select Photo for This Recipe</Label>
+                      <div className="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                        {uploadedPhotos.map((photo) => (
+                          <div
+                            key={photo.name}
+                            onClick={() => setSelectedPhoto(photo)}
+                            className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                              selectedPhoto?.name === photo.name
+                                ? 'border-ocean-wave ring-2 ring-ocean-wave'
+                                : 'border-transparent hover:border-ocean-wave/50'
+                            }`}
+                          >
+                            <img
+                              src={photo.url}
+                              alt={photo.name}
+                              className="w-full h-20 object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {selectedPhoto && (
+                        <p className="text-xs text-muted-foreground">
+                          Selected: {selectedPhoto.name}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-                {uploadedPhotos.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Select a Photo for this Recipe</Label>
-                    <div className="grid grid-cols-4 gap-3 max-h-48 overflow-y-auto p-2 border rounded-lg">
-                      {uploadedPhotos.map((photo) => (
-                        <div
-                          key={photo.name}
-                          onClick={() => setSelectedPhotoUrl(photo.url)}
-                          className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                            selectedPhotoUrl === photo.url
-                              ? 'border-ocean-wave ring-2 ring-ocean-wave'
-                              : 'border-transparent hover:border-ocean-wave/50'
-                          }`}
+                  {!uploadedPhotos.length && (
+                    <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                      <p className="text-muted-foreground">
+                        Upload photos in the "Photos" tab first, then come back here to add recipes.
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedPhoto && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="recipe-title">2. Recipe Title</Label>
+                        <Input
+                          id="recipe-title"
+                          placeholder="e.g., Ocean Ombre Lavender Dream"
+                          value={recipeTitle}
+                          onChange={(e) => setRecipeTitle(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="recipe-desc">3. Description (The Vibe)</Label>
+                        <Textarea
+                          id="recipe-desc"
+                          placeholder="Velvety vanilla waves with a hidden mint surprise and real herb crown..."
+                          value={recipeDescription}
+                          onChange={(e) => setRecipeDescription(e.target.value)}
+                          rows={3}
+                        />
+                        <Button 
+                          type="button"
+                          variant={isRecording ? "destructive" : "outline"} 
+                          size="sm" 
+                          className="gap-2"
+                          onClick={handleVoiceRecording}
                         >
-                          <img
-                            src={photo.url}
-                            alt={photo.name}
-                            className="w-full h-20 object-cover"
+                          {isRecording ? (
+                            <>
+                              <Square className="w-4 h-4" />
+                              Stop Recording
+                            </>
+                          ) : (
+                            <>
+                              <Mic className="w-4 h-4" />
+                              Dictate
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="recipe-link">4. Base Recipe Link (Optional)</Label>
+                        <Input
+                          id="recipe-link"
+                          placeholder="https://allrecipes.com/..."
+                          value={recipeLink}
+                          onChange={(e) => setRecipeLink(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Link to the original recipe you're adapting
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="recipe-instructions">5. Instructions / My Twist</Label>
+                        <Textarea
+                          id="recipe-instructions"
+                          placeholder="Swap oil for browned butter, double the cocoa, add a whisper of sea salt..."
+                          value={recipeInstructions}
+                          onChange={(e) => setRecipeInstructions(e.target.value)}
+                          rows={6}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="recipe-category">Category</Label>
+                          <Input
+                            id="recipe-category"
+                            placeholder="e.g., Wedding, Birthday"
+                            value={recipeCategory}
+                            onChange={(e) => setRecipeCategory(e.target.value)}
                           />
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        <div className="space-y-2">
+                          <Label htmlFor="recipe-tags">Tags</Label>
+                          <Input
+                            id="recipe-tags"
+                            placeholder="chocolate, vanilla"
+                            value={recipeTags}
+                            onChange={(e) => setRecipeTags(e.target.value)}
+                          />
+                        </div>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="recipe-desc">Description (The Vibe)</Label>
-                  <Textarea
-                    id="recipe-desc"
-                    placeholder="Velvety vanilla waves with a hidden mint surprise and real herb crown—can be made gluten-free!"
-                    value={recipeDescription}
-                    onChange={(e) => setRecipeDescription(e.target.value)}
-                    rows={3}
-                  />
-                  <Button 
-                    type="button"
-                    variant={isRecording ? "destructive" : "outline"} 
-                    size="sm" 
-                    className="gap-2"
-                    onClick={handleVoiceRecording}
-                  >
-                    {isRecording ? (
-                      <>
-                        <Square className="w-4 h-4" />
-                        Stop Recording
-                      </>
+                      <div className="flex items-center gap-8 p-4 bg-muted rounded-lg flex-wrap">
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={isGlutenFree}
+                            onCheckedChange={setIsGlutenFree}
+                            id="gluten-free"
+                          />
+                          <Label htmlFor="gluten-free" className="cursor-pointer">
+                            Gluten-Free
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={isPublic}
+                            onCheckedChange={setIsPublic}
+                            id="public-recipe"
+                          />
+                          <Label htmlFor="public-recipe" className="cursor-pointer">
+                            Public
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={isFeatured}
+                            onCheckedChange={setIsFeatured}
+                            id="featured-recipe"
+                          />
+                          <Label htmlFor="featured-recipe" className="cursor-pointer">
+                            Featured
+                          </Label>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={handleSaveRecipe}
+                          className="flex-1 gradient-ocean text-primary-foreground"
+                          size="lg"
+                        >
+                          {editingRecipe ? "Update Recipe" : "Save Recipe"}
+                        </Button>
+                        {editingRecipe && (
+                          <Button
+                            onClick={clearRecipeForm}
+                            variant="outline"
+                            size="lg"
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Right: Saved Recipes */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-fredoka">Saved Recipes ({recipes.length})</CardTitle>
+                  <CardDescription>
+                    Edit or delete your recipes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[600px] pr-4">
+                    {recipes.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        No recipes yet. Add your first one!
+                      </p>
                     ) : (
-                      <>
-                        <Mic className="w-4 h-4" />
-                        Dictate Description
-                      </>
+                      <div className="space-y-4">
+                        {recipes.map((recipe) => (
+                          <Card key={recipe.id} className="overflow-hidden">
+                            <div className="flex gap-4 p-4">
+                              {recipe.image_url && (
+                                <img
+                                  src={recipe.image_url}
+                                  alt={recipe.title}
+                                  className="w-24 h-24 object-cover rounded-lg"
+                                />
+                              )}
+                              <div className="flex-1 space-y-2">
+                                <h3 className="font-fredoka text-lg">{recipe.title}</h3>
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {recipe.description}
+                                </p>
+                                <div className="flex gap-2 flex-wrap">
+                                  {recipe.is_public && (
+                                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
+                                      Public
+                                    </span>
+                                  )}
+                                  {recipe.is_gluten_free && (
+                                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                                      GF
+                                    </span>
+                                  )}
+                                  {recipe.is_featured && (
+                                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
+                                      Featured
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleEditRecipe(recipe)}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleDeleteRecipe(recipe.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
                     )}
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="recipe-category">Category</Label>
-                    <Input
-                      id="recipe-category"
-                      placeholder="e.g., Base Recipe, Variation, Wedding Cake"
-                      value={recipeCategory}
-                      onChange={(e) => setRecipeCategory(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="recipe-tags">Tags (comma-separated)</Label>
-                    <Input
-                      id="recipe-tags"
-                      placeholder="chocolate, vanilla, birthday"
-                      value={recipeTags}
-                      onChange={(e) => setRecipeTags(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="recipe-link">Paste Base Recipe Link (Optional)</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="recipe-link"
-                      placeholder="https://allrecipes.com/..."
-                      value={recipeLink}
-                      onChange={(e) => setRecipeLink(e.target.value)}
-                    />
-                    <Button variant="outline" size="icon">
-                      <LinkIcon className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Sasha will import it and ask for your twists
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="recipe-instructions">Instructions / My Twist</Label>
-                  <Textarea
-                    id="recipe-instructions"
-                    placeholder="Swap oil for browned butter, double the cocoa, add a whisper of sea salt..."
-                    value={recipeInstructions}
-                    onChange={(e) => setRecipeInstructions(e.target.value)}
-                    rows={6}
-                  />
-                  <div className="flex gap-2 mt-2">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Mic className="w-4 h-4" />
-                      Voice Input
-                    </Button>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Upload className="w-4 h-4" />
-                      Upload Photo
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-8 p-4 bg-muted rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      checked={isGlutenFree}
-                      onCheckedChange={setIsGlutenFree}
-                      id="gluten-free"
-                    />
-                    <Label htmlFor="gluten-free" className="cursor-pointer">
-                      Gluten-Free (or Low-Gluten)
-                    </Label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      checked={isPublic}
-                      onCheckedChange={setIsPublic}
-                      id="public-recipe"
-                    />
-                    <Label htmlFor="public-recipe" className="cursor-pointer">
-                      Make Public
-                    </Label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      checked={isFeatured}
-                      onCheckedChange={setIsFeatured}
-                      id="featured-recipe"
-                    />
-                    <Label htmlFor="featured-recipe" className="cursor-pointer">
-                      Feature on Home Page
-                    </Label>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleSaveRecipe}
-                  className="w-full gradient-ocean text-primary-foreground"
-                  size="lg"
-                >
-                  Save Recipe
-                </Button>
-              </CardContent>
-            </Card>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* PHOTOS TAB */}
@@ -558,7 +764,7 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle className="font-fredoka">Photo Gallery Manager</CardTitle>
                 <CardDescription>
-                  Upload your cake photos and link them to recipes
+                  Upload your cake photos - then go to Recipes tab to add details
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -581,7 +787,7 @@ const Admin = () => {
                   <p className="text-muted-foreground mb-4">
                     or click to browse (JPG, PNG, HEIC)
                   </p>
-                  <Button variant="outline">Browse Files</Button>
+                  <Button variant="outline" type="button">Browse Files</Button>
                 </div>
 
                 {uploadedPhotos.length > 0 && (
@@ -596,9 +802,13 @@ const Admin = () => {
                             className="w-full aspect-square object-cover rounded-lg"
                           />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                            <p className="text-white text-xs p-2 text-center break-all">
-                              {photo.name}
-                            </p>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeletePhoto(photo.name, photo.url)}
+                            >
+                              Delete
+                            </Button>
                           </div>
                         </div>
                       ))}
