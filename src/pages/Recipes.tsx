@@ -46,7 +46,7 @@ const Recipes = () => {
   }, []);
 
   const fetchRecipes = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("recipes")
       .select(`
         *,
@@ -56,6 +56,10 @@ const Recipes = () => {
       .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
+    if (error) {
+      console.error("Error fetching recipes:", error);
+    }
+    
     setRecipes(data || []);
   };
 

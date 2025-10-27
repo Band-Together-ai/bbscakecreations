@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Flower2, Sprout } from "lucide-react";
@@ -8,15 +9,36 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { supabase } from "@/integrations/supabase/client";
 import brandiaProfile from "@/assets/brandia-profile.jpg";
 import cake1 from "@/assets/cake-1.jpg";
 import cake2 from "@/assets/cake-2.jpg";
 import cake3 from "@/assets/cake-3.jpg";
 import cake4 from "@/assets/cake-4.jpg";
+import Autoplay from "embla-carousel-autoplay";
 
 const About = () => {
+  const [profileImageUrl, setProfileImageUrl] = useState(brandiaProfile);
+
+  useEffect(() => {
+    fetchProfilePhoto();
+  }, []);
+
+  const fetchProfilePhoto = async () => {
+    const { data, error } = await supabase
+      .from("profile_settings")
+      .select("profile_image_url")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data?.profile_image_url) {
+      setProfileImageUrl(data.profile_image_url);
+    }
+  };
+
   const galleryImages = [
-    { src: brandiaProfile, caption: "Behind every cake is a story and a dream" },
+    { src: profileImageUrl, caption: "Behind every cake is a story and a dream" },
     { src: cake1, caption: "Herb garden dreams with fresh mint and edible flowers" },
     { src: cake2, caption: "Rosemary sea salt fudge—decadent and earthy" },
     { src: cake3, caption: "Lemon blueberry sunrise—bright and beautiful" },
@@ -33,7 +55,7 @@ const About = () => {
           <div className="text-center mb-16">
             <div className="w-48 h-48 mx-auto mb-8 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
               <img
-                src={brandiaProfile}
+                src={profileImageUrl}
                 alt="Brandia - Baker, Ocean Lover, Dolphin Dreamer"
                 className="w-full h-full object-cover"
               />
@@ -55,19 +77,27 @@ const About = () => {
               <h2 className="text-3xl font-fredoka text-ocean-deep mb-6 text-center">
                 My Journey in Pictures
               </h2>
-              <Carousel className="w-full max-w-2xl mx-auto">
+              <Carousel 
+                className="w-full max-w-xl mx-auto"
+                plugins={[
+                  Autoplay({
+                    delay: 4000,
+                    stopOnInteraction: true,
+                  }),
+                ]}
+              >
                 <CarouselContent>
                   {galleryImages.map((image, index) => (
                     <CarouselItem key={index}>
-                      <div className="space-y-4">
-                        <div className="aspect-[4/3] overflow-hidden rounded-xl shadow-wave">
+                      <div className="space-y-3">
+                        <div className="aspect-[4/3] overflow-hidden rounded-lg shadow-wave max-h-[300px]">
                           <img
                             src={image.src}
                             alt={image.caption}
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <p className="text-center text-lg text-muted-foreground font-quicksand italic">
+                        <p className="text-center text-sm text-muted-foreground font-quicksand italic">
                           {image.caption}
                         </p>
                       </div>
