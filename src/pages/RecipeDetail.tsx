@@ -5,7 +5,10 @@ import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Download, Lock, Edit, Sparkles, Star } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Download, Lock, Edit, Sparkles, Star, Heart } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 
@@ -30,16 +33,34 @@ interface Recipe {
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAdmin, isCollaborator, isPaid } = useUserRole();
+  const { isAdmin, isCollaborator, isPaid, isAuthenticated } = useUserRole();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+
+  // Support settings
+  const [supportSettings, setSupportSettings] = useState<any>(null);
+  const [selectedTipAmount, setSelectedTipAmount] = useState<number>(5);
+  const [customTipAmount, setCustomTipAmount] = useState<string>("");
+
+  // Ratings
+  const [ratings, setRatings] = useState<any[]>([]);
+  const [ratingStats, setRatingStats] = useState<any>(null);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [userName, setUserName] = useState<string>("");
+  const [reviewText, setReviewText] = useState<string>("");
+  const [captchaAnswer, setCaptchaAnswer] = useState<string>("");
+  const [captchaQuestion, setCaptchaQuestion] = useState<{ num1: number; num2: number }>({ num1: 0, num2: 0 });
 
   const canViewFullRecipe = isAdmin || isCollaborator || isPaid;
 
   useEffect(() => {
     if (id) {
       fetchRecipe();
+      fetchSupportSettings();
+      fetchRatings();
+      fetchRatingStats();
+      generateCaptcha();
     }
   }, [id]);
 
@@ -96,6 +117,135 @@ ${recipe.instructions || 'Full instructions available with subscription'}
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success("Recipe downloaded!");
+  };
+
+  const fetchSupportSettings = async () => {
+    const { data } = await supabase
+      .from("support_settings")
+      .select("*")
+      .eq("is_enabled", true)
+      .limit(1)
+      .maybeSingle();
+
+    setSupportSettings(data);
+  };
+
+  const fetchRatings = async () => {
+    const { data } = await supabase
+      .from("recipe_ratings")
+      .select("*")
+      .eq("recipe_id", id)
+      .eq("is_approved", true)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    setRatings(data || []);
+  };
+
+  const fetchRatingStats = async () => {
+    const { data, error } = await supabase.rpc('get_recipe_rating_stats', {
+      recipe_uuid: id
+    });
+
+    if (!error && data && data.length > 0) {
+      setRatingStats(data[0]);
+    }
+  };
+
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    setCaptchaQuestion({ num1, num2 });
+  };
+
+  const handleVenmoClick = async (amount: number) => {
+    if (!supportSettings?.venmo_username) return;
+
+    // Track the click
+    await supabase.from("support_clicks").insert({
+      recipe_id: id,
+      user_id: isAuthenticated ? (await supabase.auth.getUser()).data.user?.id : null
+    });
+
+    // Increment thank you count
+    await supabase.rpc('increment_thank_you_count');
+
+    // Open Venmo
+    const venmoUrl = `venmo://paycharge?txn=pay&recipients=${supportSettings.venmo_username}&amount=${amount}&note=Thanks for the recipe! ❤️`;
+    window.location.href = venmoUrl;
+
+    // Fallback to web
+    setTimeout(() => {
+      window.open(`https://venmo.com/${supportSettings.venmo_username}?txn=pay&amount=${amount}`, '_blank');
+    }, 500);
+
+    toast.success("Opening Venmo...");
+    fetchSupportSettings();
+  };
+
+  const handleSubmitRating = async () => {
+    // Validate
+    if (!userRating || userRating < 1 || userRating > 5) {
+      toast.error("Please select a rating");
+      return;
+    }
+
+    if (!userName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    if (reviewText.trim().length < 10) {
+      toast.error("Review must be at least 10 characters");
+      return;
+    }
+
+    // Verify captcha
+    if (parseInt(captchaAnswer) !== captchaQuestion.num1 + captchaQuestion.num2) {
+      toast.error("Incorrect captcha answer");
+      generateCaptcha();
+      setCaptchaAnswer("");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to submit a rating");
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Insert rating
+    const { error } = await supabase.from("recipe_ratings").insert({
+      recipe_id: id,
+      user_id: user?.id || null,
+      user_name: userName.trim(),
+      rating: userRating,
+      review_text: reviewText.trim(),
+      is_approved: userRating > 3, // Auto-approve 4-5 stars
+      admin_reviewed: false
+    });
+
+    if (error) {
+      toast.error("Failed to submit rating");
+      console.error(error);
+      return;
+    }
+
+    if (userRating <= 3) {
+      toast.success("Thank you! Your rating will be reviewed by an admin.");
+    } else {
+      toast.success("Thank you for your rating!");
+      fetchRatings();
+      fetchRatingStats();
+    }
+
+    // Reset form
+    setUserRating(0);
+    setUserName("");
+    setReviewText("");
+    setCaptchaAnswer("");
+    generateCaptcha();
   };
 
   if (loading) {
@@ -308,6 +458,235 @@ ${recipe.instructions || 'Full instructions available with subscription'}
             </div>
           </div>
         )}
+
+        {/* Support Brandia Section */}
+        {supportSettings && supportSettings.is_enabled && (
+          <Card className="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <h3 className="text-xl font-fredoka text-purple-900">Support Brandia</h3>
+                  <p className="text-purple-800">
+                    {supportSettings.support_message || "If you enjoyed this recipe and want to support my baking journey, I'd be grateful for any contribution! 💕"}
+                  </p>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm text-purple-900">Choose an amount:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {[5, 10, 20].map(amount => (
+                        <Button
+                          key={amount}
+                          variant={selectedTipAmount === amount ? "default" : "outline"}
+                          onClick={() => {
+                            setSelectedTipAmount(amount);
+                            setCustomTipAmount("");
+                          }}
+                          className="min-w-[80px]"
+                        >
+                          ${amount}
+                        </Button>
+                      ))}
+                      <Input
+                        type="number"
+                        placeholder="Custom"
+                        value={customTipAmount}
+                        onChange={(e) => {
+                          setCustomTipAmount(e.target.value);
+                          setSelectedTipAmount(0);
+                        }}
+                        className="w-[100px]"
+                        min="1"
+                      />
+                    </div>
+
+                    <Button
+                      onClick={() => handleVenmoClick(customTipAmount ? parseFloat(customTipAmount) : selectedTipAmount)}
+                      disabled={!selectedTipAmount && !customTipAmount}
+                      className="w-full bg-[#008CFF] hover:bg-[#0074D9] text-white"
+                      size="lg"
+                    >
+                      💙 Tip {customTipAmount ? `$${customTipAmount}` : `$${selectedTipAmount}`} on Venmo
+                    </Button>
+                  </div>
+
+                  <div className="pt-4 border-t border-purple-200">
+                    <p className="text-sm text-purple-700">
+                      {supportSettings.thank_you_count || 0} {supportSettings.thank_you_count === 1 ? 'person has' : 'people have'} shown their support
+                    </p>
+                    <p className="text-xs text-purple-600 mt-1">
+                      100% of contributions go toward ingredients and supplies for community baking
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Recipe Ratings Section */}
+        <div className="mt-8 space-y-6">
+          <h2 className="text-2xl font-fredoka text-ocean-deep">Recipe Ratings</h2>
+
+          {/* Rating Summary */}
+          {ratingStats && ratingStats.total_ratings > 0 && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-5xl font-bold text-yellow-500">{ratingStats.average_rating || '0.0'}</div>
+                      <div className="flex justify-center mt-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-5 h-5 ${
+                              i < Math.round(ratingStats.average_rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Based on {ratingStats.total_ratings} {ratingStats.total_ratings === 1 ? 'review' : 'reviews'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {[5, 4, 3, 2, 1].map(stars => {
+                      const count = ratingStats[`${['one', 'two', 'three', 'four', 'five'][stars - 1]}_star`] || 0;
+                      const percentage = ratingStats.total_ratings > 0 ? (count / ratingStats.total_ratings) * 100 : 0;
+                      return (
+                        <div key={stars} className="flex items-center gap-2">
+                          <span className="text-sm w-8">{stars}★</span>
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-yellow-400 h-2 rounded-full transition-all"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          <span className="text-sm text-muted-foreground w-8 text-right">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Add Your Rating */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-fredoka text-ocean-deep mb-4">Add Your Rating</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Your Name</Label>
+                  <Input
+                    placeholder="Enter your name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Your Rating</Label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setUserRating(star)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-8 h-8 ${
+                            star <= userRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Your Review (required, min 10 characters)</Label>
+                  <Textarea
+                    placeholder="Tell us what you thought about this recipe..."
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    rows={4}
+                    maxLength={1000}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {reviewText.length}/1000 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Security Check: What is {captchaQuestion.num1} + {captchaQuestion.num2}?</Label>
+                  <Input
+                    type="number"
+                    placeholder="Enter answer"
+                    value={captchaAnswer}
+                    onChange={(e) => setCaptchaAnswer(e.target.value)}
+                    className="w-32"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSubmitRating}
+                  className="gradient-ocean text-white"
+                  size="lg"
+                >
+                  Submit Rating
+                </Button>
+
+                {userRating <= 3 && userRating > 0 && (
+                  <p className="text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    ⚠️ Ratings of 3 stars or less require admin approval before being published.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Reviews */}
+          {ratings.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-fredoka text-ocean-deep">Recent Reviews</h3>
+              {ratings.map((rating) => (
+                <Card key={rating.id}>
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="font-medium">{rating.user_name}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(rating.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm">{rating.review_text}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

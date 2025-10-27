@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star } from "lucide-react";
 import {
@@ -58,6 +59,18 @@ const Admin = () => {
   const [profileSettingsId, setProfileSettingsId] = useState<string | null>(null);
   const profileFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Support settings state
+  const [venmoUsername, setVenmoUsername] = useState("");
+  const [venmoDisplayName, setVenmoDisplayName] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportEnabled, setSupportEnabled] = useState(false);
+  const [thankYouCount, setThankYouCount] = useState(0);
+  const [supportSettingsId, setSupportSettingsId] = useState<string | null>(null);
+
+  // Ratings state
+  const [ratings, setRatings] = useState<any[]>([]);
+  const [ratingsFilter, setRatingsFilter] = useState<'all' | 'pending' | 'approved'>('all');
+
   // Dev bypass - set VITE_DEV_BYPASS_AUTH="true" in .env to skip auth during development
   const isDev = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 
@@ -75,6 +88,8 @@ const Admin = () => {
       fetchProfileSettings();
       fetchRecipes();
       fetchRecipePhotos();
+      fetchSupportSettings();
+      fetchRatings();
     }
   }, [isAdmin, roleLoading, navigate, isDev]);
 
@@ -558,6 +573,124 @@ const Admin = () => {
     toast.success("Profile settings saved successfully!");
   };
 
+  const fetchSupportSettings = async () => {
+    const { data, error } = await supabase
+      .from("support_settings")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching support settings:", error);
+      return;
+    }
+
+    if (data) {
+      setSupportSettingsId(data.id);
+      setVenmoUsername(data.venmo_username || "");
+      setVenmoDisplayName(data.venmo_display_name || "");
+      setSupportMessage(data.support_message || "");
+      setSupportEnabled(data.is_enabled || false);
+      setThankYouCount(data.thank_you_count || 0);
+    }
+  };
+
+  const handleSaveSupportSettings = async () => {
+    const supportData = {
+      venmo_username: venmoUsername || null,
+      venmo_display_name: venmoDisplayName || null,
+      support_message: supportMessage || null,
+      is_enabled: supportEnabled,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (supportSettingsId) {
+      const result = await supabase
+        .from("support_settings")
+        .update(supportData)
+        .eq("id", supportSettingsId);
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("support_settings")
+        .insert(supportData)
+        .select()
+        .single();
+      error = result.error;
+      if (!error && result.data) {
+        setSupportSettingsId(result.data.id);
+      }
+    }
+
+    if (error) {
+      toast.error("Failed to save support settings");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Support settings saved!");
+    fetchSupportSettings();
+  };
+
+  const fetchRatings = async () => {
+    const { data, error } = await supabase
+      .from("recipe_ratings")
+      .select(`
+        *,
+        recipes(title)
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching ratings:", error);
+      return;
+    }
+
+    setRatings(data || []);
+  };
+
+  const handleApproveRating = async (ratingId: string) => {
+    const { error } = await supabase
+      .from("recipe_ratings")
+      .update({ is_approved: true, admin_reviewed: true })
+      .eq("id", ratingId);
+
+    if (error) {
+      toast.error("Failed to approve rating");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Rating approved!");
+    fetchRatings();
+  };
+
+  const handleDeleteRating = async (ratingId: string) => {
+    if (!confirm("Delete this rating?")) return;
+
+    const { error } = await supabase
+      .from("recipe_ratings")
+      .delete()
+      .eq("id", ratingId);
+
+    if (error) {
+      toast.error("Failed to delete rating");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Rating deleted!");
+    fetchRatings();
+  };
+
+  const filteredRatings = ratings.filter(rating => {
+    if (ratingsFilter === 'pending') return !rating.is_approved;
+    if (ratingsFilter === 'approved') return rating.is_approved;
+    return true;
+  });
+
   if (roleLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -584,9 +717,11 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
+            <TabsTrigger value="support">Support</TabsTrigger>
+            <TabsTrigger value="ratings">Ratings</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -1046,6 +1181,214 @@ const Admin = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* SUPPORT SETTINGS TAB */}
+          <TabsContent value="support">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-fredoka">Support Settings</CardTitle>
+                <CardDescription>
+                  Configure your "Buy Me a Coffee" style Venmo support section
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                  <Switch
+                    checked={supportEnabled}
+                    onCheckedChange={setSupportEnabled}
+                    id="support-enabled"
+                  />
+                  <div>
+                    <Label htmlFor="support-enabled" className="cursor-pointer font-medium">
+                      Enable Support Section
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Show the support section on recipe detail pages
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="venmo-username">Venmo Username</Label>
+                  <Input
+                    id="venmo-username"
+                    placeholder="e.g., Brandia-Smith"
+                    value={venmoUsername}
+                    onChange={(e) => setVenmoUsername(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your Venmo handle (without the @)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="venmo-display">Display Name</Label>
+                  <Input
+                    id="venmo-display"
+                    placeholder="e.g., Brandia Smith"
+                    value={venmoDisplayName}
+                    onChange={(e) => setVenmoDisplayName(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    How your name appears on the button
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="support-message">Support Message</Label>
+                  <Textarea
+                    id="support-message"
+                    placeholder="If you enjoyed this recipe and want to support my baking journey..."
+                    value={supportMessage}
+                    onChange={(e) => setSupportMessage(e.target.value)}
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Personal message shown in the support section
+                  </p>
+                </div>
+
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-green-900">Thank You Count</p>
+                      <p className="text-sm text-green-700">Total support button clicks</p>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">
+                      {thankYouCount}
+                    </div>
+                  </div>
+                </div>
+
+                {supportEnabled && venmoUsername && (
+                  <div className="p-4 border-2 border-dashed rounded-lg">
+                    <p className="text-sm font-medium mb-3">Preview:</p>
+                    <div className="space-y-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+                      <p className="text-sm">
+                        {supportMessage || "If you enjoyed this recipe and want to support my baking journey, I'd be grateful for any contribution! 💕"}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button className="bg-[#008CFF] hover:bg-[#0074D9]" disabled>
+                          💙 Tip ${5} on Venmo
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {thankYouCount} people have shown their support
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleSaveSupportSettings}
+                  className="w-full gradient-ocean text-primary-foreground"
+                  size="lg"
+                >
+                  Save Support Settings
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* RECIPE RATINGS TAB */}
+          <TabsContent value="ratings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-fredoka">Recipe Ratings</CardTitle>
+                <CardDescription>
+                  Review and moderate recipe ratings (3 stars or less require approval)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex gap-2">
+                  <Button
+                    variant={ratingsFilter === 'all' ? 'default' : 'outline'}
+                    onClick={() => setRatingsFilter('all')}
+                  >
+                    All ({ratings.length})
+                  </Button>
+                  <Button
+                    variant={ratingsFilter === 'pending' ? 'default' : 'outline'}
+                    onClick={() => setRatingsFilter('pending')}
+                  >
+                    Pending ({ratings.filter(r => !r.is_approved).length})
+                  </Button>
+                  <Button
+                    variant={ratingsFilter === 'approved' ? 'default' : 'outline'}
+                    onClick={() => setRatingsFilter('approved')}
+                  >
+                    Approved ({ratings.filter(r => r.is_approved).length})
+                  </Button>
+                </div>
+
+                <ScrollArea className="h-[600px]">
+                  {filteredRatings.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No ratings yet
+                    </p>
+                  ) : (
+                    <div className="space-y-4 pr-4">
+                      {filteredRatings.map((rating) => (
+                        <Card key={rating.id} className={!rating.is_approved ? 'border-yellow-300 bg-yellow-50' : ''}>
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className="flex">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star
+                                          key={i}
+                                          className={`w-4 h-4 ${
+                                            i < rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="font-medium">{rating.user_name}</span>
+                                    {!rating.is_approved && (
+                                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                                        Pending Review
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    {rating.recipes?.title || 'Unknown Recipe'}
+                                  </p>
+                                  <p className="text-sm">{rating.review_text}</p>
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    {new Date(rating.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {!rating.is_approved && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleApproveRating(rating.id)}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    Approve
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeleteRating(rating.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>

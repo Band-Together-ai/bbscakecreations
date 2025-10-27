@@ -204,6 +204,53 @@ export type Database = {
           },
         ]
       }
+      recipe_ratings: {
+        Row: {
+          admin_reviewed: boolean
+          created_at: string
+          id: string
+          is_approved: boolean
+          rating: number
+          recipe_id: string
+          review_text: string
+          updated_at: string
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          admin_reviewed?: boolean
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          rating: number
+          recipe_id: string
+          review_text: string
+          updated_at?: string
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          admin_reviewed?: boolean
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          rating?: number
+          recipe_id?: string
+          review_text?: string
+          updated_at?: string
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ratings_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           category: string | null
@@ -258,6 +305,68 @@ export type Database = {
         }
         Relationships: []
       }
+      support_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          recipe_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          recipe_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          recipe_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_clicks_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          support_message: string | null
+          thank_you_count: number
+          updated_at: string
+          venmo_display_name: string | null
+          venmo_username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          support_message?: string | null
+          thank_you_count?: number
+          updated_at?: string
+          venmo_display_name?: string | null
+          venmo_username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          support_message?: string | null
+          thank_you_count?: number
+          updated_at?: string
+          venmo_display_name?: string | null
+          venmo_username?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -284,6 +393,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_recipe_rating_stats: {
+        Args: { recipe_uuid: string }
+        Returns: {
+          average_rating: number
+          five_star: number
+          four_star: number
+          one_star: number
+          three_star: number
+          total_ratings: number
+          two_star: number
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -295,6 +416,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_thank_you_count: { Args: never; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
