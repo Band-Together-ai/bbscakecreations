@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_photos: {
+        Row: {
+          caption: string
+          created_at: string
+          display_order: number
+          id: string
+          photo_url: string
+          updated_at: string
+        }
+        Insert: {
+          caption: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          photo_url: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          photo_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null

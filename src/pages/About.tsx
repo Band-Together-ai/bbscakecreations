@@ -12,16 +12,15 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import brandiaProfile from "@/assets/brandia-profile.jpg";
 import cake1 from "@/assets/cake-1.jpg";
-import cake2 from "@/assets/cake-2.jpg";
-import cake3 from "@/assets/cake-3.jpg";
-import cake4 from "@/assets/cake-4.jpg";
 import Autoplay from "embla-carousel-autoplay";
 
 const About = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(brandiaProfile);
+  const [galleryImages, setGalleryImages] = useState<Array<{src: string, caption: string}>>([]);
 
   useEffect(() => {
     fetchProfilePhoto();
+    fetchGalleryPhotos();
   }, []);
 
   const fetchProfilePhoto = async () => {
@@ -37,13 +36,26 @@ const About = () => {
     }
   };
 
-  const galleryImages = [
-    { src: profileImageUrl, caption: "Behind every cake is a story and a dream" },
-    { src: cake1, caption: "Herb garden dreams with fresh mint and edible flowers" },
-    { src: cake2, caption: "Rosemary sea salt fudge—decadent and earthy" },
-    { src: cake3, caption: "Lemon blueberry sunrise—bright and beautiful" },
-    { src: cake4, caption: "Ocean-inspired ombre with live pansies" },
-  ];
+  const fetchGalleryPhotos = async () => {
+    const { data, error } = await supabase
+      .from("about_photos")
+      .select("*")
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      setGalleryImages(data.map(photo => ({
+        src: photo.photo_url,
+        caption: photo.caption
+      })));
+    } else {
+      // Fallback to default images if no photos in database
+      setGalleryImages([
+        { src: brandiaProfile, caption: "Behind every cake is a story and a dream" },
+        { src: cake1, caption: "Herb garden dreams with fresh mint and edible flowers" },
+      ]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">

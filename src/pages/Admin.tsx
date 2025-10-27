@@ -71,6 +71,11 @@ const Admin = () => {
   const [ratings, setRatings] = useState<any[]>([]);
   const [ratingsFilter, setRatingsFilter] = useState<'all' | 'pending' | 'approved'>('all');
 
+  // About Me Photos state
+  const [aboutPhotos, setAboutPhotos] = useState<any[]>([]);
+  const [aboutPhotoCaption, setAboutPhotoCaption] = useState("");
+  const aboutPhotoFileInputRef = useRef<HTMLInputElement>(null);
+
   // Dev bypass - set VITE_DEV_BYPASS_AUTH="true" in .env to skip auth during development
   const isDev = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
 
@@ -90,6 +95,7 @@ const Admin = () => {
       fetchRecipePhotos();
       fetchSupportSettings();
       fetchRatings();
+      fetchAboutPhotos();
     }
   }, [isAdmin, roleLoading, navigate, isDev]);
 
@@ -685,6 +691,98 @@ const Admin = () => {
     fetchRatings();
   };
 
+  const fetchAboutPhotos = async () => {
+    const { data, error } = await supabase
+      .from("about_photos")
+      .select("*")
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching about photos:", error);
+      return;
+    }
+
+    setAboutPhotos(data || []);
+  };
+
+  const handleAboutPhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!aboutPhotoCaption.trim()) {
+      toast.error("Please enter a caption first");
+      return;
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `about-${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('profile-photos')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      toast.error("Upload failed");
+      console.error(uploadError);
+      return;
+    }
+
+    const publicUrl = supabase.storage.from('profile-photos').getPublicUrl(fileName).data.publicUrl;
+
+    const { error: dbError } = await supabase
+      .from("about_photos")
+      .insert({
+        photo_url: publicUrl,
+        caption: aboutPhotoCaption,
+        display_order: aboutPhotos.length
+      });
+
+    if (dbError) {
+      toast.error("Failed to save photo");
+      console.error(dbError);
+      return;
+    }
+
+    toast.success("About Me photo added!");
+    setAboutPhotoCaption("");
+    fetchAboutPhotos();
+  };
+
+  const handleDeleteAboutPhoto = async (photoId: string) => {
+    if (!confirm("Delete this photo?")) return;
+
+    const { error } = await supabase
+      .from("about_photos")
+      .delete()
+      .eq("id", photoId);
+
+    if (error) {
+      toast.error("Failed to delete photo");
+      console.error(error);
+      return;
+    }
+
+    toast.success("Photo deleted!");
+    fetchAboutPhotos();
+  };
+
+  const handleUpdateAboutPhotoOrder = async (photoId: string, newOrder: number) => {
+    const { error } = await supabase
+      .from("about_photos")
+      .update({ display_order: newOrder })
+      .eq("id", photoId);
+
+    if (error) {
+      toast.error("Failed to update order");
+      console.error(error);
+      return;
+    }
+
+    fetchAboutPhotos();
+  };
+
   const filteredRatings = ratings.filter(rating => {
     if (ratingsFilter === 'pending') return !rating.is_approved;
     if (ratingsFilter === 'approved') return rating.is_approved;
@@ -717,9 +815,10 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
+            <TabsTrigger value="about">About Me</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
@@ -1177,6 +1276,105 @@ const Admin = () => {
                             </Button>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ABOUT ME PHOTOS TAB */}
+          <TabsContent value="about">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-fredoka">About Me Photos & Captions</CardTitle>
+                <CardDescription>
+                  Manage the photo carousel that appears on your About page
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 bg-muted rounded-lg">
+                  <h3 className="font-fredoka text-sm mb-2">Add New Photo</h3>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="about-caption">Caption</Label>
+                      <Textarea
+                        id="about-caption"
+                        placeholder="Behind every cake is a story and a dream..."
+                        value={aboutPhotoCaption}
+                        onChange={(e) => setAboutPhotoCaption(e.target.value)}
+                        rows={2}
+                      />
+                    </div>
+                    <input
+                      ref={aboutPhotoFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAboutPhotoUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => aboutPhotoFileInputRef.current?.click()}
+                      disabled={!aboutPhotoCaption.trim()}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Photo
+                    </Button>
+                  </div>
+                </div>
+
+                {aboutPhotos.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-fredoka text-lg">Current Photos ({aboutPhotos.length})</h3>
+                    <div className="space-y-4">
+                      {aboutPhotos.map((photo, index) => (
+                        <Card key={photo.id}>
+                          <CardContent className="p-4">
+                            <div className="flex gap-4">
+                              <img
+                                src={photo.photo_url}
+                                alt={photo.caption}
+                                className="w-32 h-32 object-cover rounded-lg"
+                              />
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <p className="font-fredoka text-sm text-muted-foreground">
+                                      Position: {index + 1}
+                                    </p>
+                                    <p className="text-sm mt-1">{photo.caption}</p>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleDeleteAboutPhoto(photo.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={index === 0}
+                                    onClick={() => handleUpdateAboutPhotoOrder(photo.id, photo.display_order - 1)}
+                                  >
+                                    ↑ Move Up
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={index === aboutPhotos.length - 1}
+                                    onClick={() => handleUpdateAboutPhotoOrder(photo.id, photo.display_order + 1)}
+                                  >
+                                    ↓ Move Down
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </div>
