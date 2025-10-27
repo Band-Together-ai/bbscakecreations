@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, Edit, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Recipe {
   id: string;
@@ -146,26 +151,42 @@ const Recipes = () => {
                   {isAdmin || isCollaborator ? (
                     <div className="space-y-3">
                       <div className="space-y-2">
-                        <label className="text-sm font-fredoka text-ocean-deep">Landing Page Position</label>
-                        <Select
-                          value={recipe.featured_position?.toString() || "none"}
-                          onValueChange={(value) => 
-                            updateFeaturedPosition(recipe.id, value === "none" ? null : parseInt(value))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Not on landing page" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Not on landing page</SelectItem>
-                            <SelectItem value="1">Position 1 - Featured Cake ✨</SelectItem>
-                            <SelectItem value="2">Position 2</SelectItem>
-                            <SelectItem value="3">Position 3</SelectItem>
-                            <SelectItem value="4">Position 4</SelectItem>
-                            <SelectItem value="5">Position 5</SelectItem>
-                            <SelectItem value="6">Position 6</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <label className="text-sm font-fredoka text-ocean-deep block mb-1">Landing Page Position</label>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full justify-between">
+                              {recipe.featured_position 
+                                ? recipe.featured_position === 1 
+                                  ? "Position 1 - Featured Cake ✨"
+                                  : `Position ${recipe.featured_position}`
+                                : "Not on landing page"}
+                              <Star className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-full">
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, null)}>
+                              Not on landing page
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, 1)}>
+                              Position 1 - Featured Cake ✨
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, 2)}>
+                              Position 2
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, 3)}>
+                              Position 3
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, 4)}>
+                              Position 4
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, 5)}>
+                              Position 5
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateFeaturedPosition(recipe.id, 6)}>
+                              Position 6
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <Button
                         onClick={() => navigate("/admin")}
