@@ -13,120 +13,69 @@ const DolphinAnimation = () => {
             animationDuration: '7s',
           }}
         >
-          <svg
-            width="160"
-            height="100"
-            viewBox="0 0 160 100"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="drop-shadow-2xl"
-          >
-            {/* Main body - sleek torpedo shape */}
-            <ellipse
-              cx="80"
-              cy="50"
-              rx="45"
-              ry="18"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            
-            {/* Head/rostrum - distinctive pointed beak */}
-            <path
-              d="M125 50 Q135 49, 145 48 L145 52 Q135 51, 125 50 Z"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            <ellipse
-              cx="115"
-              cy="50"
-              rx="25"
-              ry="16"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            
-            {/* Dorsal fin - curved and prominent */}
-            <path
-              d="M85 32 Q88 20, 92 15 Q94 18, 95 25 Q95 30, 92 33 L85 32 Z"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            
-            {/* Tail section - tapered body */}
-            <ellipse
-              cx="45"
-              cy="50"
-              rx="20"
-              ry="14"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            
-            {/* Tail flukes - horizontal (not vertical!) */}
-            <path
-              d="M25 45 Q15 40, 8 38 Q5 37, 3 40 Q2 43, 5 45 Q12 47, 20 48 L25 45 Z"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            <path
-              d="M25 55 Q15 60, 8 62 Q5 63, 3 60 Q2 57, 5 55 Q12 53, 20 52 L25 55 Z"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.95"
-            />
-            
-            {/* Pectoral fin - angled backward */}
-            <path
-              d="M95 58 Q90 65, 85 72 Q83 74, 82 72 Q83 68, 87 62 Q91 57, 95 56 L95 58 Z"
-              fill="hsl(var(--ocean-deep))"
-              opacity="0.85"
-            />
-            
-            {/* Belly - lighter underside for dimension */}
-            <ellipse
-              cx="85"
-              cy="58"
-              rx="38"
-              ry="10"
-              fill="hsl(var(--ocean-wave))"
-              opacity="0.6"
-            />
-            
-            {/* Body highlight - shiny wet surface */}
-            <ellipse
-              cx="90"
-              cy="42"
-              rx="30"
-              ry="8"
-              fill="white"
-              opacity="0.4"
-            />
-            
-            {/* Eye - positioned correctly on head */}
-            <circle cx="120" cy="45" r="3.5" fill="white" opacity="0.95" />
-            <circle cx="121" cy="45" r="2" fill="#1a1a1a" />
-            <circle cx="121.5" cy="44.5" r="0.8" fill="white" opacity="0.8" />
-            
-            {/* Mouth line - subtle smile */}
-            <path
-              d="M135 52 Q130 54, 125 54"
-              stroke="hsl(var(--ocean-deep))"
-              strokeWidth="1.5"
-              opacity="0.6"
+          <div className="transform -rotate-8">
+            <svg
+              width="160"
+              height="90"
+              viewBox="0 0 180 90"
               fill="none"
-            />
-            
-            {/* Water splash effects - at tail and head */}
-            <g opacity="0.6">
-              <circle cx="20" cy="48" r="4" fill="hsl(var(--ocean-foam))" />
-              <circle cx="15" cy="52" r="3" fill="hsl(var(--ocean-foam))" />
-              <circle cx="25" cy="45" r="2.5" fill="hsl(var(--ocean-foam))" />
-              <circle cx="12" cy="45" r="2" fill="hsl(var(--ocean-foam))" />
-              <circle cx="148" cy="50" r="2.5" fill="hsl(var(--ocean-foam))" />
-              <circle cx="145" cy="53" r="2" fill="hsl(var(--ocean-foam))" />
-              <circle cx="150" cy="47" r="1.8" fill="hsl(var(--ocean-foam))" />
-            </g>
-          </svg>
+              xmlns="http://www.w3.org/2000/svg"
+              className="drop-shadow-2xl"
+            >
+              {/* Body silhouette */}
+              <path
+                d="M22 48
+                   C38 32, 76 22, 118 28
+                   C138 31, 152 38, 160 44
+                   C149 45, 140 48, 132 53
+                   C118 61, 90 70, 60 67
+                   C40 65, 28 58, 22 50 Z"
+                fill="hsl(var(--ocean-deep))"
+                opacity="0.95"
+              />
+
+              {/* Rostrum (beak) */}
+              <path
+                d="M160 44 Q170 42, 176 41 L176 49 Q170 48, 160 46 Z"
+                fill="hsl(var(--ocean-deep))"
+              />
+
+              {/* Dorsal fin */}
+              <path
+                d="M96 26 Q100 12, 106 6 Q108 9, 107 18 Q106 26, 101 30 L96 26 Z"
+                fill="hsl(var(--ocean-deep))"
+              />
+
+              {/* Tail flukes (horizontal) */}
+              <path d="M20 46 L8 38 L10 45 L20 49 Z" fill="hsl(var(--ocean-deep))" />
+              <path d="M20 50 L8 58 L10 51 L20 49 Z" fill="hsl(var(--ocean-deep))" />
+
+              {/* Pectoral fin */}
+              <path
+                d="M110 56 Q104 64, 100 70 Q99 72, 100 68 Q103 61, 109 54 L110 56 Z"
+                fill="hsl(var(--ocean-deep))"
+                opacity="0.9"
+              />
+
+              {/* Eye */}
+              <circle cx="145" cy="40" r="3" fill="white" opacity="0.95" />
+              <circle cx="146" cy="40" r="1.6" fill="hsl(var(--ocean-deep))" />
+
+              {/* Belly tint */}
+              <ellipse cx="105" cy="58" rx="42" ry="9" fill="hsl(var(--ocean-wave))" opacity="0.55" />
+
+              {/* Subtle highlight */}
+              <ellipse cx="120" cy="36" rx="24" ry="6" fill="white" opacity="0.35" />
+
+              {/* Splash droplets */}
+              <g opacity="0.6">
+                <circle cx="14" cy="48" r="3" fill="hsl(var(--ocean-foam))" />
+                <circle cx="12" cy="53" r="2" fill="hsl(var(--ocean-foam))" />
+                <circle cx="172" cy="45" r="2.2" fill="hsl(var(--ocean-foam))" />
+                <circle cx="168" cy="49" r="1.6" fill="hsl(var(--ocean-foam))" />
+              </g>
+            </svg>
+          </div>
         </div>
       ))}
     </div>
