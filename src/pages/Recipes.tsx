@@ -13,6 +13,10 @@ interface Recipe {
   is_gluten_free: boolean;
   is_public: boolean;
   image_url: string | null;
+  recipe_photos?: Array<{
+    photo_url: string;
+    is_headline: boolean;
+  }>;
 }
 
 const Recipes = () => {
@@ -31,11 +35,30 @@ const Recipes = () => {
   const fetchRecipes = async () => {
     const { data } = await supabase
       .from("recipes")
-      .select("*")
+      .select(`
+        *,
+        recipe_photos(photo_url, is_headline)
+      `)
       .eq("is_public", true)
       .order("created_at", { ascending: false });
 
     setRecipes(data || []);
+  };
+
+  const getRecipeImage = (recipe: Recipe) => {
+    // First try the main image_url
+    if (recipe.image_url) return recipe.image_url;
+    
+    // Then try to find a headline photo
+    const headlinePhoto = recipe.recipe_photos?.find(p => p.is_headline);
+    if (headlinePhoto) return headlinePhoto.photo_url;
+    
+    // Finally, use the first photo if available
+    if (recipe.recipe_photos && recipe.recipe_photos.length > 0) {
+      return recipe.recipe_photos[0].photo_url;
+    }
+    
+    return null;
   };
 
   return (
@@ -60,17 +83,19 @@ const Recipes = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recipes.map((recipe) => (
-              <Card key={recipe.id} className="shadow-wave hover:shadow-float transition-all hover:scale-105 overflow-hidden">
-                {recipe.image_url && (
-                  <div className="w-full h-48 overflow-hidden">
-                    <img
-                      src={recipe.image_url}
-                      alt={recipe.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+            {recipes.map((recipe) => {
+              const recipeImage = getRecipeImage(recipe);
+              return (
+                <Card key={recipe.id} className="shadow-wave hover:shadow-float transition-all hover:scale-105 overflow-hidden">
+                  {recipeImage && (
+                    <div className="w-full h-48 overflow-hidden">
+                      <img
+                        src={recipeImage}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                 <CardHeader>
                   {recipe.is_gluten_free && (
                     <div className="inline-flex items-center gap-1 px-3 py-1 bg-seaweed/10 text-seaweed rounded-full text-sm font-fredoka mb-2 w-fit">
@@ -98,7 +123,8 @@ const Recipes = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
