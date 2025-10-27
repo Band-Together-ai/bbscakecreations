@@ -77,18 +77,30 @@ const Index = () => {
   const fetchFeaturedRecipes = async () => {
     const { data } = await supabase
       .from("recipes")
-      .select("*")
+      .select(`
+        *,
+        recipe_photos(photo_url, is_headline)
+      `)
       .eq("is_featured", true)
       .eq("is_public", true)
       .order("created_at", { ascending: false })
       .limit(6);
 
     if (data && data.length > 0) {
-      setFeaturedCakes(data.map(recipe => ({
-        image: recipe.image_url || cake1,
-        title: recipe.title,
-        description: recipe.description || "",
-      })));
+      setFeaturedCakes(data.map(recipe => {
+        // Prioritize image_url, then headline photo, then first photo
+        let image = recipe.image_url;
+        if (!image && recipe.recipe_photos && recipe.recipe_photos.length > 0) {
+          const headlinePhoto = recipe.recipe_photos.find((p: any) => p.is_headline);
+          image = headlinePhoto?.photo_url || recipe.recipe_photos[0].photo_url;
+        }
+        
+        return {
+          image: image || cake1,
+          title: recipe.title,
+          description: recipe.description || "",
+        };
+      }));
     }
   };
 
