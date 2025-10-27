@@ -173,7 +173,8 @@ const Index = () => {
             {cakes.map((cake, idx) => (
               <div
                 key={idx}
-                className={`group bg-card/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-wave hover:shadow-float transition-all hover:scale-105 ${
+                onClick={() => navigate("/recipes")}
+                className={`group bg-card/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-wave hover:shadow-float transition-all hover:scale-105 cursor-pointer ${
                   idx === 0 ? "ring-2 ring-coral/50" : ""
                 }`}
               >
