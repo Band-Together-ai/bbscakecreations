@@ -12,7 +12,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2 } from "lucide-react";
+import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -44,6 +50,7 @@ const Admin = () => {
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [featuredPosition, setFeaturedPosition] = useState<number | null>(null);
 
   // Profile settings state
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -194,6 +201,7 @@ const Admin = () => {
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
       is_featured: isFeatured,
+      featured_position: featuredPosition,
     };
 
     let recipeId = editingRecipe?.id;
@@ -249,6 +257,7 @@ const Admin = () => {
     setIsGlutenFree(false);
     setIsPublic(false);
     setIsFeatured(false);
+    setFeaturedPosition(null);
     setSelectedPhotos([]);
     setEditingRecipe(null);
   };
@@ -262,6 +271,7 @@ const Admin = () => {
     setIsGlutenFree(recipe.is_gluten_free || false);
     setIsPublic(recipe.is_public || false);
     setIsFeatured(recipe.is_featured || false);
+    setFeaturedPosition(recipe.featured_position || null);
     
     // Extract link from instructions if present
     const linkMatch = recipe.instructions?.match(/Base recipe link: (.+)/);
@@ -274,6 +284,10 @@ const Admin = () => {
     }
     
     setSelectedPhotos([]); // Clear selected photos when editing
+    
+    // Scroll to top to show the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.info("Recipe loaded for editing - see form on left");
   };
 
   const handleDeleteRecipe = async (recipeId: string) => {
@@ -727,36 +741,80 @@ const Admin = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-8 p-4 bg-muted rounded-lg flex-wrap">
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={isGlutenFree}
-                            onCheckedChange={setIsGlutenFree}
-                            id="gluten-free"
-                          />
-                          <Label htmlFor="gluten-free" className="cursor-pointer">
-                            Gluten-Free
-                          </Label>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-8 p-4 bg-muted rounded-lg flex-wrap">
+                          <div className="flex items-center gap-3">
+                            <Switch
+                              checked={isGlutenFree}
+                              onCheckedChange={setIsGlutenFree}
+                              id="gluten-free"
+                            />
+                            <Label htmlFor="gluten-free" className="cursor-pointer">
+                              Gluten-Free
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Switch
+                              checked={isPublic}
+                              onCheckedChange={setIsPublic}
+                              id="public-recipe"
+                            />
+                            <Label htmlFor="public-recipe" className="cursor-pointer">
+                              Public
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Switch
+                              checked={isFeatured}
+                              onCheckedChange={setIsFeatured}
+                              id="featured-recipe"
+                            />
+                            <Label htmlFor="featured-recipe" className="cursor-pointer">
+                              Featured
+                            </Label>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={isPublic}
-                            onCheckedChange={setIsPublic}
-                            id="public-recipe"
-                          />
-                          <Label htmlFor="public-recipe" className="cursor-pointer">
-                            Public
-                          </Label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={isFeatured}
-                            onCheckedChange={setIsFeatured}
-                            id="featured-recipe"
-                          />
-                          <Label htmlFor="featured-recipe" className="cursor-pointer">
-                            Featured
-                          </Label>
+
+                        <div className="space-y-2">
+                          <Label>Landing Page Position</Label>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" className="w-full justify-between">
+                                {featuredPosition 
+                                  ? featuredPosition === 1 
+                                    ? "Position 1 - Featured Cake ✨"
+                                    : `Position ${featuredPosition}`
+                                  : "Not on landing page"}
+                                <Star className="ml-2 h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-full">
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(null)}>
+                                Not on landing page
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(1)}>
+                                Position 1 - Featured Cake ✨
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(2)}>
+                                Position 2
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(3)}>
+                                Position 3
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(4)}>
+                                Position 4
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(5)}>
+                                Position 5
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFeaturedPosition(6)}>
+                                Position 6
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <p className="text-xs text-muted-foreground">
+                            Position 1 is the special "Featured Cake" spot on the homepage
+                          </p>
                         </div>
                       </div>
 
@@ -820,7 +878,7 @@ const Admin = () => {
                                     <p className="text-sm text-muted-foreground line-clamp-2">
                                       {recipe.description}
                                     </p>
-                                    <div className="flex gap-2 flex-wrap">
+                                     <div className="flex gap-2 flex-wrap">
                                       {recipe.is_public && (
                                         <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
                                           Public
@@ -834,6 +892,12 @@ const Admin = () => {
                                       {recipe.is_featured && (
                                         <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
                                           Featured
+                                        </span>
+                                      )}
+                                      {recipe.featured_position && (
+                                        <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded flex items-center gap-1">
+                                          <Star className="w-3 h-3" />
+                                          {recipe.featured_position === 1 ? "Featured Cake" : `Landing #${recipe.featured_position}`}
                                         </span>
                                       )}
                                     </div>
