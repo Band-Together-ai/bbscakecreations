@@ -1,51 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X } from "lucide-react";
 
 const Navigation = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, isAuthenticated } = useUserRole();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // TEMPORARILY DISABLED FOR TESTING
-  // useEffect(() => {
-  //   supabase.auth.getSession().then(({ data: { session } }) => {
-  //     setUser(session?.user ?? null);
-  //     if (session?.user) {
-  //       checkAdminStatus(session.user.id);
-  //     }
-  //   });
-
-  //   const {
-  //     data: { subscription },
-  //   } = supabase.auth.onAuthStateChange((event, session) => {
-  //     setUser(session?.user ?? null);
-  //     if (session?.user) {
-  //       checkAdminStatus(session.user.id);
-  //     }
-  //   });
-
-  //   return () => subscription.unsubscribe();
-  // }, []);
-
-  const checkAdminStatus = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", userId)
-      .single();
-    
-    setIsAdmin(data?.is_admin || false);
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
   };
-
-  // TEMPORARILY DISABLED FOR TESTING
-  // const handleSignOut = async () => {
-  //   await supabase.auth.signOut();
-  //   navigate("/");
-  // };
 
   return (
     <header className="relative z-20 border-b border-border bg-card/80 backdrop-blur-sm">
@@ -108,15 +76,28 @@ const Navigation = () => {
               <MessageSquare className="w-4 h-4" />
               Chat with Sasha
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/admin")}
-              className="gap-2 border-coral text-coral hover:bg-coral hover:text-white"
-            >
-              <Settings className="w-4 h-4" />
-              Admin
-            </Button>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/admin")}
+                className="gap-2 border-coral text-coral hover:bg-coral hover:text-white"
+              >
+                <Settings className="w-4 h-4" />
+                Admin
+              </Button>
+            )}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -195,18 +176,34 @@ const Navigation = () => {
               <MessageSquare className="w-4 h-4" />
               Chat with Sasha
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                navigate("/admin");
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full gap-2 justify-start border-coral text-coral hover:bg-coral hover:text-white"
-            >
-              <Settings className="w-4 h-4" />
-              Admin
-            </Button>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigate("/admin");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full gap-2 justify-start border-coral text-coral hover:bg-coral hover:text-white"
+              >
+                <Settings className="w-4 h-4" />
+                Admin
+              </Button>
+            )}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  handleSignOut();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full gap-2 justify-start"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            )}
           </div>
         )}
       </div>

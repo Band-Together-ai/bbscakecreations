@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,8 +16,7 @@ import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, 
 
 const Admin = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, userId, loading: roleLoading } = useUserRole();
   const [loading, setLoading] = useState(true);
 
   // Voice recording state
@@ -51,16 +51,25 @@ const Admin = () => {
   const [profileSettingsId, setProfileSettingsId] = useState<string | null>(null);
   const profileFileInputRef = useRef<HTMLInputElement>(null);
 
-  // TEMPORARILY DISABLED FOR TESTING
+  // Dev bypass - set VITE_DEV_BYPASS_AUTH="true" in .env to skip auth during development
+  const isDev = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+
+  // Auth check with redirect
   useEffect(() => {
-    // Skip auth check for testing
-    setLoading(false);
-    setIsAdmin(true);
-    fetchUploadedPhotos();
-    fetchProfileSettings();
-    fetchRecipes();
-    fetchRecipePhotos();
-  }, []);
+    if (!roleLoading) {
+      if (!isDev && !isAdmin) {
+        toast.error("Access denied. Admin privileges required.");
+        navigate('/auth');
+        return;
+      }
+      
+      setLoading(false);
+      fetchUploadedPhotos();
+      fetchProfileSettings();
+      fetchRecipes();
+      fetchRecipePhotos();
+    }
+  }, [isAdmin, roleLoading, navigate, isDev]);
 
   const fetchUploadedPhotos = async () => {
     const { data, error } = await supabase.storage
@@ -176,7 +185,7 @@ const Admin = () => {
     }
 
     const recipeData = {
-      user_id: user?.id || null,
+      user_id: userId || null,
       title: recipeTitle,
       description: recipeDescription,
       instructions: recipeInstructions + (recipeLink ? `\n\nBase recipe link: ${recipeLink}` : ''),
@@ -535,10 +544,13 @@ const Admin = () => {
     toast.success("Profile settings saved successfully!");
   };
 
-  if (loading) {
+  if (roleLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ocean-wave mx-auto mb-4"></div>
+          <p className="text-ocean-deep">Checking permissions...</p>
+        </div>
       </div>
     );
   }
