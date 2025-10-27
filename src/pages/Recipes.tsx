@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles } from "lucide-react";
+import { Lock, Sparkles, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface Recipe {
   id: string;
@@ -21,8 +22,11 @@ interface Recipe {
 
 const Recipes = () => {
   const navigate = useNavigate();
+  const { isAdmin, isCollaborator, isPaid } = useUserRole();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [user, setUser] = useState<any>(null);
+  
+  const canViewFullRecipe = isAdmin || isCollaborator || isPaid;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -109,18 +113,44 @@ const Recipes = () => {
                   <CardDescription>{recipe.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-ocean-wave/20 text-center">
-                    <Lock className="w-8 h-8 text-ocean-wave mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Full recipe with ingredients, instructions, and Brandia's secret twists
-                    </p>
+                  {isAdmin || isCollaborator ? (
+                    <div className="space-y-2">
+                      <Button
+                        onClick={() => navigate("/admin")}
+                        className="w-full gradient-ocean text-primary-foreground"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Recipe
+                      </Button>
+                      <Button
+                        onClick={() => navigate("/chat")}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Chat with Sasha
+                      </Button>
+                    </div>
+                  ) : canViewFullRecipe ? (
                     <Button
-                      onClick={() => navigate(user ? "/chat" : "/auth")}
+                      onClick={() => navigate("/chat")}
                       className="w-full gradient-ocean text-primary-foreground"
                     >
-                      {user ? "Chat with Sasha" : "Subscribe to Unlock"}
+                      View Full Recipe with Sasha
                     </Button>
-                  </div>
+                  ) : (
+                    <div className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-ocean-wave/20 text-center">
+                      <Lock className="w-8 h-8 text-ocean-wave mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Full recipe with ingredients, instructions, and Brandia's secret twists
+                      </p>
+                      <Button
+                        onClick={() => navigate(user ? "/chat" : "/auth")}
+                        className="w-full gradient-ocean text-primary-foreground"
+                      >
+                        {user ? "Chat with Sasha" : "Subscribe to Unlock"}
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
               );
