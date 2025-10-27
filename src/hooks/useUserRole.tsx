@@ -7,6 +7,8 @@ export const useUserRole = () => {
   const [role, setRole] = useState<AppRole>(null);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isPromo, setIsPromo] = useState(false);
+  const [hasFullAccess, setHasFullAccess] = useState(false);
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -16,29 +18,49 @@ export const useUserRole = () => {
         if (!session?.user) {
           setRole(null);
           setUserId(null);
+          setIsPromo(false);
+          setHasFullAccess(false);
           setLoading(false);
           return;
         }
 
         setUserId(session.user.id);
 
-        const { data, error } = await supabase
+        // Check user role
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching role:', error);
-          setRole('free'); // Default to free if error
-        } else {
-          setRole(data?.role || 'free');
-        }
+        const userRole = roleError ? 'free' : (roleData?.role || 'free');
+        setRole(userRole);
+
+        // Check promo status
+        const { data: promoData } = await supabase
+          .from('promo_users')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .or('expires_at.is.null,expires_at.gte.' + new Date().toISOString())
+          .maybeSingle();
+
+        const hasPromo = !!promoData;
+        setIsPromo(hasPromo);
+
+        // Determine full access: admin, collaborator, paid role, OR promo user
+        const fullAccess = userRole === 'admin' || 
+                          userRole === 'collaborator' || 
+                          userRole === 'paid' || 
+                          hasPromo;
+        setHasFullAccess(fullAccess);
+
       } catch (err) {
         console.error('Error in useUserRole:', err);
         setRole('free');
+        setIsPromo(false);
+        setHasFullAccess(false);
       } finally {
         setLoading(false);
       }
@@ -63,5 +85,7 @@ export const useUserRole = () => {
     isPaid: role === 'paid',
     isFree: role === 'free',
     isAuthenticated: userId !== null,
+    isPromo,
+    hasFullAccess,
   };
 };

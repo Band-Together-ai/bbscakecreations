@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.promote-admin]
 verify_jwt = false
+
+[functions.create-tip-jar-session]
+verify_jwt = false
+
+[functions.grant-promo-access]
+verify_jwt = true
+
+[functions.extend-tip-jar-session]
+verify_jwt = false

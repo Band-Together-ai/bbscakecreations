@@ -196,6 +196,33 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_users: {
+        Row: {
+          expires_at: string | null
+          granted_at: string
+          id: string
+          notes: string | null
+          promo_type: string
+          user_id: string | null
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          notes?: string | null
+          promo_type?: string
+          user_id?: string | null
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          notes?: string | null
+          promo_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       recipe_photos: {
         Row: {
           created_at: string
@@ -332,6 +359,41 @@ export type Database = {
         }
         Relationships: []
       }
+      session_notes: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          role: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          role: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          role?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_notes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tip_jar_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_clicks: {
         Row: {
           clicked_at: string
@@ -391,6 +453,66 @@ export type Database = {
           updated_at?: string
           venmo_display_name?: string | null
           venmo_username?: string | null
+        }
+        Relationships: []
+      }
+      tip_jar_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          payment_id: string | null
+          session_duration_minutes: number
+          session_start: string
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          payment_id?: string | null
+          session_duration_minutes?: number
+          session_start?: string
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          payment_id?: string | null
+          session_duration_minutes?: number
+          session_start?: string
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_activity_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          details: Json | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
