@@ -588,12 +588,12 @@ const Admin = () => {
                     <div className="space-y-2">
                       <Label>1. Select Photos for This Recipe</Label>
                       <p className="text-xs text-muted-foreground">Click to select multiple photos</p>
-                      <div className="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                      <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2 border rounded-lg">
                         {uploadedPhotos.map((photo) => (
                           <div
                             key={photo.name}
                             onClick={() => togglePhotoSelection(photo)}
-                            className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                            className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all aspect-square ${
                               selectedPhotos.some(p => p.name === photo.name)
                                 ? 'border-ocean-wave ring-2 ring-ocean-wave'
                                 : 'border-transparent hover:border-ocean-wave/50'
@@ -602,10 +602,10 @@ const Admin = () => {
                             <img
                               src={photo.url}
                               alt={photo.name}
-                              className="w-full h-20 object-cover"
+                              className="w-full h-full object-cover"
                             />
                             {selectedPhotos.some(p => p.name === photo.name) && (
-                              <div className="absolute top-1 right-1 bg-ocean-wave text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                              <div className="absolute top-2 right-2 bg-ocean-wave text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
                                 ✓
                               </div>
                             )}
