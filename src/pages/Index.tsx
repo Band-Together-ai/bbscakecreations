@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
+import DolphinAnimation from "@/components/DolphinAnimation";
 import Navigation from "@/components/Navigation";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -120,6 +121,7 @@ const Index = () => {
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
       <WaveBackground />
+      <DolphinAnimation />
 
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center">
@@ -128,7 +130,7 @@ const Index = () => {
             {/* Left: Text */}
             <div className="space-y-6 animate-fade-in">
               <h1 className="text-5xl md:text-7xl font-fredoka font-bold gradient-ocean bg-clip-text text-transparent leading-tight">
-                Brandia's<br />CakeWhisperer
+                Brandia's<br />BBs Cake Creations
               </h1>
               <p className="text-xl text-ocean-deep font-quicksand max-w-xl">
                 Where every cake is baked from scratch with love, 

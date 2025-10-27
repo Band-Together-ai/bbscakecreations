@@ -1,8 +1,28 @@
 import Navigation from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Flower2, Sprout } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import brandiaProfile from "@/assets/brandia-profile.jpg";
+import cake1 from "@/assets/cake-1.jpg";
+import cake2 from "@/assets/cake-2.jpg";
+import cake3 from "@/assets/cake-3.jpg";
+import cake4 from "@/assets/cake-4.jpg";
 
 const About = () => {
+  const galleryImages = [
+    { src: brandiaProfile, caption: "Behind every cake is a story and a dream" },
+    { src: cake1, caption: "Herb garden dreams with fresh mint and edible flowers" },
+    { src: cake2, caption: "Rosemary sea salt fudge—decadent and earthy" },
+    { src: cake3, caption: "Lemon blueberry sunrise—bright and beautiful" },
+    { src: cake4, caption: "Ocean-inspired ombre with live pansies" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -11,19 +31,54 @@ const About = () => {
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <div className="w-48 h-48 mx-auto mb-8 rounded-full bg-ocean-foam flex items-center justify-center">
-              <span className="text-6xl">👩‍🍳</span>
+            <div className="w-48 h-48 mx-auto mb-8 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
+              <img
+                src={brandiaProfile}
+                alt="Brandia - Baker, Ocean Lover, Dolphin Dreamer"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
               Meet Brandia
             </h1>
             <p className="text-2xl text-ocean-deep font-fredoka mb-4">
-              Cake Whisperer & Ocean Dreamer
+              Baker, Beach Lover & Ocean Dreamer 🐬
             </p>
             <p className="text-xl text-dolphin max-w-2xl mx-auto">
               Every layer's a love letter from scratch
             </p>
           </div>
+
+          {/* Photo Gallery Carousel */}
+          <Card className="shadow-float mb-12">
+            <CardContent className="p-8">
+              <h2 className="text-3xl font-fredoka text-ocean-deep mb-6 text-center">
+                My Journey in Pictures
+              </h2>
+              <Carousel className="w-full max-w-2xl mx-auto">
+                <CarouselContent>
+                  {galleryImages.map((image, index) => (
+                    <CarouselItem key={index}>
+                      <div className="space-y-4">
+                        <div className="aspect-[4/3] overflow-hidden rounded-xl shadow-wave">
+                          <img
+                            src={image.src}
+                            alt={image.caption}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="text-center text-lg text-muted-foreground font-quicksand italic">
+                          {image.caption}
+                        </p>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </CardContent>
+          </Card>
 
           {/* Story Section */}
           <Card className="shadow-float mb-12">

@@ -49,7 +49,7 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Welcome to CakeWhisperer! Check your email to confirm your account.");
+        toast.success("Welcome to BBs Cake Creations! Check your email to confirm your account.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -78,7 +78,7 @@ const Auth = () => {
       <Card className="w-full max-w-md mx-4 shadow-float animate-float z-10">
         <CardHeader className="text-center">
           <CardTitle className="text-4xl font-fredoka gradient-ocean bg-clip-text text-transparent">
-            CakeWhisperer
+            BBs Cake Creations
           </CardTitle>
           <CardDescription className="text-dolphin">
             {isSignUp

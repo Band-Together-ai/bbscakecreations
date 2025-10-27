@@ -23,7 +23,7 @@ const Navigation = () => {
             onClick={() => navigate("/")}
             className="text-lg md:text-2xl font-fredoka text-ocean-deep hover:opacity-80 transition-opacity shrink-0"
           >
-            CakeWhisperer
+            BBs Cake Creations
           </button>
 
           {/* Desktop Navigation */}

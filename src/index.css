@@ -146,6 +146,32 @@ All colors MUST be HSL.
     100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
   }
 
+  @keyframes dolphin-jump {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    30% {
+      transform: translateY(-120px) translateX(80px) rotate(-25deg);
+    }
+    50% {
+      transform: translateY(-140px) translateX(160px) rotate(-15deg);
+    }
+    70% {
+      transform: translateY(-80px) translateX(240px) rotate(15deg);
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0) translateX(320px) rotate(25deg);
+      opacity: 0;
+    }
+  }
+
   .animate-wave {
     animation: wave 6s ease-in-out infinite;
   }
@@ -164,6 +190,10 @@ All colors MUST be HSL.
 
   .animate-bubble {
     animation: bubble-rise 8s ease-in-out infinite;
+  }
+
+  .animate-dolphin-jump {
+    animation: dolphin-jump 6s ease-in-out infinite;
   }
 
   .gradient-ocean {
