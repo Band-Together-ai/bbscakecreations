@@ -148,26 +148,32 @@ All colors MUST be HSL.
 
   @keyframes dolphin-jump {
     0% {
-      transform: translateY(0) rotate(0deg);
+      transform: translateY(0) translateX(0) rotate(-35deg) scale(0.8);
       opacity: 0;
     }
-    10% {
+    5% {
       opacity: 1;
     }
+    15% {
+      transform: translateY(60px) translateX(120px) rotate(-20deg) scale(1);
+    }
     30% {
-      transform: translateY(-120px) translateX(80px) rotate(-25deg);
+      transform: translateY(140px) translateX(240px) rotate(0deg) scale(1.1);
     }
-    50% {
-      transform: translateY(-140px) translateX(160px) rotate(-15deg);
+    45% {
+      transform: translateY(180px) translateX(360px) rotate(20deg) scale(1.05);
     }
-    70% {
-      transform: translateY(-80px) translateX(240px) rotate(15deg);
+    60% {
+      transform: translateY(160px) translateX(480px) rotate(35deg) scale(1);
+    }
+    75% {
+      transform: translateY(100px) translateX(580px) rotate(45deg) scale(0.95);
     }
     90% {
       opacity: 1;
     }
     100% {
-      transform: translateY(0) translateX(320px) rotate(25deg);
+      transform: translateY(0) translateX(680px) rotate(50deg) scale(0.8);
       opacity: 0;
     }
   }

@@ -124,20 +124,20 @@ const Index = () => {
       <DolphinAnimation />
 
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center">
+      <section className="relative z-10 min-h-screen flex items-center pt-12">
         <div className="container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Text */}
             <div className="space-y-6 animate-fade-in">
-              <h1 className="text-5xl md:text-7xl font-fredoka font-bold gradient-ocean bg-clip-text text-transparent leading-tight">
+              <h1 className="text-5xl md:text-7xl font-fredoka font-bold gradient-ocean bg-clip-text text-transparent leading-tight drop-shadow-sm">
                 Brandia's<br />BBs Cake Creations
               </h1>
-              <p className="text-xl text-ocean-deep font-quicksand max-w-xl">
+              <p className="text-xl text-ocean-deep font-quicksand max-w-xl backdrop-blur-sm bg-background/60 p-4 rounded-2xl">
                 Where every cake is baked from scratch with love, 
                 adorned with live flowers, and crafted to tell your story. Most cakes can be made 
                 gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
               </p>
-              <div className="pt-4">
+              <div className="pt-4 backdrop-blur-sm bg-background/60 p-4 rounded-2xl">
                 <p className="text-lg font-fredoka text-dolphin mb-4">
                   Meet Sasha—my AI companion who captures my baking philosophy 
                   and helps you create your own masterpieces.
