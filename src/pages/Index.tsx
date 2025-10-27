@@ -83,6 +83,7 @@ const Index = () => {
       `)
       .eq("is_featured", true)
       .eq("is_public", true)
+      .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(6);
 
@@ -172,8 +173,15 @@ const Index = () => {
             {cakes.map((cake, idx) => (
               <div
                 key={idx}
-                className="group bg-card/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-wave hover:shadow-float transition-all hover:scale-105"
+                className={`group bg-card/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-wave hover:shadow-float transition-all hover:scale-105 ${
+                  idx === 0 ? "ring-2 ring-coral/50" : ""
+                }`}
               >
+                {idx === 0 && (
+                  <div className="bg-gradient-to-r from-coral to-ocean-wave text-white px-4 py-2 text-center font-fredoka font-semibold">
+                    ✨ Featured Cake
+                  </div>
+                )}
                 <div className="aspect-square overflow-hidden">
                   <img
                     src={cake.image}

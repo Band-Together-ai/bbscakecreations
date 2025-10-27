@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, Edit } from "lucide-react";
+import { Lock, Sparkles, Edit, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface Recipe {
   id: string;
@@ -13,6 +15,8 @@ interface Recipe {
   description: string;
   is_gluten_free: boolean;
   is_public: boolean;
+  is_featured: boolean;
+  featured_position: number | null;
   image_url: string | null;
   recipe_photos?: Array<{
     photo_url: string;
@@ -44,9 +48,27 @@ const Recipes = () => {
         recipe_photos(photo_url, is_headline)
       `)
       .eq("is_public", true)
+      .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
     setRecipes(data || []);
+  };
+
+  const updateFeaturedPosition = async (recipeId: string, position: number | null) => {
+    const { error } = await supabase
+      .from("recipes")
+      .update({ 
+        featured_position: position,
+        is_featured: position !== null 
+      })
+      .eq("id", recipeId);
+
+    if (error) {
+      toast.error("Failed to update position: " + error.message);
+    } else {
+      toast.success(position ? `Set as landing page position ${position}` : "Removed from landing page");
+      fetchRecipes();
+    }
   };
 
   const getRecipeImage = (recipe: Recipe) => {
@@ -101,12 +123,20 @@ const Recipes = () => {
                     </div>
                   )}
                 <CardHeader>
-                  {recipe.is_gluten_free && (
-                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-seaweed/10 text-seaweed rounded-full text-sm font-fredoka mb-2 w-fit">
-                      <Sparkles className="w-3 h-3" />
-                      Gluten-Free
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {recipe.is_gluten_free && (
+                      <div className="inline-flex items-center gap-1 px-3 py-1 bg-seaweed/10 text-seaweed rounded-full text-sm font-fredoka w-fit">
+                        <Sparkles className="w-3 h-3" />
+                        Gluten-Free
+                      </div>
+                    )}
+                    {recipe.featured_position && (
+                      <div className="inline-flex items-center gap-1 px-3 py-1 bg-coral/10 text-coral rounded-full text-sm font-fredoka w-fit">
+                        <Star className="w-3 h-3" />
+                        {recipe.featured_position === 1 ? "Featured Cake" : `Landing Page #${recipe.featured_position}`}
+                      </div>
+                    )}
+                  </div>
                   <CardTitle className="font-fredoka text-2xl text-ocean-deep">
                     {recipe.title}
                   </CardTitle>
@@ -114,7 +144,29 @@ const Recipes = () => {
                 </CardHeader>
                 <CardContent>
                   {isAdmin || isCollaborator ? (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <label className="text-sm font-fredoka text-ocean-deep">Landing Page Position</label>
+                        <Select
+                          value={recipe.featured_position?.toString() || "none"}
+                          onValueChange={(value) => 
+                            updateFeaturedPosition(recipe.id, value === "none" ? null : parseInt(value))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Not on landing page" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Not on landing page</SelectItem>
+                            <SelectItem value="1">Position 1 - Featured Cake ✨</SelectItem>
+                            <SelectItem value="2">Position 2</SelectItem>
+                            <SelectItem value="3">Position 3</SelectItem>
+                            <SelectItem value="4">Position 4</SelectItem>
+                            <SelectItem value="5">Position 5</SelectItem>
+                            <SelectItem value="6">Position 6</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <Button
                         onClick={() => navigate("/admin")}
                         className="w-full gradient-ocean text-primary-foreground"

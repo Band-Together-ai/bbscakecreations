@@ -209,6 +209,7 @@ export type Database = {
           category: string | null
           created_at: string | null
           description: string | null
+          featured_position: number | null
           id: string
           image_url: string | null
           ingredients: Json | null
@@ -225,6 +226,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
+          featured_position?: number | null
           id?: string
           image_url?: string | null
           ingredients?: Json | null
@@ -241,6 +243,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           description?: string | null
+          featured_position?: number | null
           id?: string
           image_url?: string | null
           ingredients?: Json | null
