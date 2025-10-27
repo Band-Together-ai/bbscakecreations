@@ -117,7 +117,11 @@ const Recipes = () => {
             {recipes.map((recipe) => {
               const recipeImage = getRecipeImage(recipe);
               return (
-                <Card key={recipe.id} className="shadow-wave hover:shadow-float transition-all hover:scale-105 overflow-hidden">
+                <Card 
+                  key={recipe.id} 
+                  className="shadow-wave hover:shadow-float transition-all hover:scale-105 overflow-hidden cursor-pointer"
+                  onClick={() => navigate(`/recipe/${recipe.id}`)}
+                >
                   {recipeImage && (
                     <div className="w-full h-48 overflow-hidden">
                       <img
@@ -189,14 +193,20 @@ const Recipes = () => {
                         </DropdownMenu>
                       </div>
                       <Button
-                        onClick={() => navigate("/admin")}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/admin");
+                        }}
                         className="w-full gradient-ocean text-primary-foreground"
                       >
                         <Edit className="w-4 h-4 mr-2" />
                         Edit Recipe
                       </Button>
                       <Button
-                        onClick={() => navigate("/chat")}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/chat");
+                        }}
                         variant="outline"
                         className="w-full"
                       >
@@ -205,19 +215,28 @@ const Recipes = () => {
                     </div>
                   ) : canViewFullRecipe ? (
                     <Button
-                      onClick={() => navigate("/chat")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/chat");
+                      }}
                       className="w-full gradient-ocean text-primary-foreground"
                     >
                       View Full Recipe with Sasha
                     </Button>
                   ) : (
-                    <div className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-ocean-wave/20 text-center">
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-4 bg-muted/30 rounded-lg border-2 border-dashed border-ocean-wave/20 text-center"
+                    >
                       <Lock className="w-8 h-8 text-ocean-wave mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground mb-3">
                         Full recipe with ingredients, instructions, and Brandia's secret twists
                       </p>
                       <Button
-                        onClick={() => navigate(user ? "/chat" : "/auth")}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(user ? "/chat" : "/auth");
+                        }}
                         className="w-full gradient-ocean text-primary-foreground"
                       >
                         {user ? "Chat with Sasha" : "Subscribe to Unlock"}

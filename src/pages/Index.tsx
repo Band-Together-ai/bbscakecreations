@@ -60,6 +60,14 @@ const Index = () => {
     fetchProfileSettings();
   }, []);
 
+  const handleCakeClick = (recipeId?: string) => {
+    if (recipeId) {
+      navigate(`/recipe/${recipeId}`);
+    } else {
+      navigate("/recipes");
+    }
+  };
+
   const fetchProfileSettings = async () => {
     const { data } = await supabase
       .from("profile_settings")
@@ -97,6 +105,7 @@ const Index = () => {
         }
         
         return {
+          id: recipe.id,
           image: image || cake1,
           title: recipe.title,
           description: recipe.description || "",
@@ -173,7 +182,7 @@ const Index = () => {
             {cakes.map((cake, idx) => (
               <div
                 key={idx}
-                onClick={() => navigate("/recipes")}
+                onClick={() => handleCakeClick((cake as any).id)}
                 className={`group bg-card/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-wave hover:shadow-float transition-all hover:scale-105 cursor-pointer ${
                   idx === 0 ? "ring-2 ring-coral/50" : ""
                 }`}

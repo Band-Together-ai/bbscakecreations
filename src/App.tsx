@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
 import Recipes from "./pages/Recipes";
+import RecipeDetail from "./pages/RecipeDetail";
 import Blog from "./pages/Blog";
 import Community from "./pages/Community";
 import About from "./pages/About";
@@ -37,6 +38,7 @@ const App = () => (
             </AdminRoute>
           } />
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/community" element={
             <ProtectedRoute>
