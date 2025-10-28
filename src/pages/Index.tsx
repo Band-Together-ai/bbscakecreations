@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
 
 import logoSquare from "@/assets/logo-square-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,8 @@ import cake3 from "@/assets/cake-3.jpg";
 import cake4 from "@/assets/cake-4.jpg";
 import cake5 from "@/assets/cake-5.jpg";
 import cake6 from "@/assets/cake-6.jpg";
+import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -24,19 +26,25 @@ const Index = () => {
     "Hi! I'm Brandia, the baker behind every scratch-made creation you see here. From ocean-inspired ombres to delicate herb-adorned layers, I believe every cake should tell a story—your story. Whether you need gluten-free magic or a classic from-scratch masterpiece, I'm here to bring your vision to life."
   );
   
-  const [logoSize] = useState(160);
-  const [logoTop] = useState(-80);
-  const [logoX, setLogoX] = useState(0);
+  const location = useLocation();
+  const isEditMode = new URLSearchParams(location.search).get("logoedit") === "1";
+  const { toast } = useToast();
 
-  // Set responsive initial position
+  const [isMobileAtLoad, setIsMobileAtLoad] = useState(false);
+  const [xMobile, setXMobile] = useState<number>(-40);
+  const [xDesktop, setXDesktop] = useState<number>(60);
+  const [logoSize, setLogoSize] = useState<number>(160);
+  const [logoTop, setLogoTop] = useState<number>(-80);
+  const [profileSettingsId, setProfileSettingsId] = useState<string | null>(null);
+  const [editDevice, setEditDevice] = useState<'mobile' | 'desktop'>("mobile");
+
+  const draggingRef = useRef(false);
+  const startRef = useRef<{ x: number; y: number; startX: number; startTop: number } | null>(null);
+
   useEffect(() => {
-    const setResponsivePosition = () => {
-      const isMobile = window.innerWidth < 768;
-      setLogoX(isMobile ? -40 : 60);
-    };
-    setResponsivePosition();
-    window.addEventListener('resize', setResponsivePosition);
-    return () => window.removeEventListener('resize', setResponsivePosition);
+    const mobile = window.innerWidth < 768;
+    setIsMobileAtLoad(mobile);
+    setEditDevice(mobile ? 'mobile' : 'desktop');
   }, []);
 
   const defaultCakes = [
@@ -94,8 +102,13 @@ const Index = () => {
       .maybeSingle();
 
     if (data) {
+      setProfileSettingsId(data.id);
       if (data.profile_image_url) setProfileImage(data.profile_image_url);
       if (data.bio_text) setProfileBio(data.bio_text);
+      if (data.logo_size !== null && data.logo_size !== undefined) setLogoSize(data.logo_size);
+      if (data.logo_top !== null && data.logo_top !== undefined) setLogoTop(data.logo_top);
+      if (data.logo_x_mobile !== null && data.logo_x_mobile !== undefined) setXMobile(data.logo_x_mobile);
+      if (data.logo_x_desktop !== null && data.logo_x_desktop !== undefined) setXDesktop(data.logo_x_desktop);
     }
   };
 
@@ -131,6 +144,35 @@ const Index = () => {
     }
   };
 
+  const saveLogoSettings = async () => {
+    const payload = {
+      logo_top: Math.round(logoTop),
+      logo_size: Math.round(logoSize),
+      logo_x_mobile: Math.round(xMobile),
+      logo_x_desktop: Math.round(xDesktop),
+    };
+
+    if (profileSettingsId) {
+      await supabase.from("profile_settings").update(payload).eq("id", profileSettingsId);
+    } else {
+      const { data } = await supabase
+        .from("profile_settings")
+        .insert(payload)
+        .select("id")
+        .maybeSingle();
+      if (data?.id) setProfileSettingsId(data.id);
+    }
+
+    toast({ title: "Logo position saved", description: "Your logo is now locked in place." });
+    navigate(location.pathname, { replace: true });
+  };
+
+  const cancelEdit = async () => {
+    await fetchProfileSettings();
+    toast({ title: "Edit cancelled", description: "Reverted to last saved position." });
+    navigate(location.pathname, { replace: true });
+  };
+
   const cakes = featuredCakes.length > 0 ? featuredCakes : defaultCakes;
 
   return (
@@ -153,7 +195,29 @@ const Index = () => {
                     src={logoSquare}
                     alt="BB's Cake Creations Logo"
                     className="absolute left-1/2 opacity-80 animate-float z-10 select-none"
-                    style={{ top: logoTop, width: logoSize, height: logoSize, transform: `translate(-50%, 0) translateX(${logoX}px)` }}
+                    style={{ top: logoTop, width: logoSize, height: logoSize, transform: `translate(-50%, 0) translateX(${(isEditMode ? (editDevice === 'mobile' ? xMobile : xDesktop) : (isMobileAtLoad ? xMobile : xDesktop))}px)` }}
+                    onPointerDown={isEditMode ? (e) => {
+                      e.preventDefault();
+                      draggingRef.current = true;
+                      startRef.current = { x: e.clientX, y: e.clientY, startX: (editDevice === 'mobile' ? xMobile : xDesktop), startTop: logoTop };
+                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                    } : undefined}
+                    onPointerMove={isEditMode ? (e) => {
+                      if (!draggingRef.current || !startRef.current) return;
+                      const dx = e.clientX - startRef.current.x;
+                      const dy = e.clientY - startRef.current.y;
+                      if (editDevice === 'mobile') setXMobile(startRef.current.startX + dx);
+                      else setXDesktop(startRef.current.startX + dx);
+                      setLogoTop(startRef.current.startTop + dy);
+                    } : undefined}
+                    onPointerUp={isEditMode ? () => {
+                      draggingRef.current = false;
+                      startRef.current = null;
+                    } : undefined}
+                    onPointerCancel={isEditMode ? () => {
+                      draggingRef.current = false;
+                      startRef.current = null;
+                    } : undefined}
                   />
                   <p className="text-xl text-ocean-deep font-quicksand">
                     Where every cake is baked from scratch with love,

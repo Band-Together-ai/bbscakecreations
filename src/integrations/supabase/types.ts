@@ -150,6 +150,10 @@ export type Database = {
           bio_text: string | null
           created_at: string | null
           id: string
+          logo_size: number | null
+          logo_top: number | null
+          logo_x_desktop: number | null
+          logo_x_mobile: number | null
           profile_image_url: string | null
           updated_at: string | null
         }
@@ -157,6 +161,10 @@ export type Database = {
           bio_text?: string | null
           created_at?: string | null
           id?: string
+          logo_size?: number | null
+          logo_top?: number | null
+          logo_x_desktop?: number | null
+          logo_x_mobile?: number | null
           profile_image_url?: string | null
           updated_at?: string | null
         }
@@ -164,6 +172,10 @@ export type Database = {
           bio_text?: string | null
           created_at?: string | null
           id?: string
+          logo_size?: number | null
+          logo_top?: number | null
+          logo_x_desktop?: number | null
+          logo_x_mobile?: number | null
           profile_image_url?: string | null
           updated_at?: string | null
         }
