@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
 import { ArrowRight, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
@@ -28,6 +29,14 @@ const Index = () => {
   
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).get("logoedit") === "1";
+  const isSettingsMode = new URLSearchParams(location.search).get("settings") === "1";
+  
+  // Hero text box settings
+  const [heroText, setHeroText] = useState(
+    "Where every cake is baked from scratch with love, adorned with live flowers, and crafted to tell your story. Most cakes can be made gluten-free or low-gluten. No box mixes. No fondant. Just pure magic."
+  );
+  const [heroBoxPaddingTop, setHeroBoxPaddingTop] = useState<number>(80);
+  const [heroBoxPadding, setHeroBoxPadding] = useState<number>(16);
   const { toast } = useToast();
 
   const [isMobileAtLoad, setIsMobileAtLoad] = useState(false);
@@ -109,6 +118,9 @@ const Index = () => {
       if (data.logo_top !== null && data.logo_top !== undefined) setLogoTop(data.logo_top);
       if (data.logo_x_mobile !== null && data.logo_x_mobile !== undefined) setXMobile(data.logo_x_mobile);
       if (data.logo_x_desktop !== null && data.logo_x_desktop !== undefined) setXDesktop(data.logo_x_desktop);
+      if (data.hero_text) setHeroText(data.hero_text);
+      if (data.hero_box_padding_top !== null && data.hero_box_padding_top !== undefined) setHeroBoxPaddingTop(data.hero_box_padding_top);
+      if (data.hero_box_padding !== null && data.hero_box_padding !== undefined) setHeroBoxPadding(data.hero_box_padding);
     }
   };
 
@@ -170,6 +182,34 @@ const Index = () => {
   const cancelEdit = async () => {
     await fetchProfileSettings();
     toast({ title: "Edit cancelled", description: "Reverted to last saved position." });
+    navigate(location.pathname, { replace: true });
+  };
+
+  const saveHeroSettings = async () => {
+    const payload = {
+      hero_text: heroText,
+      hero_box_padding_top: Math.round(heroBoxPaddingTop),
+      hero_box_padding: Math.round(heroBoxPadding),
+    };
+
+    if (profileSettingsId) {
+      await supabase.from("profile_settings").update(payload).eq("id", profileSettingsId);
+    } else {
+      const { data } = await supabase
+        .from("profile_settings")
+        .insert(payload)
+        .select("id")
+        .maybeSingle();
+      if (data?.id) setProfileSettingsId(data.id);
+    }
+
+    toast({ title: "Hero settings saved", description: "Your hero text box is updated." });
+    navigate(location.pathname, { replace: true });
+  };
+
+  const cancelHeroSettings = async () => {
+    await fetchProfileSettings();
+    toast({ title: "Settings cancelled", description: "Reverted to last saved settings." });
     navigate(location.pathname, { replace: true });
   };
 
@@ -275,6 +315,58 @@ const Index = () => {
         </div>
       )}
 
+      {/* Settings Mode Controls */}
+      {isSettingsMode && (
+        <div className="fixed top-20 right-4 z-50 bg-card/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg space-y-4 max-w-md">
+          <h3 className="font-fredoka text-sm font-bold text-foreground">Hero Text Box Settings</h3>
+          
+          {/* Hero Text Editor */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Hero Text</p>
+            <Textarea
+              value={heroText}
+              onChange={(e) => setHeroText(e.target.value)}
+              rows={4}
+              className="text-sm"
+            />
+          </div>
+
+          {/* Padding Top Slider */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Top Padding: {heroBoxPaddingTop}px</p>
+            <Slider
+              value={[heroBoxPaddingTop]}
+              onValueChange={(v) => setHeroBoxPaddingTop(v[0])}
+              min={40}
+              max={200}
+              step={4}
+            />
+          </div>
+
+          {/* General Padding Slider */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Side Padding: {heroBoxPadding}px</p>
+            <Slider
+              value={[heroBoxPadding]}
+              onValueChange={(v) => setHeroBoxPadding(v[0])}
+              min={8}
+              max={48}
+              step={4}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
+            <Button size="sm" onClick={saveHeroSettings} className="flex-1">
+              Save
+            </Button>
+            <Button size="sm" variant="outline" onClick={cancelHeroSettings} className="flex-1">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center pt-2">
         <div className="container mx-auto px-4 py-20">
@@ -285,7 +377,12 @@ const Index = () => {
                 Brandia's<br />BBs Cake Creations
               </h1>
               <div className="relative max-w-xl">
-                <div className="relative backdrop-blur-sm bg-background/60 rounded-2xl p-4 pt-28">
+                <div 
+                  className="relative backdrop-blur-sm bg-background/60 rounded-2xl"
+                  style={{ 
+                    padding: `${heroBoxPaddingTop}px ${heroBoxPadding}px ${heroBoxPadding}px ${heroBoxPadding}px`
+                  }}
+                >
                   <img
                     src={logoSquare}
                     alt="BB's Cake Creations Logo"
@@ -315,9 +412,7 @@ const Index = () => {
                     } : undefined}
                   />
                   <p className="text-xl text-ocean-deep font-quicksand">
-                    Where every cake is baked from scratch with love,
-                    adorned with live flowers, and crafted to tell your story. Most cakes can be made
-                    gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
+                    {heroText}
                   </p>
                 </div>
               </div>

@@ -149,6 +149,9 @@ export type Database = {
         Row: {
           bio_text: string | null
           created_at: string | null
+          hero_box_padding: number | null
+          hero_box_padding_top: number | null
+          hero_text: string | null
           id: string
           logo_size: number | null
           logo_top: number | null
@@ -160,6 +163,9 @@ export type Database = {
         Insert: {
           bio_text?: string | null
           created_at?: string | null
+          hero_box_padding?: number | null
+          hero_box_padding_top?: number | null
+          hero_text?: string | null
           id?: string
           logo_size?: number | null
           logo_top?: number | null
@@ -171,6 +177,9 @@ export type Database = {
         Update: {
           bio_text?: string | null
           created_at?: string | null
+          hero_box_padding?: number | null
+          hero_box_padding_top?: number | null
+          hero_text?: string | null
           id?: string
           logo_size?: number | null
           logo_top?: number | null
