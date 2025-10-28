@@ -17,6 +17,7 @@ import Autoplay from "embla-carousel-autoplay";
 const About = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(brandiaProfile);
   const [galleryImages, setGalleryImages] = useState<Array<{src: string, caption: string}>>([]);
+  const [storyText, setStoryText] = useState<string>("");
 
   useEffect(() => {
     fetchProfilePhoto();
@@ -26,13 +27,18 @@ const About = () => {
   const fetchProfilePhoto = async () => {
     const { data, error } = await supabase
       .from("profile_settings")
-      .select("profile_image_url")
+      .select("profile_image_url, story_text")
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (!error && data?.profile_image_url) {
-      setProfileImageUrl(data.profile_image_url);
+    if (!error && data) {
+      if (data.profile_image_url) {
+        setProfileImageUrl(data.profile_image_url);
+      }
+      if (data.story_text) {
+        setStoryText(data.story_text);
+      }
     }
   };
 
@@ -127,26 +133,34 @@ const About = () => {
             <CardContent className="p-8 md:p-12">
               <h2 className="text-3xl font-fredoka text-ocean-deep mb-6">My Story</h2>
               <div className="space-y-4 text-lg text-foreground leading-relaxed">
-                <p>
-                  Hi, I'm Brandia—a baker who believes cakes should tell stories, not just fill bellies. 
-                  I started baking when I realized store-bought just didn't capture the magic of 
-                  real ingredients and real intention.
-                </p>
-                <p>
-                  Growing up near the ocean in Wilmington, I learned that the best things in life 
-                  are crafted with patience, like waves shaping the shore. That's how I approach 
-                  every cake—layer by layer, from scratch, with love baked into every crumb.
-                </p>
-                <p>
-                  I never use box mixes or fondant. Why? Because shortcuts rob cakes of their soul. 
-                  Instead, I craft recipes that can be adapted to be gluten-free without compromising texture—almond flour 
-                  that creates the dreamiest sponge, xanthan gum for that perfect crumb.
-                </p>
-                <p>
-                  My signature? Live flowers and herbs. Lavender, rosemary, edible pansies—nature's 
-                  beauty adorns every creation. Each cake celebrates not just an occasion, but the 
-                  people and stories behind it.
-                </p>
+                {storyText ? (
+                  storyText.split('\n\n').map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))
+                ) : (
+                  <>
+                    <p>
+                      Hi, I'm Brandia—a baker who believes cakes should tell stories, not just fill bellies. 
+                      I started baking when I realized store-bought just didn't capture the magic of 
+                      real ingredients and real intention.
+                    </p>
+                    <p>
+                      Growing up near the ocean in Wilmington, I learned that the best things in life 
+                      are crafted with patience, like waves shaping the shore. That's how I approach 
+                      every cake—layer by layer, from scratch, with love baked into every crumb.
+                    </p>
+                    <p>
+                      I never use box mixes or fondant. Why? Because shortcuts rob cakes of their soul. 
+                      Instead, I craft recipes that can be adapted to be gluten-free without compromising texture—almond flour 
+                      that creates the dreamiest sponge, xanthan gum for that perfect crumb.
+                    </p>
+                    <p>
+                      My signature? Live flowers and herbs. Lavender, rosemary, edible pansies—nature's 
+                      beauty adorns every creation. Each cake celebrates not just an occasion, but the 
+                      people and stories behind it.
+                    </p>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -158,6 +158,7 @@ export type Database = {
           logo_x_desktop: number | null
           logo_x_mobile: number | null
           profile_image_url: string | null
+          story_text: string | null
           updated_at: string | null
         }
         Insert: {
@@ -172,6 +173,7 @@ export type Database = {
           logo_x_desktop?: number | null
           logo_x_mobile?: number | null
           profile_image_url?: string | null
+          story_text?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -186,6 +188,7 @@ export type Database = {
           logo_x_desktop?: number | null
           logo_x_mobile?: number | null
           profile_image_url?: string | null
+          story_text?: string | null
           updated_at?: string | null
         }
         Relationships: []

@@ -57,6 +57,7 @@ const Admin = () => {
   // Profile settings state
   const [profileImageUrl, setProfileImageUrl] = useState("");
   const [bioText, setBioText] = useState("");
+  const [storyText, setStoryText] = useState("");
   const [profileSettingsId, setProfileSettingsId] = useState<string | null>(null);
   const profileFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,6 +139,7 @@ const Admin = () => {
       setProfileSettingsId(data.id);
       setProfileImageUrl(data.profile_image_url || "");
       setBioText(data.bio_text || "");
+      setStoryText(data.story_text || "");
     }
   };
 
@@ -514,6 +516,7 @@ const Admin = () => {
     const profileData = {
       profile_image_url: publicUrl,
       bio_text: bioText || null,
+      story_text: storyText || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -549,6 +552,7 @@ const Admin = () => {
     const profileData = {
       profile_image_url: profileImageUrl,
       bio_text: bioText || null,
+      story_text: storyText || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -1782,7 +1786,7 @@ const Admin = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bio-text">About Me</Label>
+                    <Label htmlFor="bio-text">About Me (Homepage)</Label>
                     <Textarea
                       id="bio-text"
                       placeholder="Hi! I'm Brandia, the baker behind every scratch-made creation..."
@@ -1792,6 +1796,20 @@ const Admin = () => {
                     />
                     <p className="text-xs text-muted-foreground">
                       This will appear in the "Meet Brandia" section at the bottom of the homepage
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="story-text">My Story (About Page)</Label>
+                    <Textarea
+                      id="story-text"
+                      placeholder="Hi, I'm Brandia—a baker who believes cakes should tell stories..."
+                      value={storyText}
+                      onChange={(e) => setStoryText(e.target.value)}
+                      rows={10}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      This will appear in the "My Story" section on the About page. Use line breaks to separate paragraphs.
                     </p>
                   </div>
 
