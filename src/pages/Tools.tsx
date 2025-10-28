@@ -85,10 +85,10 @@ const Tools = () => {
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-fredoka font-bold gradient-ocean bg-clip-text text-transparent">
-              Brandia's Kitchen Essentials
+              My Favorite Things
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              The tools and ingredients I trust for every from-scratch creation
+              Must-have items I use to create magic in the kitchen
             </p>
           </div>
 

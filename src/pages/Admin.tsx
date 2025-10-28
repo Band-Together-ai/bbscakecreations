@@ -857,7 +857,8 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full gap-2">
+          <div className="w-full overflow-x-auto pb-2">
+            <TabsList className="inline-flex flex-wrap w-full min-w-fit gap-1 h-auto p-2">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
             <TabsTrigger value="about">About Me</TabsTrigger>
@@ -870,7 +871,8 @@ const Admin = () => {
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+            </TabsList>
+          </div>
 
           {/* RECIPES TAB */}
           <TabsContent value="recipes">
