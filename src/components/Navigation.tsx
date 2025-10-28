@@ -3,7 +3,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X } from "lucide-react";
+import { toast } from "sonner";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
 
 const Navigation = () => {
@@ -75,6 +76,15 @@ const Navigation = () => {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => toast.info("Tip jar coming soon! 💕")}
+              className="gap-2 text-amber-600 border-amber-400 hover:bg-amber-50"
+            >
+              <Coffee className="w-4 h-4" />
+              Buy me a Coffee
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate("/chat")}
               className="gap-2"
             >
@@ -119,6 +129,18 @@ const Navigation = () => {
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-3 pb-2 space-y-1.5 border-t border-border pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                toast.info("Tip jar coming soon! 💕");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full gap-2 justify-start text-amber-600 border-amber-400 hover:bg-amber-50"
+            >
+              <Coffee className="w-4 h-4" />
+              Buy me a Coffee
+            </Button>
             <button
               onClick={() => {
                 navigate("/");

@@ -17,7 +17,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
       role: "assistant",
-      content: "Hey, it's so good to see you! Thanks for coming by!! What are we going to bake together today?",
+      content: "Hey, it's so good to see you! Thanks for coming by!! 💕\n\nI'm Sasha, Brandia's AI baking assistant, and I'm here to help you bake anything you can dream of! Right now, I'm completely FREE to use while we're in beta.\n\nIn the future, we'll be introducing a flexible tip-based model or subscription options to keep me running and learning more baking magic. But for now, let's just have fun baking together!\n\nWhat are we going to create today? 🎂✨",
     },
   ]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
