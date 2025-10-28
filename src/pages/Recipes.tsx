@@ -228,11 +228,11 @@ const Recipes = () => {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate("/chat");
+                        navigate(`/recipe/${recipe.id}`);
                       }}
                       className="w-full gradient-ocean text-primary-foreground"
                     >
-                      {isFirstThree ? "View Free Recipe" : "View Full Recipe with Sasha"}
+                      {isFirstThree ? "View Free Recipe" : "View Full Recipe"}
                     </Button>
                   ) : (
                     <div 
