@@ -356,7 +356,7 @@ const Recipes = () => {
                         }}
                         className="w-full gradient-ocean text-primary-foreground"
                       >
-                        Subscribe to Unlock
+                        Sign Up FREE to Unlock
                       </Button>
                     </div>
                   )}
