@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star } from "lucide-react";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { LogoEditor } from "@/components/admin/LogoEditor";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -816,7 +817,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid grid-cols-3 md:grid-cols-9 w-full">
+          <TabsList className="grid grid-cols-3 md:grid-cols-10 w-full">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
             <TabsTrigger value="about">About Me</TabsTrigger>
@@ -825,6 +826,7 @@ const Admin = () => {
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
+            <TabsTrigger value="logo">Logo</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -1673,6 +1675,11 @@ const Admin = () => {
           {/* USERS TAB */}
           <TabsContent value="users">
             <UsersTab />
+          </TabsContent>
+
+          {/* LOGO EDITOR TAB */}
+          <TabsContent value="logo">
+            <LogoEditor />
           </TabsContent>
 
           {/* SETTINGS TAB */}
