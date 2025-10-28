@@ -17,7 +17,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
       role: "assistant",
-      content: "Hey sugar, let's bake something alive—what's the vibe today? 🌊✨",
+      content: "Hey, it's so good to see you! Thanks for coming by!! What are we going to bake together today?",
     },
   ]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
