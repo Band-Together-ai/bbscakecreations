@@ -144,7 +144,7 @@ const Index = () => {
                 </p>
                 <Button
                   size="lg"
-                  onClick={() => navigate("/auth")}
+                  onClick={() => navigate("/chat")}
                   className="gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105 text-lg px-8 py-6"
                 >
                   Chat with Sasha
@@ -243,7 +243,7 @@ const Index = () => {
             </div>
             <Button
               size="lg"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/chat")}
               className="mt-8 gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
             >
               Start Your Cake Journey with Sasha
