@@ -17,6 +17,7 @@ import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, 
 import { UsersTab } from "@/components/admin/UsersTab";
 import { ToolsTab } from "@/components/admin/ToolsTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
+import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -855,13 +856,16 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid grid-cols-3 md:grid-cols-9 w-full">
+          <TabsList className="grid grid-cols-3 md:grid-cols-12 w-full">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
             <TabsTrigger value="about">About Me</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="earlybird">Early Bird</TabsTrigger>
+            <TabsTrigger value="tools">Tools</TabsTrigger>
+            <TabsTrigger value="bakers">Bakers</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -1744,6 +1748,21 @@ const Admin = () => {
           {/* USERS TAB */}
           <TabsContent value="users">
             <UsersTab />
+          </TabsContent>
+
+          {/* EARLY BIRD TAB */}
+          <TabsContent value="earlybird">
+            <EarlyBirdTab />
+          </TabsContent>
+
+          {/* TOOLS TAB */}
+          <TabsContent value="tools">
+            <ToolsTab />
+          </TabsContent>
+
+          {/* BAKERS TAB */}
+          <TabsContent value="bakers">
+            <FavoriteBakersTab />
           </TabsContent>
 
           {/* SETTINGS TAB */}
