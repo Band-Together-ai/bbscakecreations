@@ -23,9 +23,11 @@ const Chat = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // TEMPORARILY DISABLED FOR TESTING
   // useEffect(() => {
@@ -69,29 +71,57 @@ const Chat = () => {
   const handleVoiceRecording = async () => {
     if (isRecording) {
       // Stop recording
+      console.log("Stopping recording...");
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
       mediaRecorderRef.current?.stop();
       setIsRecording(false);
+      setRecordingTime(0);
     } else {
       // Start recording
       try {
+        console.log("Requesting microphone access...");
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Microphone access granted");
+        
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
         audioChunksRef.current = [];
 
         mediaRecorder.ondataavailable = (event) => {
+          console.log("Audio data received:", event.data.size, "bytes");
           audioChunksRef.current.push(event.data);
         };
 
         mediaRecorder.onstop = async () => {
+          console.log("Recording stopped, starting transcription...");
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          console.log("Audio blob size:", audioBlob.size, "bytes");
           await transcribeAudio(audioBlob);
           stream.getTracks().forEach(track => track.stop());
         };
 
         mediaRecorder.start();
         setIsRecording(true);
-        toast.info("Recording... Click again to stop.");
+        setRecordingTime(0);
+        
+        // Start timer
+        recordingTimerRef.current = setInterval(() => {
+          setRecordingTime(prev => prev + 1);
+        }, 1000);
+        
+        // Auto-stop after 30 seconds
+        setTimeout(() => {
+          if (mediaRecorderRef.current?.state === 'recording') {
+            console.log("Auto-stopping recording after 30 seconds");
+            handleVoiceRecording();
+          }
+        }, 30000);
+        
+        toast.success("🎤 Recording started! Click Stop when done.", { duration: 3000 });
+        console.log("Recording started successfully");
       } catch (error) {
         console.error("Error accessing microphone:", error);
         toast.error("Could not access microphone. Please check permissions.");
@@ -101,20 +131,31 @@ const Chat = () => {
 
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsTranscribing(true);
+    toast.info("✨ Transcribing your voice...");
     try {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
+        console.log("Base64 audio length:", base64Audio.length);
         
+        console.log("Calling transcribe-audio function...");
         const { data, error } = await supabase.functions.invoke('transcribe-audio', {
           body: { audio: base64Audio },
         });
 
-        if (error) throw error;
+        console.log("Transcription response:", data, error);
+
+        if (error) {
+          console.error("Transcription error from Supabase:", error);
+          throw error;
+        }
 
         if (data?.text) {
+          console.log("Transcribed text:", data.text);
           setMessage((prev) => prev + (prev ? ' ' : '') + data.text);
-          toast.success("Voice transcribed!");
+          toast.success("✅ Voice transcribed: " + data.text.substring(0, 50) + "...");
+        } else {
+          toast.error("No text was transcribed. Please try speaking again.");
         }
       };
       reader.readAsDataURL(audioBlob);
@@ -298,12 +339,12 @@ const Chat = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className={`gap-2 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
+                  className={`gap-2 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse' : ''}`}
                   onClick={handleVoiceRecording}
                   disabled={isTranscribing}
                 >
                   <Mic className="w-4 h-4" />
-                  {isRecording ? 'Stop' : isTranscribing ? 'Processing...' : 'Voice'}
+                  {isRecording ? `🔴 Stop (${recordingTime}s)` : isTranscribing ? '⏳ Processing...' : '🎤 Voice'}
                 </Button>
               </div>
               
