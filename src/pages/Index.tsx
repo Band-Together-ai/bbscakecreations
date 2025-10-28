@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
-import HeroBranding from "@/components/HeroBranding";
 import { ArrowRight } from "lucide-react";
+import logoSquare from "@/assets/logo-square-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import heroCake from "@/assets/hero-cake.jpg";
 import brandiaProfile from "@/assets/brandia-profile.jpg";
@@ -120,11 +120,10 @@ const Index = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
-      <HeroBranding />
       <WaveBackground />
 
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center pt-4">
+      <section className="relative z-10 min-h-screen flex items-center pt-2">
         <div className="container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Text */}
@@ -132,11 +131,18 @@ const Index = () => {
               <h1 className="text-5xl md:text-7xl font-fredoka font-bold gradient-ocean bg-clip-text text-transparent leading-tight drop-shadow-sm">
                 Brandia's<br />BBs Cake Creations
               </h1>
-              <p className="text-xl text-ocean-deep font-quicksand max-w-xl backdrop-blur-sm bg-background/60 p-4 rounded-2xl">
-                Where every cake is baked from scratch with love, 
-                adorned with live flowers, and crafted to tell your story. Most cakes can be made 
-                gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
-              </p>
+              <div className="relative max-w-xl">
+                <img 
+                  src={logoSquare} 
+                  alt="BB's Cake Creations Logo" 
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 w-28 h-28 md:w-32 md:h-32 opacity-80 animate-float z-10"
+                />
+                <p className="text-xl text-ocean-deep font-quicksand backdrop-blur-sm bg-background/60 p-4 pt-20 rounded-2xl">
+                  Where every cake is baked from scratch with love, 
+                  adorned with live flowers, and crafted to tell your story. Most cakes can be made 
+                  gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
+                </p>
+              </div>
               <div className="pt-4 backdrop-blur-sm bg-background/60 p-4 rounded-2xl">
                 <p className="text-lg font-fredoka text-dolphin mb-4">
                   Meet Sasha—my AI companion who captures my baking philosophy 
