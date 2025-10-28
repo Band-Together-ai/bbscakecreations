@@ -59,6 +59,7 @@ export const EarlyBirdTab = () => {
 
     let successCount = 0;
     let errorCount = 0;
+    let inviteCount = 0;
 
     for (const email of emailList) {
       try {
@@ -70,13 +71,30 @@ export const EarlyBirdTab = () => {
           .single();
 
         if (profileError || !profiles) {
-          console.log(`User not found for email: ${email}`);
-          errorCount++;
-          toast.error(`User not found: ${email}. They need to sign up first.`);
+          // User doesn't exist - create invite
+          console.log(`User not found for email: ${email}, creating invite...`);
+          
+          const { error: inviteError } = await supabase.functions.invoke(
+            "invite-user",
+            {
+              body: {
+                email,
+                promoType: "early_bird_lifetime",
+                notes: notes || "Early Bird Beta Tester",
+              },
+            }
+          );
+
+          if (inviteError) {
+            console.error(`Error creating invite for ${email}:`, inviteError);
+            errorCount++;
+          } else {
+            inviteCount++;
+          }
           continue;
         }
 
-        // Grant promo access
+        // Grant promo access to existing user
         const { error: grantError } = await supabase.functions.invoke(
           "grant-promo-access",
           {
@@ -103,15 +121,23 @@ export const EarlyBirdTab = () => {
     setLoading(false);
 
     if (successCount > 0) {
-      toast.success(`✨ Granted lifetime access to ${successCount} user(s)!`);
+      toast.success(`✨ Granted lifetime access to ${successCount} existing user(s)!`);
+    }
+
+    if (inviteCount > 0) {
+      toast.success(
+        `📧 Created ${inviteCount} invite(s). Check Supabase invite emails and share the links with users.`,
+        { duration: 6000 }
+      );
+    }
+
+    if (successCount > 0 || inviteCount > 0) {
       setEmails("");
       fetchPromoUsers();
     }
 
     if (errorCount > 0) {
-      toast.error(
-        `${errorCount} user(s) could not be granted access. They may need to sign up first.`
-      );
+      toast.error(`Failed to process ${errorCount} email(s)`);
     }
   };
 
@@ -139,9 +165,9 @@ export const EarlyBirdTab = () => {
             Grant Early Bird Access
           </CardTitle>
           <CardDescription>
-            Give your first 10 beta testers lifetime access to all recipes,
-            community, and future features. Users must sign up first before you
-            can grant them access.
+            Give your beta testers lifetime access to all recipes, community, and future features. 
+            For existing users, access is granted immediately. For new users, an invite will be created 
+            and you can share the link with them manually.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -156,8 +182,8 @@ export const EarlyBirdTab = () => {
               className="font-mono text-sm"
             />
             <p className="text-sm text-muted-foreground">
-              💡 Tip: Users must create an account first. Send them the invite
-              email, then add their emails here after they sign up.
+              💡 Tip: Existing users get access immediately. New users will receive 
+              a Supabase invite email with a signup link - you can also share that link manually.
             </p>
           </div>
 
@@ -252,19 +278,16 @@ export const EarlyBirdTab = () => {
         </CardHeader>
         <CardContent className="text-sm space-y-2 text-muted-foreground">
           <p>
-            <strong>Step 1:</strong> Send your invite email to potential beta
-            testers
+            <strong>New Users:</strong> Enter their email above. They'll receive a 
+            Supabase invite email with a signup link. You can also share that link manually 
+            via text/email. Promo access is auto-granted when they sign up.
           </p>
           <p>
-            <strong>Step 2:</strong> They sign up at your site
-          </p>
-          <p>
-            <strong>Step 3:</strong> Come back here and paste their email
-            addresses to grant lifetime access
+            <strong>Existing Users:</strong> Enter their email above and they'll 
+            immediately get lifetime access to all features.
           </p>
           <p className="pt-2 text-xs">
-            ✨ They'll immediately have access to all recipes, community, and
-            the "Hey Sasha" AI assistant
+            ✨ All users get access to all recipes, community, and the "Hey Sasha" AI assistant
           </p>
         </CardContent>
       </Card>
