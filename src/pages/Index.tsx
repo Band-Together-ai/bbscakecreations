@@ -388,22 +388,15 @@ const Index = () => {
             </div>
 
             {/* Stacked Right Column - 40% */}
-            <div className="lg:col-span-2 space-y-6 animate-fade-in">
-              {/* Profile Photo + Logo */}
+            <div className="lg:col-span-2 space-y-6 animate-fade-in flex flex-col min-h-[500px] lg:min-h-[650px]">
+              {/* Profile Photo */}
               <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-6 shadow-wave">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-24 h-24 rounded-full overflow-hidden shadow-wave ring-2 ring-ocean-wave/30 shrink-0">
+                <div className="mb-4">
+                  <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-wave ring-2 ring-ocean-wave/30">
                     <img
                       src={profileImage}
                       alt="Brandia - Cake Artist"
                       className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="relative flex-1">
-                    <img
-                      src={logoSquare}
-                      alt="BB's Cake Creations Logo"
-                      className="w-20 h-20 opacity-90"
                     />
                   </div>
                 </div>
@@ -429,6 +422,25 @@ const Index = () => {
                 <p className="text-base text-ocean-deep font-quicksand leading-relaxed">
                   {heroText}
                 </p>
+              </div>
+
+              {/* How to Use Box */}
+              <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-6 shadow-wave">
+                <h3 className="text-xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-3">
+                  How to Use This Site
+                </h3>
+                <p className="text-sm text-ocean-deep font-quicksand leading-relaxed mb-4">
+                  Explore signature recipes, chat with Sasha (my AI baking companion), discover favorite bakers, and find essential tools. Whether you're a beginner or seasoned baker, everything here is designed to inspire your next creation.
+                </p>
+                <Button
+                  onClick={() => navigate("/instructions")}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-ocean-wave text-ocean-deep hover:bg-ocean-wave hover:text-white"
+                >
+                  Full Instructions
+                  <ArrowRight className="w-3 h-3 ml-2" />
+                </Button>
               </div>
             </div>
           </div>
@@ -480,8 +492,8 @@ const Index = () => {
                     <div className="w-12 h-12 bg-ocean-foam/20 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Sparkles className="w-6 h-6 text-ocean-foam" />
                     </div>
-                    <h4 className="font-fredoka text-base text-ocean-deep mb-2">Live Flowers</h4>
-                    <p className="text-sm text-muted-foreground">Nature adorns every creation</p>
+                    <h4 className="font-fredoka text-base text-ocean-deep mb-2">Natural Touches</h4>
+                    <p className="text-sm text-muted-foreground">Optional beauty from nature</p>
                   </div>
                 </div>
               </div>
