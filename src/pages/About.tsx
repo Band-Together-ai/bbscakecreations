@@ -18,6 +18,9 @@ const About = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(brandiaProfile);
   const [galleryImages, setGalleryImages] = useState<Array<{src: string, caption: string}>>([]);
   const [storyText, setStoryText] = useState<string>("");
+  const [profilePhotoScale, setProfilePhotoScale] = useState<number>(100);
+  const [profilePhotoX, setProfilePhotoX] = useState<number>(50);
+  const [profilePhotoY, setProfilePhotoY] = useState<number>(50);
 
   useEffect(() => {
     fetchProfilePhoto();
@@ -27,7 +30,7 @@ const About = () => {
   const fetchProfilePhoto = async () => {
     const { data, error } = await supabase
       .from("profile_settings")
-      .select("profile_image_url, story_text")
+      .select("profile_image_url, story_text, profile_photo_scale, profile_photo_x, profile_photo_y")
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -38,6 +41,15 @@ const About = () => {
       }
       if (data.story_text) {
         setStoryText(data.story_text);
+      }
+      if (data.profile_photo_scale !== null && data.profile_photo_scale !== undefined) {
+        setProfilePhotoScale(data.profile_photo_scale);
+      }
+      if (data.profile_photo_x !== null && data.profile_photo_x !== undefined) {
+        setProfilePhotoX(data.profile_photo_x);
+      }
+      if (data.profile_photo_y !== null && data.profile_photo_y !== undefined) {
+        setProfilePhotoY(data.profile_photo_y);
       }
     }
   };
@@ -71,12 +83,18 @@ const About = () => {
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <div className="w-48 h-48 mx-auto mb-8 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
-              <img
-                src={profileImageUrl}
-                alt="Brandia - Baker, Ocean Lover, Dolphin Dreamer"
-                className="w-full h-full object-cover"
-              />
+            <div className="w-full max-w-md mx-auto mb-8">
+              <div className="aspect-video rounded-2xl overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `url(${profileImageUrl})`,
+                    backgroundSize: `${profilePhotoScale}%`,
+                    backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                />
+              </div>
             </div>
             <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
               Meet Brandia
