@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
 import { ArrowRight } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import logoSquare from "@/assets/logo-square-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import heroCake from "@/assets/hero-cake.jpg";
@@ -22,6 +23,47 @@ const Index = () => {
   const [profileBio, setProfileBio] = useState(
     "Hi! I'm Brandia, the baker behind every scratch-made creation you see here. From ocean-inspired ombres to delicate herb-adorned layers, I believe every cake should tell a story—your story. Whether you need gluten-free magic or a classic from-scratch masterpiece, I'm here to bring your vision to life."
   );
+  
+  const [logoSize, setLogoSize] = useState(160);
+  const [logoTop, setLogoTop] = useState(16);
+  const [logoX, setLogoX] = useState(0);
+  const [showLogoControls, setShowLogoControls] = useState(true);
+  const [dragging, setDragging] = useState(false);
+  const startRef = useRef({ x: 0, y: 0, logoX: 0, logoTop: 0 });
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerDown = (e: any) => {
+    setDragging(true);
+    startRef.current = { x: e.clientX, y: e.clientY, logoX, logoTop };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: any) => {
+    if (!dragging) return;
+    const dx = e.clientX - startRef.current.x;
+    const dy = e.clientY - startRef.current.y;
+
+    const container = boxRef.current;
+    let newX = startRef.current.logoX + dx;
+    let newTop = startRef.current.logoTop + dy;
+
+    if (container) {
+      const innerW = container.clientWidth;
+      const innerH = container.clientHeight;
+      const padding = 8;
+      const maxTop = Math.max(padding, innerH - logoSize - padding);
+      newTop = Math.min(Math.max(padding, newTop), maxTop);
+
+      const halfW = innerW / 2;
+      const maxX = halfW - logoSize / 2 - padding;
+      newX = Math.min(Math.max(-maxX, newX), maxX);
+    }
+
+    setLogoX(newX);
+    setLogoTop(newTop);
+  };
+
+  const endDrag = () => setDragging(false);
 
   const defaultCakes = [
     {
@@ -132,16 +174,64 @@ const Index = () => {
                 Brandia's<br />BBs Cake Creations
               </h1>
               <div className="relative max-w-xl">
-                <img 
-                  src={logoSquare} 
-                  alt="BB's Cake Creations Logo" 
-                  className="absolute -top-8 left-1/2 -translate-x-1/2 w-36 h-36 md:w-40 md:h-40 opacity-80 animate-float z-10"
-                />
-                <p className="text-xl text-ocean-deep font-quicksand backdrop-blur-sm bg-background/60 p-4 pt-24 rounded-2xl">
-                  Where every cake is baked from scratch with love, 
-                  adorned with live flowers, and crafted to tell your story. Most cakes can be made 
-                  gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
-                </p>
+                <div ref={boxRef} className="relative backdrop-blur-sm bg-background/60 rounded-2xl p-4 pt-28">
+                  <img
+                    src={logoSquare}
+                    alt="BB's Cake Creations Logo"
+                    className="absolute left-1/2 opacity-80 animate-float z-10 cursor-move select-none"
+                    style={{ top: logoTop, width: logoSize, height: logoSize, transform: `translate(-50%, 0) translateX(${logoX}px)` }}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={endDrag}
+                    onPointerCancel={endDrag}
+                  />
+                  <p className="text-xl text-ocean-deep font-quicksand">
+                    Where every cake is baked from scratch with love,
+                    adorned with live flowers, and crafted to tell your story. Most cakes can be made
+                    gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
+                  </p>
+                </div>
+
+                <div className="absolute -top-2 right-0 flex flex-col items-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowLogoControls(!showLogoControls)}>
+                    {showLogoControls ? "Hide" : "Adjust"} Logo
+                  </Button>
+                  {showLogoControls && (
+                    <div className="bg-card/90 backdrop-blur-sm rounded-xl p-3 shadow-wave">
+                      <div className="grid grid-cols-3 gap-2 place-items-center">
+                        <span />
+                        <Button variant="secondary" size="icon" onClick={() => setLogoTop(Math.max(8, logoTop - 4))}>
+                          <ChevronUp className="w-4 h-4" />
+                        </Button>
+                        <span />
+                        <Button variant="secondary" size="icon" onClick={() => setLogoX(logoX - 4)}>
+                          <ChevronLeft className="w-4 h-4" />
+                        </Button>
+                        <div className="text-xs font-medium text-dolphin">Move</div>
+                        <Button variant="secondary" size="icon" onClick={() => setLogoX(logoX + 4)}>
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                        <span />
+                        <Button variant="secondary" size="icon" onClick={() => setLogoTop(logoTop + 4)}>
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                        <span />
+                      </div>
+                      <div className="mt-3">
+                        <label className="text-xs text-dolphin">Size</label>
+                        <input
+                          type="range"
+                          min={96}
+                          max={240}
+                          step={4}
+                          value={logoSize}
+                          onChange={(e) => setLogoSize(parseInt((e.target as HTMLInputElement).value))}
+                          className="w-40"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="pt-4 backdrop-blur-sm bg-background/60 p-4 rounded-2xl">
                 <p className="text-lg font-fredoka text-dolphin mb-4">
