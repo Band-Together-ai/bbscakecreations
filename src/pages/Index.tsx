@@ -47,6 +47,11 @@ const Index = () => {
   const [profileSettingsId, setProfileSettingsId] = useState<string | null>(null);
   const [editDevice, setEditDevice] = useState<'mobile' | 'desktop'>("mobile");
 
+  // Profile photo positioning
+  const [profilePhotoScale, setProfilePhotoScale] = useState<number>(100);
+  const [profilePhotoX, setProfilePhotoX] = useState<number>(50);
+  const [profilePhotoY, setProfilePhotoY] = useState<number>(50);
+
   const draggingRef = useRef(false);
   const startRef = useRef<{ x: number; y: number; startX: number; startTop: number } | null>(null);
 
@@ -121,6 +126,11 @@ const Index = () => {
       if (data.hero_text) setHeroText(data.hero_text);
       if (data.hero_box_padding_top !== null && data.hero_box_padding_top !== undefined) setHeroBoxPaddingTop(data.hero_box_padding_top);
       if (data.hero_box_padding !== null && data.hero_box_padding !== undefined) setHeroBoxPadding(data.hero_box_padding);
+      
+      // Profile photo positioning
+      if (data.profile_photo_scale !== null && data.profile_photo_scale !== undefined) setProfilePhotoScale(data.profile_photo_scale);
+      if (data.profile_photo_x !== null && data.profile_photo_x !== undefined) setProfilePhotoX(data.profile_photo_x);
+      if (data.profile_photo_y !== null && data.profile_photo_y !== undefined) setProfilePhotoY(data.profile_photo_y);
     }
   };
 
@@ -393,10 +403,14 @@ const Index = () => {
               <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-6 shadow-wave">
                 <div className="mb-4 flex justify-center">
                   <div className="w-full max-w-md aspect-video rounded-2xl overflow-hidden shadow-wave ring-2 ring-ocean-wave/30">
-                    <img
-                      src={profileImage}
-                      alt="Brandia - Cake Artist"
-                      className="w-full h-full object-cover"
+                    <div
+                      className="w-full h-full"
+                      style={{
+                        backgroundImage: `url(${profileImage})`,
+                        backgroundSize: `${profilePhotoScale}%`,
+                        backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
+                        backgroundRepeat: 'no-repeat',
+                      }}
                     />
                   </div>
                 </div>

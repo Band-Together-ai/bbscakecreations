@@ -248,6 +248,9 @@ export type Database = {
           logo_x_desktop: number | null
           logo_x_mobile: number | null
           profile_image_url: string | null
+          profile_photo_scale: number | null
+          profile_photo_x: number | null
+          profile_photo_y: number | null
           story_text: string | null
           updated_at: string | null
         }
@@ -263,6 +266,9 @@ export type Database = {
           logo_x_desktop?: number | null
           logo_x_mobile?: number | null
           profile_image_url?: string | null
+          profile_photo_scale?: number | null
+          profile_photo_x?: number | null
+          profile_photo_y?: number | null
           story_text?: string | null
           updated_at?: string | null
         }
@@ -278,6 +284,9 @@ export type Database = {
           logo_x_desktop?: number | null
           logo_x_mobile?: number | null
           profile_image_url?: string | null
+          profile_photo_scale?: number | null
+          profile_photo_x?: number | null
+          profile_photo_y?: number | null
           story_text?: string | null
           updated_at?: string | null
         }

@@ -18,6 +18,7 @@ import { UsersTab } from "@/components/admin/UsersTab";
 import { ToolsTab } from "@/components/admin/ToolsTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
 import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
+import { ProfilePhotoEditor } from "@/components/admin/ProfilePhotoEditor";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1843,6 +1844,9 @@ const Admin = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Profile Photo Position Editor */}
+              <ProfilePhotoEditor />
 
               <Card>
                 <CardHeader>
