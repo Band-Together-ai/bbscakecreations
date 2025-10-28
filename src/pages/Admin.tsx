@@ -75,6 +75,8 @@ const Admin = () => {
   // About Me Photos state
   const [aboutPhotos, setAboutPhotos] = useState<any[]>([]);
   const [aboutPhotoCaption, setAboutPhotoCaption] = useState("");
+  const [aboutPhotoPreview, setAboutPhotoPreview] = useState<string | null>(null);
+  const [aboutPhotoFile, setAboutPhotoFile] = useState<File | null>(null);
   const aboutPhotoFileInputRef = useRef<HTMLInputElement>(null);
 
   // Dev bypass - set VITE_DEV_BYPASS_AUTH="true" in .env to skip auth during development
@@ -707,22 +709,37 @@ const Admin = () => {
     setAboutPhotos(data || []);
   };
 
-  const handleAboutPhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAboutPhotoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    if (!aboutPhotoCaption.trim()) {
-      toast.error("Please enter a caption first");
+    setAboutPhotoFile(file);
+    
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setAboutPhotoPreview(previewUrl);
+    
+    toast.success("Photo selected! Add a caption and click Save.");
+  };
+
+  const handleSaveAboutPhoto = async () => {
+    if (!aboutPhotoFile) {
+      toast.error("No photo selected");
       return;
     }
 
-    const fileExt = file.name.split('.').pop();
+    if (!aboutPhotoCaption.trim()) {
+      toast.error("Please enter a caption");
+      return;
+    }
+
+    const fileExt = aboutPhotoFile.name.split('.').pop();
     const fileName = `about-${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from('profile-photos')
-      .upload(fileName, file);
+      .upload(fileName, aboutPhotoFile);
 
     if (uploadError) {
       toast.error("Upload failed");
@@ -747,8 +764,24 @@ const Admin = () => {
     }
 
     toast.success("About Me photo added!");
+    
+    // Clean up preview
+    if (aboutPhotoPreview) {
+      URL.revokeObjectURL(aboutPhotoPreview);
+    }
     setAboutPhotoCaption("");
+    setAboutPhotoPreview(null);
+    setAboutPhotoFile(null);
     fetchAboutPhotos();
+  };
+
+  const handleCancelAboutPhoto = () => {
+    if (aboutPhotoPreview) {
+      URL.revokeObjectURL(aboutPhotoPreview);
+    }
+    setAboutPhotoCaption("");
+    setAboutPhotoPreview(null);
+    setAboutPhotoFile(null);
   };
 
   const handleDeleteAboutPhoto = async (photoId: string) => {
@@ -1297,43 +1330,65 @@ const Admin = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-fredoka text-sm mb-2">Add New Photo</h3>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="about-caption" className="text-sm font-medium">
-                        Caption <span className="text-coral">*</span> <span className="text-xs text-muted-foreground">(Required before upload)</span>
-                      </Label>
-                      <Textarea
-                        id="about-caption"
-                        placeholder="Behind every cake is a story and a dream..."
-                        value={aboutPhotoCaption}
-                        onChange={(e) => setAboutPhotoCaption(e.target.value)}
-                        rows={2}
-                        className={!aboutPhotoCaption.trim() ? "border-amber-300 focus:border-amber-400" : ""}
+                  <h3 className="font-fredoka text-sm mb-3">Add New Photo</h3>
+                  
+                  {!aboutPhotoPreview ? (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Step 1: Upload a photo, then you'll add a caption
+                      </p>
+                      <input
+                        ref={aboutPhotoFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAboutPhotoSelect}
+                        className="hidden"
                       />
+                      <Button
+                        onClick={() => aboutPhotoFileInputRef.current?.click()}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Photo
+                      </Button>
                     </div>
-                    <input
-                      ref={aboutPhotoFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAboutPhotoUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      onClick={() => {
-                        if (!aboutPhotoCaption.trim()) {
-                          toast.error("Please enter a caption first");
-                          return;
-                        }
-                        aboutPhotoFileInputRef.current?.click();
-                      }}
-                      variant={!aboutPhotoCaption.trim() ? "outline" : "default"}
-                      className={!aboutPhotoCaption.trim() ? "opacity-60" : ""}
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      {!aboutPhotoCaption.trim() ? "Enter Caption First" : "Upload Photo"}
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Photo Preview</Label>
+                        <img
+                          src={aboutPhotoPreview}
+                          alt="Preview"
+                          className="w-full max-w-md rounded-lg border-2 border-border"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="about-caption" className="text-sm font-medium">
+                          Caption <span className="text-coral">*</span>
+                        </Label>
+                        <Textarea
+                          id="about-caption"
+                          placeholder="Behind every cake is a story and a dream..."
+                          value={aboutPhotoCaption}
+                          onChange={(e) => setAboutPhotoCaption(e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleSaveAboutPhoto}
+                          disabled={!aboutPhotoCaption.trim()}
+                        >
+                          Save Photo
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={handleCancelAboutPhoto}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {aboutPhotos.length > 0 && (
