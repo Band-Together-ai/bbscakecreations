@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
 import { Send, Upload, Link as LinkIcon, Mic, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const Chat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [voiceReply, setVoiceReply] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -152,8 +155,9 @@ const Chat = () => {
 
         if (data?.text) {
           console.log("Transcribed text:", data.text);
-          setMessage((prev) => prev + (prev ? ' ' : '') + data.text);
+          setMessage(data.text);
           toast.success("✅ Voice transcribed: " + data.text.substring(0, 50) + "...");
+          await sendMessageWithContent(data.text);
         } else {
           toast.error("No text was transcribed. Please try speaking again.");
         }
@@ -167,81 +171,85 @@ const Chat = () => {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() && !uploadedImage) return;
+  const speak = async (text: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { text }
+      });
+      if (error) {
+        console.error('TTS error:', error);
+        toast.error('Failed to play voice');
+        return;
+      }
+      if (data?.audioContent) {
+        const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+        await audio.play();
+      }
+    } catch (err) {
+      console.error('TTS exception:', err);
+    }
+  };
 
-    // Build the user message with text and/or image
+  const sendMessageWithContent = async (content: string) => {
+    if (!content.trim() && !uploadedImage) return;
+
     const userMessage: { role: string; content: string | Array<any>; image?: string } = {
-      role: "user",
-      content: message,
+      role: 'user',
+      content: content,
     };
 
-    // If there's an image, format it for the AI (multimodal)
     let apiMessages = [...messages];
-    
+
     if (uploadedImage) {
       userMessage.image = uploadedImage;
-      // Format for AI: array with text and image_url
       const contentArray: Array<any> = [];
-      if (message.trim()) {
-        contentArray.push({ type: "text", text: message });
+      if (content.trim()) {
+        contentArray.push({ type: 'text', text: content });
       }
-      contentArray.push({
-        type: "image_url",
-        image_url: { url: uploadedImage }
-      });
-      
-      apiMessages.push({
-        role: "user",
-        content: contentArray
-      });
+      contentArray.push({ type: 'image_url', image_url: { url: uploadedImage } });
+      apiMessages.push({ role: 'user', content: contentArray });
     } else {
-      apiMessages.push({
-        role: "user",
-        content: message
-      });
+      apiMessages.push({ role: 'user', content: content });
     }
 
-    setMessages((prev) => [...prev, userMessage]);
-    setMessage("");
+    setMessages((prev) => [...prev, userMessage, { role: 'assistant', content: '...' }]);
+    setMessage('');
     setUploadedImage(null);
-
-    // Add a loading message
-    const loadingMessage = { role: "assistant", content: "..." };
-    setMessages((prev) => [...prev, loadingMessage]);
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-with-sasha', {
         body: { messages: apiMessages },
       });
-
       if (error) {
-        console.error("Error calling Sasha:", error);
-        toast.error("Failed to get response from Sasha. Please try again.");
-        // Remove loading message
+        console.error('Error calling Sasha:', error);
+        toast.error('Failed to get response from Sasha. Please try again.');
         setMessages((prev) => prev.slice(0, -1));
         return;
       }
-
       if (data?.error) {
         toast.error(data.error);
         setMessages((prev) => prev.slice(0, -1));
         return;
       }
-
-      // Replace loading message with actual response
       const aiResponse = {
-        role: "assistant",
+        role: 'assistant',
         content: data.message || "I'm sorry, I couldn't process that. Please try again.",
       };
-      
       setMessages((prev) => [...prev.slice(0, -1), aiResponse]);
+
+      if (voiceReply && typeof aiResponse.content === 'string') {
+        speak(aiResponse.content);
+      }
     } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error("Something went wrong. Please try again.");
+      console.error('Error sending message:', error);
+      toast.error('Something went wrong. Please try again.');
       setMessages((prev) => prev.slice(0, -1));
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendMessageWithContent(message);
   };
 
   return (
@@ -315,37 +323,43 @@ const Chat = () => {
                 </div>
               )}
               
-              <div className="flex gap-2 justify-center">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={handlePhotoUpload}
-                >
-                  <Upload className="w-4 h-4" />
-                  Photo
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <LinkIcon className="w-4 h-4" />
-                  Recipe Link
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className={`gap-2 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse' : ''}`}
-                  onClick={handleVoiceRecording}
-                  disabled={isTranscribing}
-                >
-                  <Mic className="w-4 h-4" />
-                  {isRecording ? `🔴 Stop (${recordingTime}s)` : isTranscribing ? '⏳ Processing...' : '🎤 Voice'}
-                </Button>
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex gap-2 justify-center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={handlePhotoUpload}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Photo
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <LinkIcon className="w-4 h-4" />
+                    Recipe Link
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`gap-2 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse' : ''}`}
+                    onClick={handleVoiceRecording}
+                    disabled={isTranscribing}
+                  >
+                    <Mic className="w-4 h-4" />
+                    {isRecording ? `🔴 Stop (${recordingTime}s)` : isTranscribing ? '⏳ Processing...' : '🎤 Voice'}
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Switch id="voice-reply" checked={voiceReply} onCheckedChange={setVoiceReply} />
+                  <Label htmlFor="voice-reply">Voice reply</Label>
+                </div>
               </div>
               
               <form onSubmit={handleSendMessage} className="flex gap-2">
