@@ -857,7 +857,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid grid-cols-3 md:grid-cols-12 w-full">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full gap-2">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
             <TabsTrigger value="about">About Me</TabsTrigger>
