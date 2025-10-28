@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
+import HeroBranding from "@/components/HeroBranding";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroCake from "@/assets/hero-cake.jpg";
@@ -119,10 +120,11 @@ const Index = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
+      <HeroBranding />
       <WaveBackground />
 
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center pt-12">
+      <section className="relative z-10 min-h-screen flex items-center pt-4">
         <div className="container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Text */}
