@@ -4,8 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle } from "lucide-react";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -49,45 +55,40 @@ const Navigation = () => {
               Recipes
             </button>
             <button
-              onClick={() => navigate("/tools")}
-              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
-            >
-              Kitchen Tools
-            </button>
-            <button
-              onClick={() => navigate("/favorites")}
-              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
-            >
-              Bakers We Love
-            </button>
-            <button
-              onClick={() => navigate("/blog")}
-              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
-            >
-              <MessageSquare className="w-4 h-4" />
-              Blog
-            </button>
-            <button
-              onClick={() => navigate("/community")}
-              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
-            >
-              <Users className="w-4 h-4" />
-              Community
-            </button>
-            <button
-              onClick={() => navigate("/about")}
-              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
-            >
-              <User className="w-4 h-4" />
-              About
-            </button>
-            <button
               onClick={() => navigate("/instructions")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
             >
               <HelpCircle className="w-4 h-4" />
               How to Use
             </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors">
+                  <MoreHorizontal className="w-4 h-4" />
+                  More
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+                <DropdownMenuItem onClick={() => navigate("/tools")} className="cursor-pointer">
+                  Kitchen Tools
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/favorites")} className="cursor-pointer">
+                  Bakers We Love
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/blog")} className="cursor-pointer flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  Blog
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/community")} className="cursor-pointer flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Community
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  About
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Desktop Action Buttons */}
