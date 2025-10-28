@@ -391,8 +391,8 @@ const Index = () => {
             <div className="lg:col-span-2 space-y-6 animate-fade-in flex flex-col min-h-[500px] lg:min-h-[650px]">
               {/* Profile Photo */}
               <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-6 shadow-wave">
-                <div className="mb-4">
-                  <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-wave ring-2 ring-ocean-wave/30">
+                <div className="mb-4 flex justify-center">
+                  <div className="w-full max-w-md aspect-video rounded-2xl overflow-hidden shadow-wave ring-2 ring-ocean-wave/30">
                     <img
                       src={profileImage}
                       alt="Brandia - Cake Artist"
