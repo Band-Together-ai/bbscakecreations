@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
-import { ArrowRight, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Sparkles, Heart, Wheat } from "lucide-react";
 
 import logoSquare from "@/assets/logo-square-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -367,64 +367,87 @@ const Index = () => {
         </div>
       )}
 
-      {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center pt-2">
-        <div className="container mx-auto px-4 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Text */}
-            <div className="space-y-6 animate-fade-in">
-              <h1 className="text-5xl md:text-7xl font-fredoka font-bold gradient-ocean bg-clip-text text-transparent leading-tight drop-shadow-sm">
-                Brandia's<br />BBs Cake Creations
-              </h1>
-              <div className="relative max-w-xl">
-                <div 
-                  className="relative backdrop-blur-sm bg-background/60 rounded-2xl"
-                  style={{ 
-                    padding: `${heroBoxPaddingTop}px ${heroBoxPadding}px ${heroBoxPadding}px ${heroBoxPadding}px`
-                  }}
-                >
-                  <img
-                    src={logoSquare}
-                    alt="BB's Cake Creations Logo"
-                    className="absolute left-1/2 opacity-80 animate-float z-10 select-none"
-                    style={{ top: logoTop, width: logoSize, height: logoSize, transform: `translate(-50%, 0) translateX(${(isEditMode ? (editDevice === 'mobile' ? xMobile : xDesktop) : (isMobileAtLoad ? xMobile : xDesktop))}px)` }}
-                    onPointerDown={isEditMode ? (e) => {
-                      e.preventDefault();
-                      draggingRef.current = true;
-                      startRef.current = { x: e.clientX, y: e.clientY, startX: (editDevice === 'mobile' ? xMobile : xDesktop), startTop: logoTop };
-                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                    } : undefined}
-                    onPointerMove={isEditMode ? (e) => {
-                      if (!draggingRef.current || !startRef.current) return;
-                      const dx = e.clientX - startRef.current.x;
-                      const dy = e.clientY - startRef.current.y;
-                      if (editDevice === 'mobile') setXMobile(startRef.current.startX + dx);
-                      else setXDesktop(startRef.current.startX + dx);
-                      setLogoTop(startRef.current.startTop + dy);
-                    } : undefined}
-                    onPointerUp={isEditMode ? () => {
-                      draggingRef.current = false;
-                      startRef.current = null;
-                    } : undefined}
-                    onPointerCancel={isEditMode ? () => {
-                      draggingRef.current = false;
-                      startRef.current = null;
-                    } : undefined}
-                  />
-                  <p className="text-xl text-ocean-deep font-quicksand">
-                    {heroText}
-                  </p>
-                </div>
+      {/* Hero Section - Magazine Layout */}
+      <section className="relative z-10 pt-24 pb-8 px-4">
+        <div className="container mx-auto">
+          {/* Hero Row 1: Large Image + Profile Column */}
+          <div className="grid lg:grid-cols-5 gap-6 mb-6">
+            {/* Large Hero Cake Image - 60% */}
+            <div className="lg:col-span-3 animate-fade-in">
+              <div className="relative h-full min-h-[500px] lg:min-h-[650px] rounded-3xl overflow-hidden shadow-float">
+                <img
+                  src={heroCake}
+                  alt="Brandia's signature ocean ombre wedding cake with lavender and roses"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <h1 className="absolute bottom-8 left-8 right-8 text-4xl md:text-5xl lg:text-6xl font-fredoka font-bold text-white leading-tight drop-shadow-lg">
+                  Brandia's<br />BBs Cake Creations
+                </h1>
               </div>
-              <div className="pt-4 backdrop-blur-sm bg-background/60 p-4 rounded-2xl">
-                <p className="text-lg font-fredoka text-dolphin mb-4">
-                  Meet Sasha—my AI companion who captures my baking philosophy 
-                  and helps you create your own masterpieces.
+            </div>
+
+            {/* Stacked Right Column - 40% */}
+            <div className="lg:col-span-2 space-y-6 animate-fade-in">
+              {/* Profile Photo + Logo */}
+              <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-6 shadow-wave">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-24 h-24 rounded-full overflow-hidden shadow-wave ring-2 ring-ocean-wave/30 shrink-0">
+                    <img
+                      src={profileImage}
+                      alt="Brandia - Cake Artist"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="relative flex-1">
+                    <img
+                      src={logoSquare}
+                      alt="BB's Cake Creations Logo"
+                      className="w-20 h-20 opacity-90"
+                    />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-2">
+                  Meet Brandia
+                </h2>
+                <p className="text-sm text-ocean-deep font-quicksand leading-relaxed">
+                  {profileBio.substring(0, 180)}...
+                </p>
+                <Button
+                  onClick={() => navigate("/about")}
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full border-ocean-wave text-ocean-deep hover:bg-ocean-wave hover:text-white"
+                >
+                  Read Full Story
+                  <ArrowRight className="w-3 h-3 ml-2" />
+                </Button>
+              </div>
+
+              {/* Mission Statement */}
+              <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-6 shadow-wave">
+                <p className="text-base text-ocean-deep font-quicksand leading-relaxed">
+                  {heroText}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Row 2: CTA Card + Philosophy Highlights */}
+          <div className="grid lg:grid-cols-5 gap-6 mb-12">
+            {/* Chat with Sasha CTA - 40% */}
+            <div className="lg:col-span-2 animate-fade-in">
+              <div className="h-full bg-gradient-to-br from-ocean-wave/20 to-ocean-foam/20 backdrop-blur-sm rounded-3xl p-8 shadow-wave flex flex-col justify-center">
+                <h3 className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-3">
+                  Meet Sasha
+                </h3>
+                <p className="text-base font-quicksand text-dolphin mb-6">
+                  My AI companion who captures my baking philosophy and helps you create your own masterpieces.
                 </p>
                 <Button
                   size="lg"
                   onClick={() => navigate("/chat")}
-                  className="gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105 text-lg px-8 py-6"
+                  className="gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
                 >
                   Chat with Sasha
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -432,34 +455,54 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Right: Hero Image */}
-            <div className="relative animate-float">
-              <div className="rounded-3xl overflow-hidden shadow-float">
-                <img
-                  src={heroCake}
-                  alt="Brandia's signature ocean ombre wedding cake with lavender and roses"
-                  className="w-full h-auto object-cover"
-                />
+            {/* Philosophy Highlights - 60% */}
+            <div className="lg:col-span-3 animate-fade-in">
+              <div className="h-full bg-card/90 backdrop-blur-sm rounded-3xl p-8 shadow-wave">
+                <h3 className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-6">
+                  The Philosophy
+                </h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-coral/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Heart className="w-6 h-6 text-coral" />
+                    </div>
+                    <h4 className="font-fredoka text-base text-ocean-deep mb-2">From Scratch</h4>
+                    <p className="text-sm text-muted-foreground">Real ingredients, never box mixes</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-ocean-wave/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Wheat className="w-6 h-6 text-ocean-wave" />
+                    </div>
+                    <h4 className="font-fredoka text-base text-ocean-deep mb-2">Gluten-Free</h4>
+                    <p className="text-sm text-muted-foreground">Most cakes can be adapted beautifully</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-ocean-foam/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Sparkles className="w-6 h-6 text-ocean-foam" />
+                    </div>
+                    <h4 className="font-fredoka text-base text-ocean-deep mb-2">Live Flowers</h4>
+                    <p className="text-sm text-muted-foreground">Nature adorns every creation</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="relative z-10 py-20 px-4">
+      {/* Gallery Section - Tighter Spacing */}
+      <section className="relative z-10 pb-12 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-3">
               Signature Creations
             </h2>
-            <p className="text-xl text-dolphin font-quicksand max-w-2xl mx-auto">
-              Every cake is a love letter baked from scratch—can be adapted to be gluten-free or low-gluten, 
-              never using box mixes or fondant. Just real ingredients and real stories.
+            <p className="text-lg text-dolphin font-quicksand max-w-2xl mx-auto">
+              Every cake is a love letter baked from scratch—can be adapted to be gluten-free or low-gluten.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cakes.map((cake, idx) => (
               <div
                 key={idx}
@@ -469,7 +512,7 @@ const Index = () => {
                 }`}
               >
                 {idx === 0 && (
-                  <div className="bg-gradient-to-r from-coral to-ocean-wave text-white px-4 py-2 text-center font-fredoka font-semibold">
+                  <div className="bg-gradient-to-r from-coral to-ocean-wave text-white px-4 py-2 text-center font-fredoka font-semibold text-sm">
                     ✨ Featured Cake
                   </div>
                 )}
@@ -481,90 +524,15 @@ const Index = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-2xl font-fredoka text-ocean-deep mb-2">
+                  <h3 className="text-xl font-fredoka text-ocean-deep mb-2">
                     {cake.title}
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {cake.description}
                   </p>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About/Philosophy Section */}
-      <section className="relative z-10 py-20 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-card/80 backdrop-blur-sm rounded-3xl p-12 shadow-float text-center">
-            <h2 className="text-3xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-6">
-              The Philosophy
-            </h2>
-            <div className="space-y-4 text-lg text-ocean-deep">
-              <p>
-                <strong className="font-fredoka text-xl">From scratch, always.</strong> Every cake 
-                starts with real ingredients—almond flour, farm-fresh eggs, pure vanilla. Never a box mix.
-              </p>
-              <p>
-                <strong className="font-fredoka text-xl">Gluten-free adaptable.</strong> Most cakes can 
-                be made gluten-free or low-gluten without compromising on texture or taste. My gluten-free 
-                swaps create the dreamiest crumb when you need them.
-              </p>
-              <p>
-                <strong className="font-fredoka text-xl">Live flowers, real stories.</strong> Lavender, 
-                rosemary, edible pansies—nature adorns every creation. Each cake tells the story of 
-                the moment it celebrates.
-              </p>
-              <p className="pt-4 text-coral font-fredoka text-xl">
-                No fondant. No shortcuts. Just pure love in every layer.
-              </p>
-            </div>
-            <Button
-              size="lg"
-              onClick={() => navigate("/chat")}
-              className="mt-8 gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
-            >
-              Start Your Cake Journey with Sasha
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Meet Brandia Section */}
-      <section className="relative z-10 py-20 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-card/90 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-float">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              {/* Profile Image */}
-              <div className="shrink-0">
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
-                  <img
-                    src={profileImage}
-                    alt="Brandia - Cake Artist and Creator"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-
-              {/* Bio Content */}
-              <div className="flex-1 text-center md:text-left space-y-4">
-                <h2 className="text-3xl md:text-4xl font-fredoka gradient-ocean bg-clip-text text-transparent">
-                  Meet Brandia
-                </h2>
-                <p className="text-lg text-ocean-deep font-quicksand leading-relaxed">
-                  {profileBio}
-                </p>
-                <Button
-                  onClick={() => navigate("/about")}
-                  variant="outline"
-                  className="border-ocean-wave text-ocean-deep hover:bg-ocean-wave hover:text-white transition-all"
-                >
-                  Read My Full Story
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
