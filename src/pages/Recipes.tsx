@@ -150,7 +150,7 @@ const Recipes = () => {
                         Gluten-Free
                       </div>
                     )}
-                    {recipe.featured_position && (
+                    {(isAdmin || isCollaborator) && recipe.featured_position && (
                       <div className="inline-flex items-center gap-1 px-3 py-1 bg-coral/10 text-coral rounded-full text-sm font-fredoka w-fit">
                         <Star className="w-3 h-3" />
                         {recipe.featured_position === 1 ? "Featured Cake" : `Landing Page #${recipe.featured_position}`}
