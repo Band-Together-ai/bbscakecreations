@@ -180,6 +180,101 @@ const Index = () => {
       <Navigation />
       <WaveBackground />
 
+      {/* Edit Mode Controls */}
+      {isEditMode && (
+        <div className="fixed top-20 right-4 z-50 bg-card/95 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg space-y-3 max-w-xs">
+          <h3 className="font-fredoka text-sm font-bold text-foreground">Logo Editor</h3>
+          
+          {/* Device Toggle */}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={editDevice === 'mobile' ? 'default' : 'outline'}
+              onClick={() => setEditDevice('mobile')}
+              className="flex-1"
+            >
+              Mobile
+            </Button>
+            <Button
+              size="sm"
+              variant={editDevice === 'desktop' ? 'default' : 'outline'}
+              onClick={() => setEditDevice('desktop')}
+              className="flex-1"
+            >
+              Desktop
+            </Button>
+          </div>
+
+          {/* Nudge Controls */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Nudge (16px)</p>
+            <div className="grid grid-cols-3 gap-1">
+              <div></div>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setLogoTop(logoTop - 16)}
+              >
+                <ChevronUp className="w-4 h-4" />
+              </Button>
+              <div></div>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => editDevice === 'mobile' ? setXMobile(xMobile - 16) : setXDesktop(xDesktop - 16)}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <div></div>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => editDevice === 'mobile' ? setXMobile(xMobile + 16) : setXDesktop(xDesktop + 16)}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              <div></div>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setLogoTop(logoTop + 16)}
+              >
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Size Slider */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Size: {logoSize}px</p>
+            <Slider
+              value={[logoSize]}
+              onValueChange={(v) => setLogoSize(v[0])}
+              min={80}
+              max={240}
+              step={8}
+            />
+          </div>
+
+          {/* Position Info */}
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>Mobile X: {xMobile}px</p>
+            <p>Desktop X: {xDesktop}px</p>
+            <p>Top: {logoTop}px</p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
+            <Button size="sm" onClick={saveLogoSettings} className="flex-1">
+              Save
+            </Button>
+            <Button size="sm" variant="outline" onClick={cancelEdit} className="flex-1">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center pt-2">
         <div className="container mx-auto px-4 py-20">
