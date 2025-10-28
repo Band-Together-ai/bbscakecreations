@@ -16,6 +16,8 @@ All colors MUST be HSL.
     --dolphin-grey: 200 18% 46%;
     --coral-pink: 340 82% 75%;
     --seaweed-green: 142 44% 55%;
+    --lavender-light: 270 65% 75%;
+    --lavender-accent: 270 60% 65%;
 
     --background: 166 55% 96%;
     --foreground: 197 71% 15%;
@@ -35,7 +37,7 @@ All colors MUST be HSL.
     --muted: 186 100% 94%;
     --muted-foreground: 200 18% 46%;
 
-    --accent: 340 82% 75%;
+    --accent: 270 65% 75%;
     --accent-foreground: 197 71% 15%;
 
     --destructive: 0 84.2% 60.2%;
@@ -69,6 +71,8 @@ All colors MUST be HSL.
     --dolphin-grey: 200 10% 60%;
     --coral-pink: 340 70% 65%;
     --seaweed-green: 142 35% 45%;
+    --lavender-light: 270 50% 60%;
+    --lavender-accent: 270 55% 50%;
 
     --background: 166 25% 15%;
     --foreground: 186 100% 94%;
@@ -88,7 +92,7 @@ All colors MUST be HSL.
     --muted: 200 15% 20%;
     --muted-foreground: 200 10% 60%;
 
-    --accent: 340 70% 60%;
+    --accent: 270 55% 60%;
     --accent-foreground: 186 100% 94%;
 
     --destructive: 0 62.8% 30.6%;
