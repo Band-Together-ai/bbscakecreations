@@ -135,9 +135,9 @@ const Index = () => {
                 <img 
                   src={logoSquare} 
                   alt="BB's Cake Creations Logo" 
-                  className="absolute -top-12 left-1/2 -translate-x-1/2 w-28 h-28 md:w-32 md:h-32 opacity-80 animate-float z-10"
+                  className="absolute -top-8 left-1/2 -translate-x-1/2 w-36 h-36 md:w-40 md:h-40 opacity-80 animate-float z-10"
                 />
-                <p className="text-xl text-ocean-deep font-quicksand backdrop-blur-sm bg-background/60 p-4 pt-20 rounded-2xl">
+                <p className="text-xl text-ocean-deep font-quicksand backdrop-blur-sm bg-background/60 p-4 pt-24 rounded-2xl">
                   Where every cake is baked from scratch with love, 
                   adorned with live flowers, and crafted to tell your story. Most cakes can be made 
                   gluten-free or low-gluten. No box mixes. No fondant. Just pure magic.
