@@ -24,6 +24,7 @@ interface Recipe {
   category: string;
   tags: string[];
   image_url: string | null;
+  display_order: number | null;
   recipe_photos?: Array<{
     photo_url: string;
     is_headline: boolean;
@@ -52,7 +53,8 @@ const RecipeDetail = () => {
   const [captchaAnswer, setCaptchaAnswer] = useState<string>("");
   const [captchaQuestion, setCaptchaQuestion] = useState<{ num1: number; num2: number }>({ num1: 0, num2: 0 });
 
-  const canViewFullRecipe = isAdmin || isCollaborator || isPaid;
+  // During launch phase, all recipes are free to view
+  const canViewFullRecipe = true; // isAdmin || isCollaborator || isPaid || (recipe && recipe.display_order !== null && recipe.display_order < 3);
 
   useEffect(() => {
     if (id) {
