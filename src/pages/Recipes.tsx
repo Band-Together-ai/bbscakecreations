@@ -239,11 +239,11 @@ const Recipes = () => {
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(user ? "/chat" : "/auth");
+                          navigate("/chat");
                         }}
                         className="w-full gradient-ocean text-primary-foreground"
                       >
-                        {user ? "Chat with Sasha" : "Subscribe to Unlock"}
+                        Chat with Sasha
                       </Button>
                     </div>
                   )}
