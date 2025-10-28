@@ -1300,13 +1300,16 @@ const Admin = () => {
                   <h3 className="font-fredoka text-sm mb-2">Add New Photo</h3>
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label htmlFor="about-caption">Caption</Label>
+                      <Label htmlFor="about-caption" className="text-sm font-medium">
+                        Caption <span className="text-coral">*</span> <span className="text-xs text-muted-foreground">(Required before upload)</span>
+                      </Label>
                       <Textarea
                         id="about-caption"
                         placeholder="Behind every cake is a story and a dream..."
                         value={aboutPhotoCaption}
                         onChange={(e) => setAboutPhotoCaption(e.target.value)}
                         rows={2}
+                        className={!aboutPhotoCaption.trim() ? "border-amber-300 focus:border-amber-400" : ""}
                       />
                     </div>
                     <input
@@ -1317,11 +1320,18 @@ const Admin = () => {
                       className="hidden"
                     />
                     <Button
-                      onClick={() => aboutPhotoFileInputRef.current?.click()}
-                      disabled={!aboutPhotoCaption.trim()}
+                      onClick={() => {
+                        if (!aboutPhotoCaption.trim()) {
+                          toast.error("Please enter a caption first");
+                          return;
+                        }
+                        aboutPhotoFileInputRef.current?.click();
+                      }}
+                      variant={!aboutPhotoCaption.trim() ? "outline" : "default"}
+                      className={!aboutPhotoCaption.trim() ? "opacity-60" : ""}
                     >
                       <Upload className="w-4 h-4 mr-2" />
-                      Upload Photo
+                      {!aboutPhotoCaption.trim() ? "Enter Caption First" : "Upload Photo"}
                     </Button>
                   </div>
                 </div>
