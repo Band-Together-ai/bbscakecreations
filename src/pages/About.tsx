@@ -214,7 +214,7 @@ const About = () => {
                 your own masterpieces with the same from-scratch magic I pour into every layer.
               </p>
               <p className="text-coral font-fredoka text-xl mt-6">
-                "Hey sugar, let's bake something alive!"
+                "Ready to get messy in the kitchen?"
               </p>
             </CardContent>
           </Card>
