@@ -25,7 +25,7 @@ const Index = () => {
   );
   
   const [logoSize, setLogoSize] = useState(160);
-  const [logoTop, setLogoTop] = useState(16);
+  const [logoTop, setLogoTop] = useState(-80);
   const [logoX, setLogoX] = useState(0);
   const [showLogoControls, setShowLogoControls] = useState(true);
   const [dragging, setDragging] = useState(false);
@@ -52,7 +52,7 @@ const Index = () => {
       const innerH = container.clientHeight;
       const padding = 8;
       const maxTop = Math.max(padding, innerH - logoSize - padding);
-      newTop = Math.min(Math.max(padding, newTop), maxTop);
+      newTop = Math.min(Math.max(-logoSize, newTop), maxTop);
 
       const halfW = innerW / 2;
       const maxX = halfW - logoSize / 2 - padding;
@@ -200,19 +200,19 @@ const Index = () => {
                     <div className="bg-card/90 backdrop-blur-sm rounded-xl p-3 shadow-wave">
                       <div className="grid grid-cols-3 gap-2 place-items-center">
                         <span />
-                        <Button variant="secondary" size="icon" onClick={() => setLogoTop(Math.max(8, logoTop - 4))}>
+                        <Button variant="secondary" size="icon" onClick={() => setLogoTop(logoTop - 16)}>
                           <ChevronUp className="w-4 h-4" />
                         </Button>
                         <span />
-                        <Button variant="secondary" size="icon" onClick={() => setLogoX(logoX - 4)}>
+                        <Button variant="secondary" size="icon" onClick={() => setLogoX(logoX - 16)}>
                           <ChevronLeft className="w-4 h-4" />
                         </Button>
                         <div className="text-xs font-medium text-dolphin">Move</div>
-                        <Button variant="secondary" size="icon" onClick={() => setLogoX(logoX + 4)}>
+                        <Button variant="secondary" size="icon" onClick={() => setLogoX(logoX + 16)}>
                           <ChevronRight className="w-4 h-4" />
                         </Button>
                         <span />
-                        <Button variant="secondary" size="icon" onClick={() => setLogoTop(logoTop + 4)}>
+                        <Button variant="secondary" size="icon" onClick={() => setLogoTop(logoTop + 16)}>
                           <ChevronDown className="w-4 h-4" />
                         </Button>
                         <span />
