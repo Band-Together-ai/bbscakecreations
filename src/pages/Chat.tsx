@@ -263,6 +263,9 @@ const Chat = () => {
           <CardHeader>
             <CardTitle className="font-fredoka text-ocean-deep">
               Chat with Sasha
+              <span className="block text-base text-ocean-wave font-quicksand font-normal mt-1">
+                BB's AI Baking Companion
+              </span>
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Upload photos • Paste recipe links • Use voice • Get Brandia's magic

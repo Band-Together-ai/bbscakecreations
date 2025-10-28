@@ -464,9 +464,12 @@ const Index = () => {
             {/* Chat with Sasha CTA - 40% */}
             <div className="lg:col-span-2 animate-fade-in">
               <div className="h-full bg-gradient-to-br from-ocean-wave/20 to-ocean-foam/20 backdrop-blur-sm rounded-3xl p-8 shadow-wave flex flex-col justify-center">
-                <h3 className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-3">
+                <h3 className="text-2xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-2">
                   Meet Sasha
                 </h3>
+                <p className="text-sm text-ocean-wave font-quicksand mb-3">
+                  BB's AI Baking Companion
+                </p>
                 <p className="text-base font-quicksand text-dolphin mb-6">
                   My AI companion who captures my baking philosophy and helps you create your own masterpieces.
                 </p>
