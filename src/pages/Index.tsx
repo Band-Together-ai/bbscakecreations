@@ -377,12 +377,12 @@ const Index = () => {
               <div className="relative h-full min-h-[500px] lg:min-h-[650px] rounded-3xl overflow-hidden shadow-float">
                 <img
                   src={heroCake}
-                  alt="Brandia's signature ocean ombre wedding cake with lavender and roses"
+                  alt="Signature ocean ombre wedding cake with lavender and roses"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 <h1 className="absolute bottom-8 left-8 right-8 text-4xl md:text-5xl lg:text-6xl font-fredoka font-bold text-white leading-tight drop-shadow-lg">
-                  Brandia's<br />BBs Cake Creations
+                  BBs Cake Creations
                 </h1>
               </div>
             </div>
