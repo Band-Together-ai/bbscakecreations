@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee } from "lucide-react";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
 
 const Navigation = () => {
@@ -80,6 +80,13 @@ const Navigation = () => {
             >
               <User className="w-4 h-4" />
               About
+            </button>
+            <button
+              onClick={() => navigate("/instructions")}
+              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+              How to Use
             </button>
           </nav>
 
@@ -202,6 +209,16 @@ const Navigation = () => {
             >
               <User className="w-4 h-4" />
               About
+            </button>
+            <button
+              onClick={() => {
+                navigate("/instructions");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
+            >
+              <HelpCircle className="w-4 h-4" />
+              How to Use
             </button>
             <Button
               variant="outline"

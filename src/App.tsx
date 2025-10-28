@@ -16,6 +16,7 @@ import Community from "./pages/Community";
 import About from "./pages/About";
 import Tools from "./pages/Tools";
 import Favorites from "./pages/Favorites";
+import Instructions from "./pages/Instructions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/about" element={<About />} />
+          <Route path="/instructions" element={<Instructions />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
