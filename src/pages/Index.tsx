@@ -32,6 +32,17 @@ const Index = () => {
   const startRef = useRef({ x: 0, y: 0, logoX: 0, logoTop: 0 });
   const boxRef = useRef<HTMLDivElement>(null);
 
+  // Set responsive initial position
+  useEffect(() => {
+    const setResponsivePosition = () => {
+      const isMobile = window.innerWidth < 768;
+      setLogoX(isMobile ? -40 : 60);
+    };
+    setResponsivePosition();
+    window.addEventListener('resize', setResponsivePosition);
+    return () => window.removeEventListener('resize', setResponsivePosition);
+  }, []);
+
   const handlePointerDown = (e: any) => {
     setDragging(true);
     startRef.current = { x: e.clientX, y: e.clientY, logoX, logoTop };
