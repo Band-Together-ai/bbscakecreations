@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X } from "lucide-react";
+import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -21,9 +22,13 @@ const Navigation = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
-            className="text-lg md:text-2xl font-fredoka text-ocean-deep hover:opacity-80 transition-opacity shrink-0"
+            className="hover:opacity-80 transition-opacity shrink-0"
           >
-            BBs Cake Creations
+            <img 
+              src={logoHorizontal} 
+              alt="BB's Cake Creations" 
+              className="h-10 md:h-12 w-auto"
+            />
           </button>
 
           {/* Desktop Navigation */}
