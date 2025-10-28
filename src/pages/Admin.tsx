@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star } from "lucide-react";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { ToolsTab } from "@/components/admin/ToolsTab";
+import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
 import {
   DropdownMenu,
   DropdownMenuContent,

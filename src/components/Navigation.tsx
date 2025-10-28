@@ -49,6 +49,18 @@ const Navigation = () => {
               Recipes
             </button>
             <button
+              onClick={() => navigate("/tools")}
+              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
+            >
+              Kitchen Tools
+            </button>
+            <button
+              onClick={() => navigate("/favorites")}
+              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
+            >
+              Bakers We Love
+            </button>
+            <button
               onClick={() => navigate("/blog")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
             >

@@ -49,11 +49,22 @@ export const useUserRole = () => {
         const hasPromo = !!promoData;
         setIsPromo(hasPromo);
 
-        // Determine full access: admin, collaborator, paid role, OR promo user
+        // Check temporary access (tip jar 30-day passes)
+        const { data: tempAccessData } = await supabase
+          .from('temporary_access')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .gte('expires_at', new Date().toISOString())
+          .maybeSingle();
+
+        const hasTempAccess = !!tempAccessData;
+
+        // Determine full access: admin, collaborator, paid role, promo user, OR temp access
         const fullAccess = userRole === 'admin' || 
                           userRole === 'collaborator' || 
                           userRole === 'paid' || 
-                          hasPromo;
+                          hasPromo ||
+                          hasTempAccess;
         setHasFullAccess(fullAccess);
 
       } catch (err) {

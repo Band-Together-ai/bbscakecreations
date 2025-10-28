@@ -41,11 +41,57 @@ export type Database = {
         }
         Relationships: []
       }
+      baking_tools: {
+        Row: {
+          affiliate_link: string | null
+          brandia_take: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          name: string
+          price_range: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          affiliate_link?: string | null
+          brandia_take?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          name: string
+          price_range?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          affiliate_link?: string | null
+          brandia_take?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          name?: string
+          price_range?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
           content: string
           created_at: string | null
+          display_order: number | null
           excerpt: string | null
           id: string
           image_url: string | null
@@ -58,6 +104,7 @@ export type Database = {
           author_id?: string | null
           content: string
           created_at?: string | null
+          display_order?: number | null
           excerpt?: string | null
           id?: string
           image_url?: string | null
@@ -70,6 +117,7 @@ export type Database = {
           author_id?: string | null
           content?: string
           created_at?: string | null
+          display_order?: number | null
           excerpt?: string | null
           id?: string
           image_url?: string | null
@@ -77,6 +125,48 @@ export type Database = {
           published_at?: string | null
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      favorite_bakers: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          instagram_handle: string | null
+          is_featured: boolean | null
+          name: string
+          profile_image_url: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          instagram_handle?: string | null
+          is_featured?: boolean | null
+          name: string
+          profile_image_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          instagram_handle?: string | null
+          is_featured?: boolean | null
+          name?: string
+          profile_image_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -329,11 +419,55 @@ export type Database = {
           },
         ]
       }
+      recipe_tools: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_essential: boolean | null
+          recipe_id: string
+          tool_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_essential?: boolean | null
+          recipe_id: string
+          tool_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_essential?: boolean | null
+          recipe_id?: string
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_tools_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_tools_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "baking_tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
+          author_id: string | null
           category: string | null
           created_at: string | null
           description: string | null
+          display_order: number | null
           featured_position: number | null
           id: string
           image_url: string | null
@@ -348,9 +482,11 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          author_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
+          display_order?: number | null
           featured_position?: number | null
           id?: string
           image_url?: string | null
@@ -365,9 +501,11 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          author_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
+          display_order?: number | null
           featured_position?: number | null
           id?: string
           image_url?: string | null
@@ -480,6 +618,33 @@ export type Database = {
         }
         Relationships: []
       }
+      temporary_access: {
+        Row: {
+          access_type: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          payment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          access_type?: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          payment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          access_type?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          payment_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tip_jar_sessions: {
         Row: {
           created_at: string
@@ -515,6 +680,38 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      tool_clicks: {
+        Row: {
+          clicked_at: string | null
+          id: string
+          referrer_page: string | null
+          tool_id: string
+          user_id: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          id?: string
+          referrer_page?: string | null
+          tool_id: string
+          user_id?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          id?: string
+          referrer_page?: string | null
+          tool_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_clicks_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "baking_tools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_activity_log: {
         Row: {

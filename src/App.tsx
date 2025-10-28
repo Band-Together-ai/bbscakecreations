@@ -14,6 +14,8 @@ import RecipeDetail from "./pages/RecipeDetail";
 import Blog from "./pages/Blog";
 import Community from "./pages/Community";
 import About from "./pages/About";
+import Tools from "./pages/Tools";
+import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="/community" element={
             <ProtectedRoute>
               <Community />

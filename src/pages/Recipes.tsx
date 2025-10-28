@@ -53,6 +53,7 @@ const Recipes = () => {
         recipe_photos(photo_url, is_headline)
       `)
       .eq("is_public", true)
+      .order("display_order", { ascending: true, nullsFirst: false })
       .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
@@ -118,8 +119,9 @@ const Recipes = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recipes.map((recipe) => {
+            {recipes.map((recipe, index) => {
               const recipeImage = getRecipeImage(recipe);
+              const isFirstThree = index < 3;
               return (
                 <Card 
                   key={recipe.id} 
@@ -137,6 +139,11 @@ const Recipes = () => {
                   )}
                 <CardHeader>
                   <div className="flex flex-wrap gap-2 mb-2">
+                    {isFirstThree && (
+                      <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-fredoka w-fit">
+                        Free
+                      </div>
+                    )}
                     {recipe.is_gluten_free && (
                       <div className="inline-flex items-center gap-1 px-3 py-1 bg-seaweed/10 text-seaweed rounded-full text-sm font-fredoka w-fit">
                         <Sparkles className="w-3 h-3" />
@@ -217,7 +224,7 @@ const Recipes = () => {
                         Chat with Sasha
                       </Button>
                     </div>
-                  ) : canViewFullRecipe ? (
+                  ) : canViewFullRecipe || isFirstThree ? (
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -225,7 +232,7 @@ const Recipes = () => {
                       }}
                       className="w-full gradient-ocean text-primary-foreground"
                     >
-                      View Full Recipe with Sasha
+                      {isFirstThree ? "View Free Recipe" : "View Full Recipe with Sasha"}
                     </Button>
                   ) : (
                     <div 
@@ -239,11 +246,11 @@ const Recipes = () => {
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate("/chat");
+                          navigate("/auth");
                         }}
                         className="w-full gradient-ocean text-primary-foreground"
                       >
-                        Chat with Sasha
+                        Subscribe to Unlock
                       </Button>
                     </div>
                   )}

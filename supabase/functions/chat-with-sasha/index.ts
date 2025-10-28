@@ -21,7 +21,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Fetch all public recipes from database
+    // Fetch all public recipes and baking tools from database
     const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
@@ -29,11 +29,19 @@ serve(async (req) => {
       .eq('is_public', true)
       .order('created_at', { ascending: false });
 
+    const { data: tools, error: toolsError } = await supabase
+      .from('baking_tools')
+      .select('*')
+      .order('display_order', { ascending: true });
+
     if (recipesError) {
       console.error("Error fetching recipes:", recipesError);
     }
+    if (toolsError) {
+      console.error("Error fetching tools:", toolsError);
+    }
 
-    console.log("Calling Lovable AI with messages:", messages.length, "and", recipes?.length || 0, "recipes");
+    console.log("Calling Lovable AI with messages:", messages.length, ",", recipes?.length || 0, "recipes, and", tools?.length || 0, "tools");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -67,6 +75,20 @@ ${r.instructions || ''}
 ${r.tags?.length ? `Tags: ${r.tags.join(', ')}` : ''}
 `).join('\n---\n')}
 ` : 'No recipes available yet in the database.'}
+
+${tools && tools.length > 0 ? `
+
+IMPORTANT: You also have access to Brandia's favorite tools and products. Recommend these when users ask about equipment, ingredients, or supplies.
+
+Recommended Tools & Products:
+${tools.map(t => `
+**${t.name}** (${t.category})
+${t.description || ''}
+${t.price_range ? `Price: ${t.price_range}` : ''}
+${t.brandia_take ? `BB says: "${t.brandia_take}"` : ''}
+${t.affiliate_link ? `Shop: ${t.affiliate_link}` : ''}
+`).join('\n---\n')}
+` : ''}
 
 When analyzing cake photos:
 - Describe what you see in detail (colors, decorations, texture, flowers/herbs used)
