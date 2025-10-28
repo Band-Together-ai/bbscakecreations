@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import WaveBackground from "@/components/WaveBackground";
-import DolphinAnimation from "@/components/DolphinAnimation";
 import Navigation from "@/components/Navigation";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,7 +120,6 @@ const Index = () => {
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
       <WaveBackground />
-      <DolphinAnimation />
 
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center pt-12">
