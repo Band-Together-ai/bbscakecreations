@@ -399,16 +399,39 @@ ${recipe.instructions || 'Full instructions available with subscription'}
             <CardContent className="p-6">
               <h2 className="text-2xl font-fredoka text-ocean-deep mb-4">Ingredients</h2>
               {canViewFullRecipe ? (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {recipe.ingredients ? (
                     typeof recipe.ingredients === 'string' ? (
                       <p className="whitespace-pre-wrap">{recipe.ingredients}</p>
                     ) : Array.isArray(recipe.ingredients) ? (
-                      <ul className="list-disc list-inside space-y-1">
-                        {recipe.ingredients.map((ingredient: any, idx: number) => (
-                          <li key={idx}>{typeof ingredient === 'string' ? ingredient : JSON.stringify(ingredient)}</li>
-                        ))}
-                      </ul>
+                      (() => {
+                        // Group ingredients by category
+                        const grouped = recipe.ingredients.reduce((acc: any, ingredient: any) => {
+                          if (typeof ingredient === 'object' && ingredient.category) {
+                            if (!acc[ingredient.category]) {
+                              acc[ingredient.category] = [];
+                            }
+                            acc[ingredient.category].push(ingredient.item);
+                          } else if (typeof ingredient === 'string') {
+                            if (!acc['Other']) {
+                              acc['Other'] = [];
+                            }
+                            acc['Other'].push(ingredient);
+                          }
+                          return acc;
+                        }, {});
+
+                        return Object.entries(grouped).map(([category, items]: [string, any]) => (
+                          <div key={category}>
+                            <h3 className="font-semibold text-ocean-deep mb-2">{category}</h3>
+                            <ul className="list-disc list-inside space-y-1 ml-2">
+                              {items.map((item: string, idx: number) => (
+                                <li key={idx} className="text-muted-foreground">{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ));
+                      })()
                     ) : (
                       <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(recipe.ingredients, null, 2)}</pre>
                     )
