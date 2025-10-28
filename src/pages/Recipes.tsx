@@ -13,6 +13,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Recipe {
   id: string;
@@ -34,6 +44,13 @@ const Recipes = () => {
   const { isAdmin, isCollaborator, isPaid } = useUserRole();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [replaceDialogData, setReplaceDialogData] = useState<{
+    recipeId: string;
+    position: number;
+    existingRecipeTitle: string;
+    existingRecipeId: string;
+  } | null>(null);
   
   const canViewFullRecipe = isAdmin || isCollaborator || isPaid;
 
@@ -65,20 +82,85 @@ const Recipes = () => {
   };
 
   const updateFeaturedPosition = async (recipeId: string, position: number | null) => {
+    // If removing from landing page, just do it
+    if (position === null) {
+      const { error } = await supabase
+        .from("recipes")
+        .update({ 
+          featured_position: null,
+          is_featured: false 
+        })
+        .eq("id", recipeId);
+
+      if (error) {
+        toast.error("Failed to update position: " + error.message);
+      } else {
+        toast.success("Removed from landing page");
+        fetchRecipes();
+      }
+      return;
+    }
+
+    // Check if another recipe already has this position
+    const { data: existingRecipe, error: checkError } = await supabase
+      .from("recipes")
+      .select("id, title")
+      .eq("featured_position", position)
+      .neq("id", recipeId)
+      .maybeSingle();
+
+    if (checkError) {
+      toast.error("Failed to check position: " + checkError.message);
+      return;
+    }
+
+    // If position is occupied, show confirmation dialog
+    if (existingRecipe) {
+      setReplaceDialogData({
+        recipeId,
+        position,
+        existingRecipeTitle: existingRecipe.title,
+        existingRecipeId: existingRecipe.id,
+      });
+      setShowReplaceDialog(true);
+      return;
+    }
+
+    // Position is free, proceed with update
+    await performPositionUpdate(recipeId, position);
+  };
+
+  const performPositionUpdate = async (recipeId: string, position: number) => {
+    // If replacing, first clear the old recipe's position
+    if (replaceDialogData) {
+      await supabase
+        .from("recipes")
+        .update({ 
+          featured_position: null,
+          is_featured: false 
+        })
+        .eq("id", replaceDialogData.existingRecipeId);
+    }
+
+    // Now set the new recipe's position
     const { error } = await supabase
       .from("recipes")
       .update({ 
         featured_position: position,
-        is_featured: position !== null 
+        is_featured: true 
       })
       .eq("id", recipeId);
 
     if (error) {
       toast.error("Failed to update position: " + error.message);
     } else {
-      toast.success(position ? `Set as landing page position ${position}` : "Removed from landing page");
+      toast.success(`Set as landing page position ${position}`);
       fetchRecipes();
     }
+
+    // Reset dialog state
+    setShowReplaceDialog(false);
+    setReplaceDialogData(null);
   };
 
   const getRecipeImage = (recipe: Recipe) => {
@@ -100,6 +182,30 @@ const Recipes = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+
+      <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Replace Recipe at Position {replaceDialogData?.position}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Position {replaceDialogData?.position} is currently occupied by "{replaceDialogData?.existingRecipeTitle}". 
+              Do you want to replace it with this recipe? The existing recipe will be removed from the landing page.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (replaceDialogData) {
+                  performPositionUpdate(replaceDialogData.recipeId, replaceDialogData.position);
+                }
+              }}
+            >
+              Replace
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
