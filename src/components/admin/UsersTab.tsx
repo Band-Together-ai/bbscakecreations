@@ -49,6 +49,20 @@ interface UserActivity {
   created_at: string;
 }
 
+interface ActivitySummary {
+  user_id: string;
+  total_sessions: number;
+  total_time_minutes: number;
+  last_active: string | null;
+  is_online: boolean;
+  total_page_views: number;
+  total_chat_sessions: number;
+  total_chat_messages: number;
+  total_chat_time_minutes: number;
+  support_clicks: number;
+  tool_clicks: number;
+}
+
 export const UsersTab = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string>>({});
@@ -57,6 +71,7 @@ export const UsersTab = () => {
   const [filterRole, setFilterRole] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userActivity, setUserActivity] = useState<UserActivity[]>([]);
+  const [activitySummary, setActivitySummary] = useState<ActivitySummary | null>(null);
   const [showActivityDialog, setShowActivityDialog] = useState(false);
   
   // Grant access form
@@ -134,6 +149,7 @@ export const UsersTab = () => {
   };
 
   const fetchUserActivity = async (userId: string) => {
+    // Fetch activity log
     const { data, error } = await supabase
       .from('user_activity_log')
       .select('*')
@@ -148,10 +164,21 @@ export const UsersTab = () => {
     }
 
     setUserActivity(data || []);
+
+    // Fetch activity summary using database function
+    const { data: summaryData, error: summaryError } = await supabase
+      .rpc('get_user_activity_summary', { target_user_id: userId });
+
+    if (summaryError) {
+      console.error('Error fetching summary:', summaryError);
+    } else if (summaryData) {
+      setActivitySummary(summaryData as unknown as ActivitySummary);
+    }
   };
 
   const handleViewActivity = async (user: User) => {
     setSelectedUser(user);
+    setActivitySummary(null); // Reset summary
     await fetchUserActivity(user.id);
     setShowActivityDialog(true);
   };
@@ -459,36 +486,126 @@ export const UsersTab = () => {
 
       {/* Activity Dialog */}
       <Dialog open={showActivityDialog} onOpenChange={setShowActivityDialog}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Activity Log: {selectedUser?.email}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Activity: {selectedUser?.email}
+              {activitySummary?.is_online && (
+                <Badge variant="default" className="bg-green-500">
+                  🟢 Online
+                </Badge>
+              )}
+            </DialogTitle>
             <DialogDescription>
-              Recent actions by this user
+              User engagement and activity summary
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-2">
-              {userActivity.map((activity, index) => (
-                <div key={index} className="p-3 border rounded-lg text-sm">
-                  <div className="flex justify-between items-start mb-1">
-                    <Badge variant="outline">{activity.action_type}</Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(activity.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                  {activity.details && (
-                    <pre className="text-xs text-muted-foreground mt-2 overflow-auto">
-                      {JSON.stringify(activity.details, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              ))}
 
-              {userActivity.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  No activity recorded yet
+          <ScrollArea className="h-[600px]">
+            <div className="space-y-4">
+              {/* Activity Summary Cards */}
+              {activitySummary && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.total_sessions}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Login Sessions</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {Math.floor(activitySummary.total_time_minutes / 60)}h {activitySummary.total_time_minutes % 60}m
+                      </div>
+                      <div className="text-xs text-muted-foreground">Total Time</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.total_page_views}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Pages Viewed</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.total_chat_sessions}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Chat Sessions</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.total_chat_messages}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Chat Messages</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.total_chat_time_minutes}m
+                      </div>
+                      <div className="text-xs text-muted-foreground">Chat Time</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.support_clicks}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Support Clicks</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4">
+                      <div className="text-2xl font-bold text-ocean-wave">
+                        {activitySummary.tool_clicks}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Tool Clicks</div>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
+
+              {activitySummary?.last_active && (
+                <div className="text-sm text-muted-foreground mb-4">
+                  Last active: {new Date(activitySummary.last_active).toLocaleString()}
+                </div>
+              )}
+
+              {/* Activity Log */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Recent Activity Log</h3>
+                <div className="space-y-2">
+                  {userActivity.map((activity, index) => (
+                    <div key={index} className="p-3 border rounded-lg text-sm">
+                      <div className="flex justify-between items-start mb-1">
+                        <Badge variant="outline">{activity.action_type}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(activity.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      {activity.details && (
+                        <pre className="text-xs text-muted-foreground mt-2 overflow-auto max-h-32">
+                          {JSON.stringify(activity.details, null, 2)}
+                        </pre>
+                      )}
+                    </div>
+                  ))}
+
+                  {userActivity.length === 0 && (
+                    <div className="text-center py-12 text-muted-foreground">
+                      No activity recorded yet
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </ScrollArea>
         </DialogContent>

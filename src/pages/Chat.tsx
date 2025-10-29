@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useTipJarSession } from "@/hooks/useTipJarSession";
 import { TipJarExtension } from "@/components/TipJarExtension";
+import { useChatSessionTracking } from "@/hooks/useChatSessionTracking";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -37,6 +38,9 @@ const Chat = () => {
 
   // Get tip jar session info
   const { sessionId, remainingMinutes, isActive, refetch } = useTipJarSession(user?.id || null);
+
+  // Track chat session
+  useChatSessionTracking(user?.id || null, messages.length);
 
   // TEMPORARILY DISABLED FOR TESTING
   // useEffect(() => {

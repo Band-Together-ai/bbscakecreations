@@ -128,6 +128,39 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          message_count: number | null
+          session_end: string | null
+          session_start: string
+          time_spent_seconds: number | null
+          topics: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_count?: number | null
+          session_end?: string | null
+          session_start?: string
+          time_spent_seconds?: number | null
+          topics?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_count?: number | null
+          session_end?: string | null
+          session_start?: string
+          time_spent_seconds?: number | null
+          topics?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       favorite_bakers: {
         Row: {
           category: string | null
@@ -231,6 +264,36 @@ export type Database = {
           image_url?: string | null
           title?: string
           updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          page_title: string | null
+          referrer: string | null
+          time_spent_seconds: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path: string
+          page_title?: string | null
+          referrer?: string | null
+          time_spent_seconds?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          page_title?: string | null
+          referrer?: string | null
+          time_spent_seconds?: number | null
           user_id?: string | null
         }
         Relationships: []
@@ -824,6 +887,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          last_activity: string
+          session_end: string | null
+          session_start: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          last_activity?: string
+          session_end?: string | null
+          session_start?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          last_activity?: string
+          session_end?: string | null
+          session_start?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -840,6 +936,10 @@ export type Database = {
           total_ratings: number
           two_star: number
         }[]
+      }
+      get_user_activity_summary: {
+        Args: { target_user_id: string }
+        Returns: Json
       }
       get_user_role: {
         Args: { _user_id: string }
