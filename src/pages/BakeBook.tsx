@@ -37,21 +37,15 @@ const FOLDERS = ["All", "Saved", "Favorites", "To Try", "Made It", "Holiday"];
 
 const BakeBook = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, bakeBookLimit } = useUserRole();
+  const { bakeBookLimit } = useUserRole();
   const [entries, setEntries] = useState<BakeBookEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    console.log('BakeBook page loaded, isAuthenticated:', isAuthenticated);
-    if (!isAuthenticated) {
-      console.log('Not authenticated, redirecting to /auth');
-      navigate("/auth");
-      return;
-    }
     fetchEntries();
-  }, [isAuthenticated]);
+  }, []);
 
   const fetchEntries = async () => {
     try {
