@@ -78,48 +78,52 @@ export const UsersTab = () => {
       
       if (usersError) {
         console.error('Error fetching users:', usersError);
-        toast.error('Failed to load users');
+        
+        // Better error handling
+        if (usersError.message?.includes('401') || usersError.message?.includes('403')) {
+          toast.error('Admin access required to view users');
+        } else if (usersError.message?.includes('FunctionsRelayError')) {
+          toast.error('Users service not available. Please try again.');
+        } else {
+          toast.error('Failed to load users');
+        }
+        
         setLoading(false);
         return;
       }
 
       const authUsers = usersData?.users || [];
+      const rolesData = usersData?.roles || [];
+      const promoData = usersData?.promo || [];
       
       if (!authUsers.length) {
         console.log('No users returned from edge function');
       }
 
-    // Fetch user roles
-    const { data: rolesData } = await supabase
-      .from('user_roles')
-      .select('user_id, role');
+      // Build roles map from function response
+      const rolesMap: Record<string, string> = {};
+      rolesData.forEach((r: any) => {
+        rolesMap[r.user_id] = r.role;
+      });
+      setUserRoles(rolesMap);
 
-    const rolesMap: Record<string, string> = {};
-    rolesData?.forEach(r => {
-      rolesMap[r.user_id] = r.role;
-    });
-    setUserRoles(rolesMap);
+      // Build promo map from function response
+      const promoMap: Record<string, PromoUser> = {};
+      promoData.forEach((p: any) => {
+        promoMap[p.user_id] = p;
+      });
+      setPromoUsers(promoMap);
 
-    // Fetch promo users
-    const { data: promoData } = await supabase
-      .from('promo_users')
-      .select('*');
-
-    const promoMap: Record<string, PromoUser> = {};
-    promoData?.forEach(p => {
-      promoMap[p.user_id] = p;
-    });
-    setPromoUsers(promoMap);
-
-    const mappedUsers: User[] = authUsers
-      .filter((u: any) => u.email)
-      .map((u: any) => ({
-        id: u.id,
-        email: u.email!,
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at || null
-      }));
-    
+      // Map auth users to User interface
+      const mappedUsers: User[] = authUsers
+        .filter((u: any) => u.email)
+        .map((u: any) => ({
+          id: u.id,
+          email: u.email!,
+          created_at: u.created_at,
+          last_sign_in_at: u.last_sign_in_at || null
+        }));
+      
       setUsers(mappedUsers);
       setLoading(false);
     } catch (error) {

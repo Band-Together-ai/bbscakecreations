@@ -70,7 +70,6 @@ const Recipes = () => {
         recipe_photos(photo_url, is_headline)
       `)
       .eq("is_public", true)
-      .order("display_order", { ascending: true, nullsFirst: false })
       .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
@@ -259,7 +258,7 @@ const Recipes = () => {
                     {(isAdmin || isCollaborator) && recipe.featured_position && (
                       <div className="inline-flex items-center gap-1 px-3 py-1 bg-coral/10 text-coral rounded-full text-sm font-fredoka w-fit">
                         <Star className="w-3 h-3" />
-                        {recipe.featured_position === 1 ? "Featured Cake" : `Landing Page #${recipe.featured_position}`}
+                        {recipe.featured_position === 1 ? "Featured Cake ✨" : `Position ${recipe.featured_position}`}
                       </div>
                     )}
                   </div>

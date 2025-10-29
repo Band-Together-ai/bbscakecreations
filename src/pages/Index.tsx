@@ -135,34 +135,61 @@ const Index = () => {
   };
 
   const fetchFeaturedRecipes = async () => {
-    const { data } = await supabase
+    // Step 1: Get the single Featured Cake (position 1)
+    const { data: featuredData } = await supabase
       .from("recipes")
       .select(`
         *,
         recipe_photos(photo_url, is_headline)
       `)
-      .eq("is_featured", true)
+      .eq("featured_position", 1)
       .eq("is_public", true)
-      .order("featured_position", { ascending: true, nullsFirst: false })
+      .maybeSingle();
+
+    // Step 2: Get public recipes (excluding the featured one)
+    const { data: publicData } = await supabase
+      .from("recipes")
+      .select(`
+        *,
+        recipe_photos(photo_url, is_headline)
+      `)
+      .eq("is_public", true)
       .order("created_at", { ascending: false })
       .limit(6);
 
-    if (data && data.length > 0) {
-      setFeaturedCakes(data.map(recipe => {
-        // Prioritize image_url, then headline photo, then first photo
-        let image = recipe.image_url;
-        if (!image && recipe.recipe_photos && recipe.recipe_photos.length > 0) {
-          const headlinePhoto = recipe.recipe_photos.find((p: any) => p.is_headline);
-          image = headlinePhoto?.photo_url || recipe.recipe_photos[0].photo_url;
-        }
-        
-        return {
-          id: recipe.id,
-          image: image || cake1,
-          title: recipe.title,
-          description: recipe.description || "",
-        };
-      }));
+    const mapRecipe = (recipe: any) => {
+      let image = recipe.image_url;
+      if (!image && recipe.recipe_photos && recipe.recipe_photos.length > 0) {
+        const headlinePhoto = recipe.recipe_photos.find((p: any) => p.is_headline);
+        image = headlinePhoto?.photo_url || recipe.recipe_photos[0].photo_url;
+      }
+      return {
+        id: recipe.id,
+        image: image || cake1,
+        title: recipe.title,
+        description: recipe.description || "",
+      };
+    };
+
+    // Step 3: Build the 6-tile list: [featured, then up to 5 public]
+    const cakesArray: any[] = [];
+    
+    if (featuredData) {
+      cakesArray.push(mapRecipe(featuredData));
+    }
+
+    if (publicData) {
+      // Add public recipes, excluding featured if it was found
+      const publicRecipes = publicData
+        .filter(r => !featuredData || r.id !== featuredData.id)
+        .slice(0, featuredData ? 5 : 6)
+        .map(mapRecipe);
+      
+      cakesArray.push(...publicRecipes);
+    }
+
+    if (cakesArray.length > 0) {
+      setFeaturedCakes(cakesArray);
     }
   };
 

@@ -42,15 +42,37 @@ Deno.serve(async (req) => {
       )
     }
 
-    // List all users
+    // List all users from auth
     const { data: usersData, error: usersError } = await supabaseClient.auth.admin.listUsers()
 
     if (usersError) {
       throw usersError
     }
 
+    // Fetch user roles
+    const { data: rolesData, error: rolesError } = await supabaseClient
+      .from('user_roles')
+      .select('user_id, role')
+
+    if (rolesError) {
+      console.error('Error fetching roles:', rolesError)
+    }
+
+    // Fetch promo users
+    const { data: promoData, error: promoError } = await supabaseClient
+      .from('promo_users')
+      .select('user_id, promo_type, expires_at, granted_at, notes')
+
+    if (promoError) {
+      console.error('Error fetching promo users:', promoError)
+    }
+
     return new Response(
-      JSON.stringify({ users: usersData.users }),
+      JSON.stringify({ 
+        users: usersData.users,
+        roles: rolesData || [],
+        promo: promoData || []
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
