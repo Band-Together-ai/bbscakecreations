@@ -46,7 +46,7 @@ const Wishlist = () => {
     }
 
     fetchWishlist();
-  }, [isAuthenticated, canUseWishlists]);
+  }, [isAuthenticated, canUseWishlists, navigate]);
 
   const fetchWishlist = async () => {
     try {
