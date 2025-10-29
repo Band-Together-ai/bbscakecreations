@@ -133,6 +133,30 @@ ${trainingContext}`;
       const errorText = await response.text();
       console.error("OpenAI API error:", response.status, errorText);
       
+      // Log authentication errors specifically
+      if (response.status === 401) {
+        console.error("❌ OpenAI Authentication Failed (401):", errorText);
+        console.error("OPENAI_API_KEY is set:", !!OPENAI_API_KEY);
+        return new Response(
+          JSON.stringify({ error: "Authentication failed with OpenAI. Please check API key." }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
+      if (response.status === 403) {
+        console.error("❌ OpenAI Forbidden (403):", errorText);
+        return new Response(
+          JSON.stringify({ error: "Access forbidden. Please check API key permissions." }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
