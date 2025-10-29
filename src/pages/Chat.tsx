@@ -11,6 +11,8 @@ import Navigation from "@/components/Navigation";
 import { Send, Upload, Link as LinkIcon, Mic, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useTipJarSession } from "@/hooks/useTipJarSession";
+import { TipJarExtension } from "@/components/TipJarExtension";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -32,6 +34,9 @@ const Chat = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Get tip jar session info
+  const { sessionId, remainingMinutes, isActive, refetch } = useTipJarSession(user?.id || null);
 
   // TEMPORARILY DISABLED FOR TESTING
   // useEffect(() => {
@@ -285,6 +290,13 @@ const Chat = () => {
           <CardContent className="flex-1 flex flex-col">
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4">
+                {sessionId && (
+                  <TipJarExtension
+                    sessionId={sessionId}
+                    remainingMinutes={remainingMinutes}
+                    onExtensionComplete={refetch}
+                  />
+                )}
                 {messages.map((msg, idx) => (
                   <div
                     key={idx}

@@ -13,31 +13,31 @@ export const useTipJarSession = (userId: string | null) => {
   const [loading, setLoading] = useState(true);
   const [remainingMinutes, setRemainingMinutes] = useState(0);
 
-  useEffect(() => {
+  const fetchSession = async () => {
     if (!userId) {
       setLoading(false);
       return;
     }
 
-    const fetchSession = async () => {
-      const { data, error } = await supabase
-        .from('tip_jar_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .gte('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    const { data, error } = await supabase
+      .from('tip_jar_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .gte('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-      if (!error && data) {
-        setSession(data);
-        const remaining = Math.max(0, Math.floor((new Date(data.expires_at).getTime() - Date.now()) / 60000));
-        setRemainingMinutes(remaining);
-      }
-      setLoading(false);
-    };
+    if (!error && data) {
+      setSession(data);
+      const remaining = Math.max(0, Math.floor((new Date(data.expires_at).getTime() - Date.now()) / 60000));
+      setRemainingMinutes(remaining);
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchSession();
 
     // Update remaining time every minute
@@ -61,5 +61,6 @@ export const useTipJarSession = (userId: string | null) => {
     isActive: !!session && remainingMinutes > 0,
     remainingMinutes,
     sessionId: session?.id || null,
+    refetch: fetchSession,
   };
 };
