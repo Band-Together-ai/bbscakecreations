@@ -530,6 +530,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sasha_training_notes: {
+        Row: {
+          author_id: string | null
+          category: string
+          content: string
+          created_at: string
+          id: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       session_notes: {
         Row: {
           created_at: string
@@ -743,6 +773,33 @@ export type Database = {
           details?: Json | null
           id?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_mutes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          muted_until: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          muted_until: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          muted_until?: string
+          reason?: string | null
+          user_id?: string
         }
         Relationships: []
       }

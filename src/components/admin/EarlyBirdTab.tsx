@@ -21,20 +21,43 @@ export const EarlyBirdTab = () => {
   }, []);
 
   const fetchPromoUsers = async () => {
-    const { data, error } = await supabase
+    // Fetch promo users without inner join
+    const { data: promoData, error: promoError } = await supabase
       .from("promo_users")
-      .select(`
-        *,
-        profiles!inner(email)
-      `)
+      .select("*")
       .order("granted_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching promo users:", error);
+    if (promoError) {
+      console.error("Error fetching promo users:", promoError);
+      toast.error("Failed to load promo users");
       return;
     }
 
-    setPromoUsers(data || []);
+    // Get unique user IDs
+    const userIds = [...new Set(promoData?.map(p => p.user_id) || [])];
+    
+    if (userIds.length === 0) {
+      setPromoUsers([]);
+      return;
+    }
+
+    // Fetch profiles separately
+    const { data: profilesData, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, email")
+      .in("id", userIds);
+
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+    }
+
+    // Map profiles to promo users
+    const promoWithProfiles = promoData?.map(promo => ({
+      ...promo,
+      profiles: profilesData?.find(p => p.id === promo.user_id) || null
+    })) || [];
+
+    setPromoUsers(promoWithProfiles);
   };
 
   const handleGrantAccess = async () => {

@@ -15,14 +15,44 @@ serve(async (req) => {
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Create service role client for backend operations
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Check if user is muted from chat
+    const authHeader = req.headers.get('Authorization')
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '')
+      const { data: { user } } = await supabase.auth.getUser(token)
+      
+      if (user) {
+        const { data: mutes } = await supabase
+          .from('user_mutes')
+          .select('muted_until, reason')
+          .eq('user_id', user.id)
+          .gte('muted_until', new Date().toISOString())
+          .limit(1)
+          .maybeSingle()
+
+        if (mutes) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'You are temporarily unable to use chat. Please contact support if you have questions.',
+              muted_until: mutes.muted_until,
+              reason: mutes.reason 
+            }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          )
+        }
+      }
+    }
+
     // Fetch all public recipes and baking tools from database
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
@@ -34,6 +64,13 @@ serve(async (req) => {
       .select('*')
       .order('display_order', { ascending: true });
 
+    // Fetch training notes for Brandia's voice
+    const { data: trainingNotes } = await supabase
+      .from('sasha_training_notes')
+      .select('category, content')
+      .order('created_at', { ascending: false })
+      .limit(50)
+
     if (recipesError) {
       console.error("Error fetching recipes:", recipesError);
     }
@@ -41,7 +78,23 @@ serve(async (req) => {
       console.error("Error fetching tools:", toolsError);
     }
 
-    console.log("Calling Lovable AI with messages:", messages.length, ",", recipes?.length || 0, "recipes, and", tools?.length || 0, "tools");
+    let trainingContext = ""
+    if (trainingNotes && trainingNotes.length > 0) {
+      const styleNotes = trainingNotes.filter(n => n.category === 'style').map(n => `• ${n.content}`).join('\n')
+      const factNotes = trainingNotes.filter(n => n.category === 'fact').map(n => `• ${n.content}`).join('\n')
+      const doNotes = trainingNotes.filter(n => n.category === 'do').map(n => `• ${n.content}`).join('\n')
+      const dontNotes = trainingNotes.filter(n => n.category === 'dont').map(n => `• ${n.content}`).join('\n')
+      const storyNotes = trainingNotes.filter(n => n.category === 'story').map(n => `• ${n.content}`).join('\n')
+
+      trainingContext = "\n\nBRANDIA'S VOICE & TRAINING NOTES:\n"
+      if (styleNotes) trainingContext += `\nVoice & Style:\n${styleNotes}`
+      if (factNotes) trainingContext += `\n\nBaking Facts:\n${factNotes}`
+      if (doNotes) trainingContext += `\n\nDo This:\n${doNotes}`
+      if (dontNotes) trainingContext += `\n\nDon't Do This:\n${dontNotes}`
+      if (storyNotes) trainingContext += `\n\nStories & Anecdotes:\n${storyNotes}`
+    }
+
+    console.log("Calling Lovable AI with messages:", messages.length, ",", recipes?.length || 0, "recipes,", tools?.length || 0, "tools, and", trainingNotes?.length || 0, "training notes");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -54,7 +107,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are Sasha, BB's AI baking companion. You help people create amazing cakes from scratch with Brandia's philosophy:
+            content: `You are Sasha, Brandia's AI baking companion. You help people create amazing cakes from scratch with Brandia's philosophy:
 
 CRITICAL: When someone asks to learn about the app or requests a tour:
 - Explain this is a FREE beta where they can browse public recipes, chat with you about baking, and learn Brandia's from-scratch philosophy
@@ -101,6 +154,7 @@ ${t.brandia_take ? `BB says: "${t.brandia_take}"` : ''}
 ${t.affiliate_link ? `Shop: ${t.affiliate_link}` : ''}
 `).join('\n---\n')}
 ` : ''}
+${trainingContext}
 
 When analyzing cake photos:
 - Describe what you see in detail (colors, decorations, texture, flowers/herbs used)
