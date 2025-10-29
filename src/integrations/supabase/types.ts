@@ -761,6 +761,7 @@ export type Database = {
       }
       promo_users: {
         Row: {
+          display_name: string | null
           expires_at: string | null
           granted_at: string
           id: string
@@ -769,6 +770,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          display_name?: string | null
           expires_at?: string | null
           granted_at?: string
           id?: string
@@ -777,6 +779,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          display_name?: string | null
           expires_at?: string | null
           granted_at?: string
           id?: string

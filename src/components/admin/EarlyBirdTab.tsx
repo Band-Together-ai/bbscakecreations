@@ -15,13 +15,15 @@ export const EarlyBirdTab = () => {
   const [notes, setNotes] = useState("Early Bird Beta Tester - Lifetime Access");
   const [promoUsers, setPromoUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
     fetchPromoUsers();
   }, []);
 
   const fetchPromoUsers = async () => {
-    // Fetch promo users without inner join
+    // Fetch promo users
     const { data: promoData, error: promoError } = await supabase
       .from("promo_users")
       .select("*")
@@ -33,29 +35,35 @@ export const EarlyBirdTab = () => {
       return;
     }
 
-    // Get unique user IDs
-    const userIds = [...new Set(promoData?.map(p => p.user_id) || [])];
-    
-    if (userIds.length === 0) {
+    if (!promoData || promoData.length === 0) {
       setPromoUsers([]);
       return;
     }
 
-    // Fetch profiles separately
-    const { data: profilesData, error: profilesError } = await supabase
+    // Get unique user IDs
+    const userIds = [...new Set(promoData.map(p => p.user_id))];
+
+    // Fetch profiles
+    const { data: profilesData } = await supabase
       .from("profiles")
       .select("id, email")
       .in("id", userIds);
 
-    if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
-    }
+    // Fetch auth users as fallback using list-users function
+    const { data: authUsersData } = await supabase.functions.invoke('list-users');
+    const authUsers = authUsersData?.users || [];
 
-    // Map profiles to promo users
-    const promoWithProfiles = promoData?.map(promo => ({
-      ...promo,
-      profiles: profilesData?.find(p => p.id === promo.user_id) || null
-    })) || [];
+    // Map profiles and auth emails to promo users
+    const promoWithProfiles = promoData.map(promo => {
+      const profile = profilesData?.find(p => p.id === promo.user_id);
+      const authUser = authUsers.find((u: any) => u.id === promo.user_id);
+      
+      return {
+        ...promo,
+        email: profile?.email || authUser?.email || "Unknown",
+        profiles: profile || null
+      };
+    });
 
     setPromoUsers(promoWithProfiles);
   };
@@ -179,6 +187,22 @@ export const EarlyBirdTab = () => {
     fetchPromoUsers();
   };
 
+  const handleUpdateName = async (promoId: string, displayName: string) => {
+    const { error } = await supabase
+      .from("promo_users")
+      .update({ display_name: displayName.trim() || null })
+      .eq("id", promoId);
+
+    if (error) {
+      toast.error("Failed to update name");
+      return;
+    }
+
+    toast.success("Name updated!");
+    setEditingId(null);
+    fetchPromoUsers();
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -257,31 +281,83 @@ export const EarlyBirdTab = () => {
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium truncate">
-                          {promo.profiles?.email || "Unknown"}
-                        </p>
-                        <Badge variant="secondary" className="shrink-0">
-                          <Gift className="h-3 w-3 mr-1" />
-                          {promo.promo_type}
-                        </Badge>
-                      </div>
-                      {promo.notes && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {promo.notes}
-                        </p>
+                      {editingId === promo.id ? (
+                        <div className="flex items-center gap-2 mb-2">
+                          <Input
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            placeholder="Enter display name"
+                            className="h-8"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleUpdateName(promo.id, editValue);
+                              } else if (e.key === 'Escape') {
+                                setEditingId(null);
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdateName(promo.id, editValue)}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditingId(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium truncate">
+                            {promo.display_name || promo.email}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2"
+                            onClick={() => {
+                              setEditingId(promo.id);
+                              setEditValue(promo.display_name || '');
+                            }}
+                          >
+                            <Mail className="h-3 w-3" />
+                          </Button>
+                          <Badge variant="secondary" className="shrink-0">
+                            <Gift className="h-3 w-3 mr-1" />
+                            {promo.promo_type}
+                          </Badge>
+                        </div>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Granted: {new Date(promo.granted_at).toLocaleDateString()}
-                        {promo.expires_at &&
-                          ` • Expires: ${new Date(promo.expires_at).toLocaleDateString()}`}
-                      </p>
+                      {!editingId || editingId !== promo.id ? (
+                        <>
+                          {promo.display_name && (
+                            <p className="text-sm text-muted-foreground truncate">
+                              {promo.email}
+                            </p>
+                          )}
+                          {promo.notes && (
+                            <p className="text-sm text-muted-foreground truncate">
+                              {promo.notes}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Granted: {new Date(promo.granted_at).toLocaleDateString()}
+                            {promo.expires_at &&
+                              ` • Expires: ${new Date(promo.expires_at).toLocaleDateString()}`}
+                          </p>
+                        </>
+                      ) : null}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        handleRevoke(promo.user_id, promo.profiles?.email)
+                        handleRevoke(promo.user_id, promo.email)
                       }
                       className="ml-4 shrink-0"
                     >
