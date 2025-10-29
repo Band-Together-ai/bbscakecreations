@@ -1278,6 +1278,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          created_at: string | null
+          experience_level: string | null
+          goal_focus: string | null
+          id: string
+          onboarding_completed: boolean | null
+          persona: string | null
+          style_vibe: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_level?: string | null
+          goal_focus?: string | null
+          id: string
+          onboarding_completed?: boolean | null
+          persona?: string | null
+          style_vibe?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_level?: string | null
+          goal_focus?: string | null
+          id?: string
+          onboarding_completed?: boolean | null
+          persona?: string | null
+          style_vibe?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

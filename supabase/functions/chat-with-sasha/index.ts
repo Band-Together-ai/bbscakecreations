@@ -70,6 +70,40 @@ serve(async (req) => {
       }
     }
 
+    // Fetch user persona profile for personalized chat tone
+    let personaContext = '';
+    if (userId) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('persona, experience_level, goal_focus, style_vibe')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (profile) {
+        const personaMap: Record<string, string> = {
+          learner: "Encouraging, teacherly, light humor. Explain techniques, give visual tips, celebrate progress.",
+          hobbyist: "Cozy, upbeat, conversational. Suggest weekend projects, photo inspiration, aesthetic themes.",
+          busy_pro: "Empathetic, efficient, practical. Emphasize make-ahead recipes, minimal cleanup, time-saving tips.",
+          home_biz: "Confident, supportive, business-minded. Talk about cost per batch, consistency, pricing ideas.",
+          explorer: "Playful, neutral tone. Dabbles across all personas, light touch."
+        };
+        
+        const expMap: Record<string, string> = {
+          beginner: "Prioritize clarity, define terms, reassure and celebrate progress.",
+          confident: "Balanced explanations with occasional technique tips.",
+          experienced: "Assume knowledge, focus on efficiency and advanced techniques."
+        };
+        
+        personaContext = `\n\nUSER PERSONA:
+Persona: ${profile.persona || 'explorer'} — ${personaMap[profile.persona || 'explorer'] || 'Flexible approach'}
+Experience: ${profile.experience_level || 'beginner'} — ${expMap[profile.experience_level || 'beginner']}
+Goal: ${profile.goal_focus || 'exploring'}
+Style: ${profile.style_vibe || 'calm'}
+
+Adjust your tone and advice to match this persona. Keep it natural and conversational.`;
+      }
+    }
+
     // Load conversation history based on user role
     let conversationHistory: any[] = [];
     
@@ -195,7 +229,7 @@ On save: "All set! I scanned your recipe. Want a multi-day staging plan? 🌊"`;
 Help users with baking ideas, quick organization tips, and positivity through practical support. Start with empathy, then give clear next steps ("Want me to make that a checklist?"). Use short paragraphs or concise bullets; max one emoji (🌊🧁✨). If users feel stressed, simplify and shrink the task. Avoid medical, legal, or financial advice. Always sound capable, coastal, and kind.
 
 Your audience is working moms who love to bake and need great work-life balance. Give realistic total timelines (prep → bake → cool → rest). Prefer from-scratch over boxed mixes unless asked. Analyze photos, URLs, or pasted recipes; improve flavor and workflow; include US + metric where useful; and ask 1–3 targeted follow-ups if info is missing. Practice food safety.
-
+${personaContext}
 ${recipes && recipes.length > 0 ? `
 Available Recipes:
 ${recipes.map(r => `**${r.title}** ${r.is_gluten_free ? '(Gluten-Free)' : '(Can be adapted to be gluten-free)'} - ${r.description || ''}`).join('\n')}

@@ -16,12 +16,15 @@ import { TipJarExtension } from "@/components/TipJarExtension";
 import { useChatSessionTracking } from "@/hooks/useChatSessionTracking";
 import { VoiceSettings } from "@/components/VoiceSettings";
 import { useUserRole } from "@/hooks/useUserRole";
+import { SashaOnboarding } from "@/components/SashaOnboarding";
 
 const Chat = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState<boolean>(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
@@ -50,9 +53,12 @@ const Chat = () => {
   // Track chat session
   useChatSessionTracking(userId || null, messages.length);
   
-  // Fetch user profile with voice preferences
+  // Fetch user profile with voice preferences and onboarding status
   const fetchUserProfile = async () => {
-    if (!userId) return;
+    if (!userId) {
+      setCheckingOnboarding(false);
+      return;
+    }
     
     const { data, error } = await supabase
       .from('profiles')
@@ -62,10 +68,25 @@ const Chat = () => {
     
     if (error) {
       console.error('Error fetching profile:', error);
+      setCheckingOnboarding(false);
       return;
     }
     
     setUserProfile(data);
+
+    // Check onboarding status
+    const { data: profileData, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('onboarding_completed')
+      .eq('id', userId)
+      .maybeSingle();
+    
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+    }
+    
+    setNeedsOnboarding(!profileData?.onboarding_completed);
+    setCheckingOnboarding(false);
   };
   
   // Create or load conversation
@@ -407,8 +428,19 @@ const Chat = () => {
       <Navigation />
       <WaveBackground />
 
-      {/* Main chat area */}
-      <div className="flex-1 container mx-auto px-4 py-8 flex flex-col relative z-10">
+      {/* Onboarding Flow */}
+      {checkingOnboarding ? (
+        <div className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <p className="text-muted-foreground">Getting things ready...</p>
+        </div>
+      ) : needsOnboarding && userId ? (
+        <div className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <SashaOnboarding onComplete={() => setNeedsOnboarding(false)} />
+        </div>
+      ) : (
+        <>
+          {/* Main chat area */}
+          <div className="flex-1 container mx-auto px-4 py-8 flex flex-col relative z-10">
         <Card className="flex-1 flex flex-col shadow-float">
           <CardHeader>
             <CardTitle className="font-fredoka text-ocean-deep">
@@ -576,6 +608,8 @@ const Chat = () => {
           </CardContent>
         </Card>
       </div>
+        </>
+      )}
     </div>
   );
 };
