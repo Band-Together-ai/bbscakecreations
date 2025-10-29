@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
+import TrainSasha from "./pages/admin/TrainSasha";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
 import Blog from "./pages/Blog";
@@ -54,6 +55,11 @@ const AppContent = () => {
       <Route path="/admin" element={
         <AdminRoute>
           <Admin />
+        </AdminRoute>
+      } />
+      <Route path="/admin/train" element={
+        <AdminRoute>
+          <TrainSasha />
         </AdminRoute>
       } />
       <Route path="/recipes" element={<Recipes />} />

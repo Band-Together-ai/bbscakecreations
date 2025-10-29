@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 export const SashaTrainingTab = () => {
+  const navigate = useNavigate();
   const [notes, setNotes] = useState<TrainingNote[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingNote, setEditingNote] = useState<TrainingNote | null>(null);
@@ -252,7 +254,14 @@ export const SashaTrainingTab = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-6">
+            <Button
+              onClick={() => navigate('/admin/train')}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg"
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              TRAIN SASHA
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -268,6 +277,9 @@ export const SashaTrainingTab = () => {
               {notes.length} training notes
             </Badge>
           </div>
+          <p className="text-sm text-muted-foreground mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+            💬 <strong>New!</strong> Click "TRAIN SASHA" to have a natural conversation. Sasha will proactively ask about your day, recipes, and life - automatically extracting insights as you chat.
+          </p>
         </CardContent>
       </Card>
 
