@@ -49,6 +49,12 @@ const BakeBook = () => {
   const [scanResults, setScanResults] = useState<any[]>([]);
   const [showScanModal, setShowScanModal] = useState(false);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchEntries();
+    }
+  }, [isAuthenticated]);
+
   // Show teaser for unauthenticated users
   if (!isAuthenticated) {
     return (
@@ -58,10 +64,6 @@ const BakeBook = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    fetchEntries();
-  }, []);
 
   const fetchEntries = async () => {
     try {
