@@ -14,9 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/useUserRole";
-import { BookOpen, Search, Star, Archive } from "lucide-react";
+import { BookOpen, Search, Star, Archive, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { TeaserBakeBook } from "@/components/TeaserBakeBook";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface BakeBookEntry {
   id: string;
@@ -132,6 +133,24 @@ const BakeBook = () => {
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
+        {/* Almost Full Alert */}
+        {entries.length >= 8 && bakeBookLimit === 10 && (
+          <Alert className="mb-6 border-coral/50 bg-coral/5">
+            <Sparkles className="h-4 w-4 text-coral" />
+            <AlertTitle>Almost Full!</AlertTitle>
+            <AlertDescription>
+              You've saved {entries.length}/10 recipes. Want unlimited saves + real-time scanning?{" "}
+              <Button 
+                variant="link" 
+                className="h-auto p-0 text-coral hover:text-coral/80"
+                onClick={() => navigate('/how-it-works')}
+              >
+                Learn about Home Bakers Club →
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4 flex items-center gap-3">

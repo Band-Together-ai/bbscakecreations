@@ -24,6 +24,7 @@ import Tools from "./pages/Tools";
 import Favorites from "./pages/Favorites";
 import Gallery from "./pages/Gallery";
 import Instructions from "./pages/Instructions";
+import HowItWorks from "./pages/HowItWorks";
 import BakeBook from "./pages/BakeBook";
 import NotFound from "./pages/NotFound";
 
@@ -81,6 +82,7 @@ const AppContent = () => {
       } />
       <Route path="/about" element={<About />} />
       <Route path="/instructions" element={<Instructions />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

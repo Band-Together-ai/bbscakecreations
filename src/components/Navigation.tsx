@@ -102,11 +102,11 @@ const Navigation = () => {
               BakeBook
             </button>
             <button
-              onClick={() => navigate("/instructions")}
+              onClick={() => navigate("/how-it-works")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
             >
               <HelpCircle className="w-4 h-4" />
-              How to Use
+              How It Works
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -299,13 +299,13 @@ const Navigation = () => {
             </button>
             <button
               onClick={() => {
-                navigate("/instructions");
+                navigate("/how-it-works");
                 setIsMobileMenuOpen(false);
               }}
               className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
             >
               <HelpCircle className="w-4 h-4" />
-              How to Use
+              How It Works
             </button>
             <Button
               variant="outline"
