@@ -23,49 +23,69 @@ export const EarlyBirdTab = () => {
   }, []);
 
   const fetchPromoUsers = async () => {
-    // Fetch promo users
-    const { data: promoData, error: promoError } = await supabase
-      .from("promo_users")
-      .select("*")
-      .order("granted_at", { ascending: false });
+    try {
+      // Fetch promo users
+      const { data: promoData, error: promoError } = await supabase
+        .from("promo_users")
+        .select("*")
+        .order("granted_at", { ascending: false });
 
-    if (promoError) {
-      console.error("Error fetching promo users:", promoError);
-      toast.error("Failed to load promo users");
-      return;
-    }
+      if (promoError) {
+        console.error("Error fetching promo users:", promoError);
+        toast.error("Failed to load promo users");
+        return;
+      }
 
-    if (!promoData || promoData.length === 0) {
-      setPromoUsers([]);
-      return;
-    }
+      if (!promoData || promoData.length === 0) {
+        setPromoUsers([]);
+        return;
+      }
 
-    // Get unique user IDs
-    const userIds = [...new Set(promoData.map(p => p.user_id))];
+      console.log("📊 Promo users found:", promoData.length);
 
-    // Fetch profiles
-    const { data: profilesData } = await supabase
-      .from("profiles")
-      .select("id, email")
-      .in("id", userIds);
+      // Get unique user IDs
+      const userIds = [...new Set(promoData.map(p => p.user_id))];
 
-    // Fetch auth users as fallback using list-users function
-    const { data: authUsersData } = await supabase.functions.invoke('list-users');
-    const authUsers = authUsersData?.users || [];
+      // Fetch profiles
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .in("id", userIds);
 
-    // Map profiles and auth emails to promo users
-    const promoWithProfiles = promoData.map(promo => {
-      const profile = profilesData?.find(p => p.id === promo.user_id);
-      const authUser = authUsers.find((u: any) => u.id === promo.user_id);
+      console.log("👤 Profiles found:", profilesData?.length || 0);
+
+      // Fetch auth users as fallback using list-users function
+      const { data: authUsersData, error: authError } = await supabase.functions.invoke('list-users');
       
-      return {
-        ...promo,
-        email: profile?.email || authUser?.email || "Unknown",
-        profiles: profile || null
-      };
-    });
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+      }
 
-    setPromoUsers(promoWithProfiles);
+      console.log("🔐 Auth users response:", authUsersData);
+      const authUsers = authUsersData?.users || [];
+      console.log("🔐 Auth users array:", authUsers.length);
+
+      // Map profiles and auth emails to promo users
+      const promoWithProfiles = promoData.map(promo => {
+        const profile = profilesData?.find(p => p.id === promo.user_id);
+        const authUser = authUsers.find((u: any) => u.id === promo.user_id);
+        
+        const email = profile?.email || authUser?.email || "Unknown";
+        console.log(`📧 User ${promo.user_id.substring(0, 8)}...: profile=${profile?.email}, auth=${authUser?.email}, final=${email}`);
+        
+        return {
+          ...promo,
+          email,
+          profiles: profile || null
+        };
+      });
+
+      console.log("✅ Final promo users with emails:", promoWithProfiles);
+      setPromoUsers(promoWithProfiles);
+    } catch (err) {
+      console.error("Error in fetchPromoUsers:", err);
+      toast.error("Failed to load users");
+    }
   };
 
   const handleGrantAccess = async () => {
