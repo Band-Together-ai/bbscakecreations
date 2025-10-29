@@ -18,7 +18,7 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
     if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured");
+      throw new Error("AI service unavailable");
     }
 
     // Create service role client for backend operations
@@ -275,9 +275,9 @@ ${tierNudge}`;
         console.error("❌ OpenAI Authentication Failed (401):", errorText);
         console.error("OPENAI_API_KEY is set:", !!OPENAI_API_KEY);
         return new Response(
-          JSON.stringify({ error: "Authentication failed with OpenAI. Please check API key." }),
+          JSON.stringify({ error: "Unable to connect to AI service" }),
           {
-            status: 401,
+            status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
@@ -286,9 +286,9 @@ ${tierNudge}`;
       if (response.status === 403) {
         console.error("❌ OpenAI Forbidden (403):", errorText);
         return new Response(
-          JSON.stringify({ error: "Access forbidden. Please check API key permissions." }),
+          JSON.stringify({ error: "AI service access denied" }),
           {
-            status: 403,
+            status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
@@ -296,7 +296,7 @@ ${tierNudge}`;
       
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+          JSON.stringify({ error: "Too many requests. Please try again shortly." }),
           {
             status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -305,7 +305,7 @@ ${tierNudge}`;
       }
       
       return new Response(
-        JSON.stringify({ error: `OpenAI API error: ${response.status}` }),
+        JSON.stringify({ error: "AI service temporarily unavailable" }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -352,7 +352,7 @@ ${tierNudge}`;
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     console.error("Chat error:", errorMessage);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "Chat service temporarily unavailable" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
