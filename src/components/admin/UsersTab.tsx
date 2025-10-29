@@ -72,16 +72,22 @@ export const UsersTab = () => {
   const fetchUsers = async () => {
     setLoading(true);
     
-    // Fetch all users using admin API
-    const { data: authUsersData, error: usersError } = await supabase.auth.admin.listUsers();
-    const authUsers = authUsersData?.users || [];
-    
-    if (usersError) {
-      console.error('Error fetching users:', usersError);
-      toast.error('Failed to load users');
-      setLoading(false);
-      return;
-    }
+    try {
+      // Fetch all users using edge function (requires admin role)
+      const { data: usersData, error: usersError } = await supabase.functions.invoke('list-users');
+      
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        toast.error('Failed to load users');
+        setLoading(false);
+        return;
+      }
+
+      const authUsers = usersData?.users || [];
+      
+      if (!authUsers.length) {
+        console.log('No users returned from edge function');
+      }
 
     // Fetch user roles
     const { data: rolesData } = await supabase
@@ -114,8 +120,13 @@ export const UsersTab = () => {
         last_sign_in_at: u.last_sign_in_at || null
       }));
     
-    setUsers(mappedUsers);
-    setLoading(false);
+      setUsers(mappedUsers);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error in fetchUsers:', error);
+      toast.error('Failed to load users');
+      setLoading(false);
+    }
   };
 
   const fetchUserActivity = async (userId: string) => {
@@ -191,16 +202,23 @@ export const UsersTab = () => {
   const handleDeleteUser = async (userId: string, email: string) => {
     if (!confirm(`Are you sure you want to delete user ${email}? This cannot be undone.`)) return;
 
-    const { error } = await supabase.auth.admin.deleteUser(userId);
+    try {
+      const { error } = await supabase.functions.invoke('delete-user', {
+        body: { userId }
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Error deleting user:', error);
+        toast.error('Failed to delete user');
+        return;
+      }
+
+      toast.success('User deleted');
+      fetchUsers();
+    } catch (error) {
       console.error('Error deleting user:', error);
       toast.error('Failed to delete user');
-      return;
     }
-
-    toast.success('User deleted');
-    fetchUsers();
   };
 
   const getRoleBadgeVariant = (role: string) => {
