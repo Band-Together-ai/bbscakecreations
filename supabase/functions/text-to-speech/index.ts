@@ -61,11 +61,18 @@ serve(async (req) => {
     }
 
     console.log('🎵 Converting audio to base64...');
-    // Convert audio buffer to base64
-    const arrayBuffer = await response.arrayBuffer()
-    const base64Audio = btoa(
-      String.fromCharCode(...new Uint8Array(arrayBuffer))
-    )
+    // Convert audio buffer to base64 in chunks to avoid stack overflow
+    const arrayBuffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const chunkSize = 8192;
+    let binary = '';
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    
+    const base64Audio = btoa(binary);
     
     console.log('✅ TTS successful, base64 length:', base64Audio.length);
 
