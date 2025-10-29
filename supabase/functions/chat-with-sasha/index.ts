@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, conversationId } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -26,11 +26,29 @@ serve(async (req) => {
 
     // Check if user is muted from chat
     const authHeader = req.headers.get('Authorization')
+    let userId: string | null = null;
+    let userRole: string = 'free';
+    
     if (authHeader) {
       const token = authHeader.replace('Bearer ', '')
       const { data: { user } } = await supabase.auth.getUser(token)
       
       if (user) {
+        userId = user.id;
+        
+        // Get user role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (roleData) {
+          userRole = roleData.role;
+        }
+        
         const { data: mutes } = await supabase
           .from('user_mutes')
           .select('muted_until, reason')
@@ -49,6 +67,24 @@ serve(async (req) => {
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           )
         }
+      }
+    }
+
+    // Load conversation history based on user role
+    let conversationHistory: any[] = [];
+    
+    if (conversationId && userId) {
+      const messageLimit = ['admin', 'collaborator', 'paid'].includes(userRole) ? 100 : 10;
+      
+      const { data: historyMessages } = await supabase
+        .from('chat_messages')
+        .select('role, content')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true })
+        .limit(messageLimit);
+      
+      if (historyMessages) {
+        conversationHistory = historyMessages;
       }
     }
 
@@ -109,6 +145,16 @@ Recommended Tools: ${tools.map(t => t.name).join(', ')}
 ` : ''}
 ${trainingContext}`;
 
+    // Prepare messages with conversation history
+    const allMessages = [
+      {
+        role: "system",
+        content: sashaSystemMessage
+      },
+      ...conversationHistory,
+      ...messages,
+    ];
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -117,13 +163,7 @@ ${trainingContext}`;
       },
       body: JSON.stringify({
         model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: sashaSystemMessage
-          },
-          ...messages,
-        ],
+        messages: allMessages,
         max_tokens: 700,
         temperature: 0.7,
       }),
@@ -184,6 +224,26 @@ ${trainingContext}`;
     }
 
     console.log("AI response received successfully");
+
+    // Store messages in database if user is authenticated and conversationId provided
+    if (userId && conversationId) {
+      // Store user message
+      const userMessage = messages[messages.length - 1];
+      if (userMessage) {
+        await supabase.from('chat_messages').insert({
+          conversation_id: conversationId,
+          role: userMessage.role,
+          content: userMessage.content
+        });
+      }
+      
+      // Store AI response
+      await supabase.from('chat_messages').insert({
+        conversation_id: conversationId,
+        role: 'assistant',
+        content: aiMessage
+      });
+    }
 
     return new Response(
       JSON.stringify({ message: aiMessage }),

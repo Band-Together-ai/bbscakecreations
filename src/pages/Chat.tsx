@@ -22,6 +22,7 @@ const Chat = () => {
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
@@ -67,8 +68,62 @@ const Chat = () => {
     setUserProfile(data);
   };
   
+  // Create or load conversation
+  const initializeConversation = async () => {
+    if (!userId) return;
+    
+    try {
+      // Check for existing active conversation
+      const { data: existingConversations, error: fetchError } = await supabase
+        .from('chat_conversations')
+        .select('id, updated_at')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+      
+      if (fetchError) {
+        console.error('Error fetching conversation:', fetchError);
+        return;
+      }
+      
+      // Use most recent conversation if it exists and is less than 24 hours old
+      if (existingConversations && existingConversations.length > 0) {
+        const conversation = existingConversations[0];
+        const conversationAge = Date.now() - new Date(conversation.updated_at).getTime();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+        
+        if (conversationAge < twentyFourHours) {
+          setConversationId(conversation.id);
+          console.log('Using existing conversation:', conversation.id);
+          return;
+        }
+      }
+      
+      // Create new conversation
+      const { data: newConversation, error: createError } = await supabase
+        .from('chat_conversations')
+        .insert({
+          user_id: userId,
+          title: 'Chat with Sasha'
+        })
+        .select()
+        .single();
+      
+      if (createError) {
+        console.error('Error creating conversation:', createError);
+        return;
+      }
+      
+      setConversationId(newConversation.id);
+      console.log('Created new conversation:', newConversation.id);
+    } catch (error) {
+      console.error('Error initializing conversation:', error);
+    }
+  };
+  
   useEffect(() => {
     fetchUserProfile();
+    initializeConversation();
   }, [userId]);
 
   // Handle initial message from navigation state
@@ -300,7 +355,10 @@ const Chat = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-with-sasha', {
-        body: { messages: apiMessages },
+        body: { 
+          messages: apiMessages,
+          conversationId: conversationId 
+        },
       });
       if (error) {
         console.error('Error calling Sasha:', error);
