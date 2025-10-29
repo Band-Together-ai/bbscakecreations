@@ -136,15 +136,18 @@ const Navigation = () => {
 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCoffeeClick}
-              className="gap-2 text-amber-600 border-amber-400 hover:bg-amber-50"
-            >
-              <Coffee className="w-4 h-4" />
-              Buy me a Coffee
-            </Button>
+            {/* Hide coffee button for admins and collaborators */}
+            {!isAdmin && role !== 'collaborator' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCoffeeClick}
+                className="gap-2 text-amber-600 border-amber-400 hover:bg-amber-50"
+              >
+                <Coffee className="w-4 h-4" />
+                Buy me a Coffee
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -202,18 +205,21 @@ const Navigation = () => {
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-3 pb-2 space-y-1.5 border-t border-border pt-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                handleCoffeeClick();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full gap-2 justify-start text-amber-600 border-amber-400 hover:bg-amber-50"
-            >
-              <Coffee className="w-4 h-4" />
-              Buy me a Coffee
-            </Button>
+            {/* Hide coffee button for admins and collaborators */}
+            {!isAdmin && role !== 'collaborator' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  handleCoffeeClick();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full gap-2 justify-start text-amber-600 border-amber-400 hover:bg-amber-50"
+              >
+                <Coffee className="w-4 h-4" />
+                Buy me a Coffee
+              </Button>
+            )}
             <button
               onClick={() => {
                 navigate("/");
