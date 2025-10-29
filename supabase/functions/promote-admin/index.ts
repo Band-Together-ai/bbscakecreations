@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,11 +60,21 @@ serve(async (req) => {
     }
 
     // Parse and validate the email list
-    const { emails } = await req.json();
+    const requestSchema = z.object({
+      emails: z.array(z.string().email().max(255)).min(1).max(100),
+    });
+
+    const body = await req.json();
+    const validation = requestSchema.safeParse(body);
     
-    if (!emails || !Array.isArray(emails)) {
-      throw new Error('Invalid request: emails array required');
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: validation.error.issues }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const { emails } = validation.data;
 
     console.log('Promoting emails to admin:', emails);
 
@@ -72,7 +83,7 @@ serve(async (req) => {
     
     if (usersError) throw usersError;
 
-    const targetUsers = users.users.filter(u => emails.includes(u.email));
+    const targetUsers = users.users.filter(u => u.email && emails.includes(u.email));
     
     if (targetUsers.length === 0) {
       throw new Error('No matching users found. Make sure accounts exist first.');
@@ -111,9 +122,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in promote-admin:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Operation failed. Please try again.' }),
       { 
-        status: 400, 
+        status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

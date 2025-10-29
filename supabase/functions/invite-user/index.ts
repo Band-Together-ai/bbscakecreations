@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,11 +36,26 @@ serve(async (req) => {
       throw new Error('Admin access required');
     }
 
-    const { email, promoType, days, notes, redirectTo } = await req.json();
+    // Validate input
+    const requestSchema = z.object({
+      email: z.string().email().max(255),
+      promoType: z.string().max(100).optional(),
+      days: z.number().int().min(1).max(3650).optional(),
+      notes: z.string().max(500).optional(),
+      redirectTo: z.string().url().max(500).optional(),
+    });
 
-    if (!email) {
-      throw new Error('Email is required');
+    const body = await req.json();
+    const validation = requestSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: validation.error.issues }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const { email, promoType, days, notes, redirectTo } = validation.data;
 
     console.log('Creating invite for user:', email);
 
@@ -86,7 +102,7 @@ serve(async (req) => {
     const isAuthError = errorMessage.includes('Unauthorized') || errorMessage.includes('Admin');
     
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: isAuthError ? 'Access denied' : 'Operation failed. Please try again.' }),
       { 
         status: isAuthError ? 403 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
