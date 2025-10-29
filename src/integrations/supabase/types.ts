@@ -357,28 +357,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          continuous_voice_enabled: boolean | null
           created_at: string | null
           email: string | null
           id: string
           is_admin: boolean | null
           is_collaborator: boolean | null
+          is_lifetime_patron: boolean | null
           updated_at: string | null
+          voice_preference: string | null
         }
         Insert: {
+          continuous_voice_enabled?: boolean | null
           created_at?: string | null
           email?: string | null
           id: string
           is_admin?: boolean | null
           is_collaborator?: boolean | null
+          is_lifetime_patron?: boolean | null
           updated_at?: string | null
+          voice_preference?: string | null
         }
         Update: {
+          continuous_voice_enabled?: boolean | null
           created_at?: string | null
           email?: string | null
           id?: string
           is_admin?: boolean | null
           is_collaborator?: boolean | null
+          is_lifetime_patron?: boolean | null
           updated_at?: string | null
+          voice_preference?: string | null
         }
         Relationships: []
       }

@@ -14,11 +14,14 @@ import { Label } from "@/components/ui/label";
 import { useTipJarSession } from "@/hooks/useTipJarSession";
 import { TipJarExtension } from "@/components/TipJarExtension";
 import { useChatSessionTracking } from "@/hooks/useChatSessionTracking";
+import { VoiceSettings } from "@/components/VoiceSettings";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Chat = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
@@ -36,12 +39,37 @@ const Chat = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Get user role
+  const { role: userRole, userId } = useUserRole();
 
   // Get tip jar session info
-  const { sessionId, remainingMinutes, isActive, refetch } = useTipJarSession(user?.id || null);
+  const { sessionId, remainingMinutes, isActive, refetch } = useTipJarSession(userId || null);
 
   // Track chat session
-  useChatSessionTracking(user?.id || null, messages.length);
+  useChatSessionTracking(userId || null, messages.length);
+  
+  // Fetch user profile with voice preferences
+  const fetchUserProfile = async () => {
+    if (!userId) return;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('voice_preference, is_lifetime_patron, continuous_voice_enabled')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return;
+    }
+    
+    setUserProfile(data);
+  };
+  
+  useEffect(() => {
+    fetchUserProfile();
+  }, [userId]);
 
   // Handle initial message from navigation state
   useEffect(() => {
@@ -198,9 +226,11 @@ const Chat = () => {
 
   const speak = async (text: string) => {
     try {
-      console.log('🔊 Calling text-to-speech for:', text.substring(0, 50) + '...');
+      const selectedVoice = userProfile?.voice_preference || 'nova';
+      console.log('🔊 Calling text-to-speech with voice:', selectedVoice, 'for:', text.substring(0, 50) + '...');
+      
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text, voice: 'nova' } // Using 'nova' voice for a friendly female voice
+        body: { text, voice: selectedVoice }
       });
       
       if (error) {
@@ -408,6 +438,18 @@ const Chat = () => {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
+              )}
+              
+              {/* Voice Settings for Premium Users */}
+              {userId && userProfile && (
+                <VoiceSettings
+                  userRole={userRole}
+                  isLifetimePatron={userProfile.is_lifetime_patron || false}
+                  voicePreference={userProfile.voice_preference || 'nova'}
+                  continuousVoiceEnabled={userProfile.continuous_voice_enabled || false}
+                  userId={userId}
+                  onUpdate={fetchUserProfile}
+                />
               )}
               
               <div className="flex flex-col items-center gap-2">
