@@ -25,6 +25,23 @@ const Navigation = () => {
     navigate("/");
   };
 
+  const handleCoffeeClick = async () => {
+    // Track the click
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('coffee_clicks').insert({
+        user_id: user?.id || null,
+        page_path: window.location.pathname,
+        user_agent: navigator.userAgent
+      });
+      console.log('Coffee click tracked');
+    } catch (error) {
+      console.error('Error tracking coffee click:', error);
+    }
+    
+    toast.info("Tip jar coming soon! 💕");
+  };
+
   return (
     <>
       {/* View As Banner */}
@@ -122,7 +139,7 @@ const Navigation = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.info("Tip jar coming soon! 💕")}
+              onClick={handleCoffeeClick}
               className="gap-2 text-amber-600 border-amber-400 hover:bg-amber-50"
             >
               <Coffee className="w-4 h-4" />
@@ -189,7 +206,7 @@ const Navigation = () => {
               variant="outline"
               size="sm"
               onClick={() => {
-                toast.info("Tip jar coming soon! 💕");
+                handleCoffeeClick();
                 setIsMobileMenuOpen(false);
               }}
               className="w-full gap-2 justify-start text-amber-600 border-amber-400 hover:bg-amber-50"

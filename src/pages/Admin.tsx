@@ -21,6 +21,7 @@ import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
 import { SashaTrainingTab } from "@/components/admin/SashaTrainingTab";
 import { ProfilePhotoEditor } from "@/components/admin/ProfilePhotoEditor";
 import { ViewAsTab } from "@/components/admin/ViewAsTab";
+import { CoffeeClicksTab } from "@/components/admin/CoffeeClicksTab";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -882,6 +883,7 @@ const Admin = () => {
             <TabsTrigger value="about">About Me</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
+            <TabsTrigger value="coffee">☕ Coffee Clicks</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="earlybird">Early Bird</TabsTrigger>
             <TabsTrigger value="sasha">Sasha Training</TabsTrigger>
@@ -1766,6 +1768,11 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* COFFEE CLICKS TAB */}
+          <TabsContent value="coffee">
+            <CoffeeClicksTab />
           </TabsContent>
 
           {/* USERS TAB */}

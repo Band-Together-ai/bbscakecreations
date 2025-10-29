@@ -161,6 +161,30 @@ export type Database = {
         }
         Relationships: []
       }
+      coffee_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          page_path: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          page_path?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          page_path?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       favorite_bakers: {
         Row: {
           category: string | null
