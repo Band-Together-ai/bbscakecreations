@@ -311,7 +311,7 @@ const Recipes = () => {
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate("/admin");
+                          navigate(`/admin?editRecipe=${recipe.id}`);
                         }}
                         className="w-full gradient-ocean text-primary-foreground"
                       >

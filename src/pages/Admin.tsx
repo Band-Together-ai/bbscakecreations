@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import Navigation from "@/components/Navigation";
@@ -29,6 +29,7 @@ import {
 
 const Admin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAdmin, userId, loading: roleLoading } = useUserRole();
   const [loading, setLoading] = useState(true);
 
@@ -107,6 +108,21 @@ const Admin = () => {
       fetchAboutPhotos();
     }
   }, [isAdmin, roleLoading, navigate, isDev]);
+
+  // Auto-load recipe for editing if editRecipe query param is present
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const editRecipeId = searchParams.get('editRecipe');
+    
+    if (editRecipeId && recipes.length > 0) {
+      const recipeToEdit = recipes.find(r => r.id === editRecipeId);
+      if (recipeToEdit) {
+        handleEditRecipe(recipeToEdit);
+        // Clear the query param after loading
+        navigate('/admin', { replace: true });
+      }
+    }
+  }, [location.search, recipes]);
 
   const fetchUploadedPhotos = async () => {
     const { data, error } = await supabase.storage
