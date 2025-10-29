@@ -44,7 +44,9 @@ const BakeBook = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    console.log('BakeBook page loaded, isAuthenticated:', isAuthenticated);
     if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to /auth');
       navigate("/auth");
       return;
     }

@@ -96,7 +96,10 @@ const Navigation = () => {
             </button>
             {isAuthenticated && (
               <button
-                onClick={() => navigate("/bakebook")}
+                onClick={() => {
+                  console.log('BakeBook clicked - navigating to /bakebook');
+                  navigate("/bakebook");
+                }}
                 className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
               >
                 <Book className="w-4 h-4" />
@@ -252,6 +255,7 @@ const Navigation = () => {
             {isAuthenticated && (
               <button
                 onClick={() => {
+                  console.log('BakeBook mobile clicked - navigating to /bakebook');
                   navigate("/bakebook");
                   setIsMobileMenuOpen(false);
                 }}
