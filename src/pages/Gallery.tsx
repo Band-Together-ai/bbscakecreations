@@ -10,7 +10,7 @@ const Gallery = () => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<{ src: string; name?: string; hasRecipe?: boolean } | null>(null);
   const [uploadedPhotos, setUploadedPhotos] = useState<{ name: string; url: string }[]>([]);
-  const [recipePhotos, setRecipePhotos] = useState<{ photo_url: string; recipe_id: string }[]>([]);
+  const [recipePhotos, setRecipePhotos] = useState<{ photo_url: string; recipe_id: string; recipe_title: string }[]>([]);
 
   useEffect(() => {
     fetchUploadedPhotos();
@@ -39,7 +39,11 @@ const Gallery = () => {
   const fetchRecipePhotos = async () => {
     const { data, error } = await supabase
       .from('recipe_photos')
-      .select('photo_url, recipe_id');
+      .select(`
+        photo_url,
+        recipe_id,
+        recipes!inner(title)
+      `);
 
     if (error) {
       console.error("Error fetching recipe photos:", error);
@@ -47,15 +51,23 @@ const Gallery = () => {
     }
 
     if (data) {
-      setRecipePhotos(data);
+      setRecipePhotos(data.map(item => ({
+        photo_url: item.photo_url,
+        recipe_id: item.recipe_id,
+        recipe_title: (item.recipes as any).title
+      })));
     }
   };
 
-  const allCakeImages = uploadedPhotos.map(photo => ({
-    src: photo.url,
-    name: photo.name.replace('.jpg', '').replace('.png', '').replace(/-/g, ' '),
-    hasRecipe: recipePhotos.some(rp => rp.photo_url === photo.url)
-  }));
+  const allCakeImages = uploadedPhotos.map(photo => {
+    const recipePhoto = recipePhotos.find(rp => rp.photo_url === photo.url);
+    return {
+      src: photo.url,
+      name: recipePhoto ? recipePhoto.recipe_title : photo.name.replace('.jpg', '').replace('.png', '').replace(/-/g, ' '),
+      hasRecipe: !!recipePhoto,
+      recipeId: recipePhoto?.recipe_id
+    };
+  });
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -81,7 +93,13 @@ const Gallery = () => {
               <Card
                 key={index}
                 className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-wave overflow-hidden group aspect-square"
-                onClick={() => setSelectedImage(image)}
+                onClick={() => {
+                  if (image.recipeId) {
+                    navigate(`/recipe/${image.recipeId}`);
+                  } else {
+                    setSelectedImage(image);
+                  }
+                }}
               >
                 <div className="relative w-full h-full">
                   <img
