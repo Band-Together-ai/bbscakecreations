@@ -41,6 +41,232 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_bakebook_entries: {
+        Row: {
+          admin_notes: string | null
+          admin_user_id: string
+          created_at: string
+          development_stage: string | null
+          id: string
+          is_canon: boolean | null
+          is_favorite_base: boolean | null
+          recipe_id: string
+          refinement_log: Json | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          admin_user_id: string
+          created_at?: string
+          development_stage?: string | null
+          id?: string
+          is_canon?: boolean | null
+          is_favorite_base?: boolean | null
+          recipe_id: string
+          refinement_log?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          admin_user_id?: string
+          created_at?: string
+          development_stage?: string | null
+          id?: string
+          is_canon?: boolean | null
+          is_favorite_base?: boolean | null
+          recipe_id?: string
+          refinement_log?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_bakebook_entries_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: true
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_catalog: {
+        Row: {
+          brand: string | null
+          canonical_key: string
+          category: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          fallback_urls: Json | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          price_estimate: string | null
+          primary_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          canonical_key: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          fallback_urls?: Json | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          price_estimate?: string | null
+          primary_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          canonical_key?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          fallback_urls?: Json | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          price_estimate?: string | null
+          primary_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      affiliate_mentions: {
+        Row: {
+          canonical_key: string | null
+          clicked: boolean | null
+          clicked_at: string | null
+          confidence: number | null
+          created_at: string
+          id: string
+          shown_to_user: boolean | null
+          source_id: string | null
+          source_type: string
+          user_id: string | null
+        }
+        Insert: {
+          canonical_key?: string | null
+          clicked?: boolean | null
+          clicked_at?: string | null
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          shown_to_user?: boolean | null
+          source_id?: string | null
+          source_type: string
+          user_id?: string | null
+        }
+        Update: {
+          canonical_key?: string | null
+          clicked?: boolean | null
+          clicked_at?: string | null
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          shown_to_user?: boolean | null
+          source_id?: string | null
+          source_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_mentions_canonical_key_fkey"
+            columns: ["canonical_key"]
+            isOneToOne: false
+            referencedRelation: "affiliate_catalog"
+            referencedColumns: ["canonical_key"]
+          },
+        ]
+      }
+      bakebook_entries: {
+        Row: {
+          actual_active_minutes: number | null
+          actual_passive_minutes: number | null
+          attempt_number: number | null
+          bake_time_minutes: number | null
+          bakebook_id: string
+          folder: string | null
+          id: string
+          is_archived: boolean | null
+          last_made_date: string | null
+          learned_tips: string[] | null
+          notes: string | null
+          pan_size: string | null
+          recipe_id: string
+          result_feedback: string | null
+          saved_at: string
+          share_with_admin: boolean | null
+          stage_notes: Json | null
+          user_modifications: Json | null
+          user_rating: number | null
+        }
+        Insert: {
+          actual_active_minutes?: number | null
+          actual_passive_minutes?: number | null
+          attempt_number?: number | null
+          bake_time_minutes?: number | null
+          bakebook_id: string
+          folder?: string | null
+          id?: string
+          is_archived?: boolean | null
+          last_made_date?: string | null
+          learned_tips?: string[] | null
+          notes?: string | null
+          pan_size?: string | null
+          recipe_id: string
+          result_feedback?: string | null
+          saved_at?: string
+          share_with_admin?: boolean | null
+          stage_notes?: Json | null
+          user_modifications?: Json | null
+          user_rating?: number | null
+        }
+        Update: {
+          actual_active_minutes?: number | null
+          actual_passive_minutes?: number | null
+          attempt_number?: number | null
+          bake_time_minutes?: number | null
+          bakebook_id?: string
+          folder?: string | null
+          id?: string
+          is_archived?: boolean | null
+          last_made_date?: string | null
+          learned_tips?: string[] | null
+          notes?: string | null
+          pan_size?: string | null
+          recipe_id?: string
+          result_feedback?: string | null
+          saved_at?: string
+          share_with_admin?: boolean | null
+          stage_notes?: Json | null
+          user_modifications?: Json | null
+          user_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bakebook_entries_bakebook_id_fkey"
+            columns: ["bakebook_id"]
+            isOneToOne: false
+            referencedRelation: "user_bakebooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bakebook_entries_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       baking_tools: {
         Row: {
           affiliate_link: string | null
@@ -240,6 +466,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      community_insights: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          data: Json
+          id: string
+          insight_type: string
+          recipe_id: string
+          updated_at: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          data: Json
+          id?: string
+          insight_type: string
+          recipe_id: string
+          updated_at?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          data?: Json
+          id?: string
+          insight_type?: string
+          recipe_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_insights_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favorite_bakers: {
         Row: {
@@ -625,6 +889,7 @@ export type Database = {
       recipes: {
         Row: {
           author_id: string | null
+          base_recipe_id: string | null
           category: string | null
           created_at: string | null
           description: string | null
@@ -634,16 +899,26 @@ export type Database = {
           image_url: string | null
           ingredients: Json | null
           instructions: string | null
+          is_base_recipe: boolean | null
           is_featured: boolean | null
           is_gluten_free: boolean | null
           is_public: boolean | null
+          make_ahead: boolean | null
+          make_ahead_window_days: number | null
+          prep_active_minutes: number | null
+          prep_passive_minutes: number | null
+          recommended_freeze_days: number | null
+          staging_json: Json | null
           tags: string[] | null
+          thaw_time_hours: number | null
           title: string
           updated_at: string | null
           user_id: string | null
+          variant_notes: string | null
         }
         Insert: {
           author_id?: string | null
+          base_recipe_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
@@ -653,16 +928,26 @@ export type Database = {
           image_url?: string | null
           ingredients?: Json | null
           instructions?: string | null
+          is_base_recipe?: boolean | null
           is_featured?: boolean | null
           is_gluten_free?: boolean | null
           is_public?: boolean | null
+          make_ahead?: boolean | null
+          make_ahead_window_days?: number | null
+          prep_active_minutes?: number | null
+          prep_passive_minutes?: number | null
+          recommended_freeze_days?: number | null
+          staging_json?: Json | null
           tags?: string[] | null
+          thaw_time_hours?: number | null
           title: string
           updated_at?: string | null
           user_id?: string | null
+          variant_notes?: string | null
         }
         Update: {
           author_id?: string | null
+          base_recipe_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
@@ -672,15 +957,32 @@ export type Database = {
           image_url?: string | null
           ingredients?: Json | null
           instructions?: string | null
+          is_base_recipe?: boolean | null
           is_featured?: boolean | null
           is_gluten_free?: boolean | null
           is_public?: boolean | null
+          make_ahead?: boolean | null
+          make_ahead_window_days?: number | null
+          prep_active_minutes?: number | null
+          prep_passive_minutes?: number | null
+          recommended_freeze_days?: number | null
+          staging_json?: Json | null
           tags?: string[] | null
+          thaw_time_hours?: number | null
           title?: string
           updated_at?: string | null
           user_id?: string | null
+          variant_notes?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "recipes_base_recipe_id_fkey"
+            columns: ["base_recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sasha_training_notes: {
         Row: {
@@ -928,6 +1230,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_bakebooks: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_mutes: {
         Row: {
           created_at: string
@@ -1008,6 +1331,87 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      user_wishlists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wishlist_items: {
+        Row: {
+          added_at: string
+          affiliate_catalog_id: string | null
+          display_order: number | null
+          external_product_name: string | null
+          external_product_url: string | null
+          id: string
+          notes: string | null
+          priority: string | null
+          wishlist_id: string
+        }
+        Insert: {
+          added_at?: string
+          affiliate_catalog_id?: string | null
+          display_order?: number | null
+          external_product_name?: string | null
+          external_product_url?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          wishlist_id: string
+        }
+        Update: {
+          added_at?: string
+          affiliate_catalog_id?: string | null
+          display_order?: number | null
+          external_product_name?: string | null
+          external_product_url?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          wishlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_items_affiliate_catalog_id_fkey"
+            columns: ["affiliate_catalog_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_items_wishlist_id_fkey"
+            columns: ["wishlist_id"]
+            isOneToOne: false
+            referencedRelation: "user_wishlists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

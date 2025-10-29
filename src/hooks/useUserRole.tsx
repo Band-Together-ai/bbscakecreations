@@ -112,5 +112,8 @@ export const useUserRole = () => {
     isAuthenticated: effectiveIsAuthenticated,
     isPromo,
     hasFullAccess: effectiveHasFullAccess,
+    bakeBookLimit: effectiveHasFullAccess ? Infinity : (effectiveIsAuthenticated ? 10 : 0),
+    canUseWishlists: effectiveHasFullAccess,
+    realtimeScanEnabled: effectiveRole === 'paid' || effectiveRole === 'admin' || effectiveRole === 'collaborator',
   };
 };

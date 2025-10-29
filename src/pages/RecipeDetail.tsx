@@ -8,9 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Download, Lock, Edit, Sparkles, Star, Heart } from "lucide-react";
+import { ArrowLeft, Download, Lock, Edit, Sparkles, Star, Clock, Snowflake, Heart } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
+import { RecipeSaveButton } from "@/components/RecipeSaveButton";
 
 interface Recipe {
   id: string;
@@ -25,6 +26,21 @@ interface Recipe {
   tags: string[];
   image_url: string | null;
   display_order: number | null;
+  is_base_recipe?: boolean;
+  base_recipe_id?: string | null;
+  variant_notes?: string | null;
+  prep_active_minutes?: number | null;
+  prep_passive_minutes?: number | null;
+  make_ahead?: boolean;
+  make_ahead_window_days?: number | null;
+  recommended_freeze_days?: number | null;
+  thaw_time_hours?: number | null;
+  staging_json?: Array<{
+    stage: string;
+    active_min?: number;
+    passive_min?: number;
+    can_make_ahead?: boolean;
+  }>;
   recipe_photos?: Array<{
     photo_url: string;
     is_headline: boolean;
@@ -38,6 +54,7 @@ const RecipeDetail = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [baseRecipe, setBaseRecipe] = useState<{ id: string; title: string } | null>(null);
 
   // Support settings
   const [supportSettings, setSupportSettings] = useState<any>(null);
@@ -82,7 +99,21 @@ const RecipeDetail = () => {
       toast.error("Recipe not found");
       navigate("/recipes");
     } else {
-      setRecipe(data);
+      setRecipe(data as any);
+      
+      // Fetch base recipe if this is a variant
+      if (data.base_recipe_id) {
+        const { data: baseData } = await supabase
+          .from("recipes")
+          .select("id, title")
+          .eq("id", data.base_recipe_id)
+          .single();
+        
+        if (baseData) {
+          setBaseRecipe(baseData);
+        }
+      }
+      
       // Set the first photo as selected
       const mainImage = data.image_url || 
         data.recipe_photos?.find((p: any) => p.is_headline)?.photo_url || 
@@ -355,6 +386,85 @@ ${recipe.instructions || 'Full instructions available with subscription'}
           </div>
         )}
 
+        {/* Base Recipe Badge */}
+        {recipe.base_recipe_id && baseRecipe && (
+          <Badge 
+            variant="secondary" 
+            className="mb-4 cursor-pointer hover:bg-accent" 
+            onClick={() => navigate(`/recipes/${recipe.base_recipe_id}`)}
+          >
+            <Sparkles className="w-3 h-3 mr-1" />
+            Built on Brandia's {baseRecipe.title}
+          </Badge>
+        )}
+
+        {/* Time & Make-Ahead Info */}
+        {(recipe.prep_active_minutes || recipe.prep_passive_minutes || recipe.make_ahead) && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                {recipe.prep_active_minutes && (
+                  <div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Active Time
+                    </p>
+                    <p className="text-lg font-semibold">{recipe.prep_active_minutes} min</p>
+                  </div>
+                )}
+                {recipe.prep_passive_minutes && (
+                  <div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Passive Time
+                    </p>
+                    <p className="text-lg font-semibold">{recipe.prep_passive_minutes} min</p>
+                  </div>
+                )}
+                {recipe.make_ahead && (
+                  <div className="col-span-2 border-t pt-4 mt-2">
+                    <Badge variant="outline" className="bg-blue-50 mb-2">
+                      <Snowflake className="w-3 h-3 mr-1" />
+                      Make-Ahead Friendly
+                    </Badge>
+                    <p className="text-sm text-muted-foreground">
+                      {recipe.make_ahead_window_days && `Bake up to ${recipe.make_ahead_window_days} days ahead`}
+                      {recipe.recommended_freeze_days && ` • Freeze ${recipe.recommended_freeze_days} days`}
+                      {recipe.thaw_time_hours && ` • Thaw ${recipe.thaw_time_hours} hours`}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Staging Display */}
+        {recipe.staging_json && recipe.staging_json.length > 0 && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Multi-Day Plan</h3>
+              <div className="space-y-3">
+                {recipe.staging_json.map((stage, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">{stage.stage}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {stage.active_min && stage.active_min > 0 && `${stage.active_min} min active`}
+                        {stage.passive_min && stage.passive_min > 0 && ` • ${stage.passive_min} min passive`}
+                        {stage.can_make_ahead && <Badge variant="outline" className="ml-2">Can prep ahead</Badge>}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
           {(isAdmin || isCollaborator) && (
@@ -376,13 +486,16 @@ ${recipe.instructions || 'Full instructions available with subscription'}
           </Button>
           
           {canViewFullRecipe ? (
-            <Button
-              onClick={handleDownload}
-              variant="outline"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download Recipe
-            </Button>
+            <>
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download Recipe
+              </Button>
+              <RecipeSaveButton recipeId={recipe.id} canViewFullRecipe={canViewFullRecipe} />
+            </>
           ) : (
             <Button
               onClick={() => navigate("/auth")}
