@@ -148,7 +148,7 @@ const Navigation = () => {
                 Admin
               </Button>
             )}
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -157,6 +157,16 @@ const Navigation = () => {
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="gap-2 gradient-ocean text-white shadow-wave"
+              >
+                <User className="w-4 h-4" />
+                Sign In
               </Button>
             )}
           </div>
@@ -283,7 +293,7 @@ const Navigation = () => {
                 Admin
               </Button>
             )}
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -295,6 +305,19 @@ const Navigation = () => {
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  navigate("/auth");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full gap-2 justify-start gradient-ocean text-white shadow-wave"
+              >
+                <User className="w-4 h-4" />
+                Sign In
               </Button>
             )}
           </div>
