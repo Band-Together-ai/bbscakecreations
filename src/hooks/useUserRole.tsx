@@ -89,8 +89,8 @@ export const useUserRole = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Override with viewAs if active (but don't allow viewing as unauthenticated with a real userId)
-  const effectiveRole = isViewingAs && viewAsRole !== 'unauthenticated' ? viewAsRole : role;
+  // Override with viewAs if active
+  const effectiveRole = isViewingAs ? (viewAsRole === 'unauthenticated' ? null : viewAsRole) : role;
   const effectiveUserId = isViewingAs && viewAsRole === 'unauthenticated' ? null : userId;
   const effectiveIsAuthenticated = isViewingAs && viewAsRole === 'unauthenticated' ? false : userId !== null;
   
