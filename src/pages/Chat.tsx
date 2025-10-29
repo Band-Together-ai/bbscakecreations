@@ -132,7 +132,9 @@ const Chat = () => {
         clearInterval(recordingTimerRef.current);
         recordingTimerRef.current = null;
       }
-      mediaRecorderRef.current?.stop();
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
       setIsRecording(false);
       setRecordingTime(0);
     } else {
@@ -168,14 +170,6 @@ const Chat = () => {
           setRecordingTime(prev => prev + 1);
         }, 1000);
         
-        // Auto-stop after 30 seconds
-        setTimeout(() => {
-          if (mediaRecorderRef.current?.state === 'recording') {
-            console.log("Auto-stopping recording after 30 seconds");
-            handleVoiceRecording();
-          }
-        }, 30000);
-        
         toast.success("🎤 Recording started! Click Stop when done.", { duration: 3000 });
         console.log("Recording started successfully");
       } catch (error) {
@@ -184,6 +178,19 @@ const Chat = () => {
       }
     }
   };
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up recording resources
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+      }
+    };
+  }, []);
 
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsTranscribing(true);
