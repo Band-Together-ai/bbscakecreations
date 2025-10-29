@@ -52,6 +52,7 @@ const Recipes = () => {
     existingRecipeId: string;
   } | null>(null);
   
+  // Beta access: Featured recipes OR recipes with landing page position are free
   const canViewFullRecipe = isAdmin || isCollaborator || isPaid;
 
   useEffect(() => {
@@ -212,7 +213,7 @@ const Recipes = () => {
             Brandia's Recipe Collection
           </h1>
           <p className="text-xl text-dolphin max-w-2xl mx-auto">
-            From-scratch recipes—many can be made gluten-free. Teasers are free—full recipes unlock with subscription.
+            Featured recipes & landing page picks are FREE during beta. Everything else unlocks with subscription!
           </p>
         </div>
 
@@ -224,9 +225,10 @@ const Recipes = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recipes.map((recipe, index) => {
+            {recipes.map((recipe) => {
               const recipeImage = getRecipeImage(recipe);
-              const isFirstThree = index < 3;
+              // Beta free access: Featured OR has landing page position
+              const isBetaFree = recipe.is_featured || recipe.featured_position !== null;
               return (
                 <Card 
                   key={recipe.id} 
@@ -244,9 +246,9 @@ const Recipes = () => {
                   )}
                 <CardHeader>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {isFirstThree && (
+                    {isBetaFree && (
                       <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-fredoka w-fit">
-                        Free
+                        Free (Beta)
                       </div>
                     )}
                     {recipe.is_gluten_free && (
@@ -329,7 +331,7 @@ const Recipes = () => {
                         Chat with Sasha
                       </Button>
                     </div>
-                  ) : canViewFullRecipe || isFirstThree ? (
+                  ) : canViewFullRecipe || isBetaFree ? (
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -337,7 +339,7 @@ const Recipes = () => {
                       }}
                       className="w-full gradient-ocean text-primary-foreground"
                     >
-                      {isFirstThree ? "View Free Recipe" : "View Full Recipe"}
+                      {isBetaFree ? "View Free Recipe" : "View Full Recipe"}
                     </Button>
                   ) : (
                     <div 

@@ -53,8 +53,10 @@ const RecipeDetail = () => {
   const [captchaAnswer, setCaptchaAnswer] = useState<string>("");
   const [captchaQuestion, setCaptchaQuestion] = useState<{ num1: number; num2: number }>({ num1: 0, num2: 0 });
 
-  // During launch phase, all recipes are free to view
-  const canViewFullRecipe = true; // isAdmin || isCollaborator || isPaid || (recipe && recipe.display_order !== null && recipe.display_order < 3);
+  // Beta access: Featured recipes OR recipes with landing page position are free
+  // Everyone else needs subscription for full access (ingredients, instructions, download)
+  const isBetaFree = recipe?.is_featured || (recipe?.featured_position !== null && recipe?.featured_position !== undefined);
+  const canViewFullRecipe = isAdmin || isCollaborator || isPaid || isBetaFree;
 
   useEffect(() => {
     if (id) {
@@ -365,30 +367,30 @@ ${recipe.instructions || 'Full instructions available with subscription'}
             </Button>
           )}
           
+          <Button
+            onClick={() => navigate("/chat")}
+            className="gradient-ocean text-white"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Chat with Sasha
+          </Button>
+          
           {canViewFullRecipe ? (
-            <>
-              <Button
-                onClick={() => navigate("/chat")}
-                className="gradient-ocean text-white"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Chat with Sasha
-              </Button>
-              <Button
-                onClick={handleDownload}
-                variant="outline"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download Recipe
-              </Button>
-            </>
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Recipe
+            </Button>
           ) : (
             <Button
               onClick={() => navigate("/auth")}
-              className="gradient-ocean text-white"
+              variant="outline"
+              className="border-purple-500 text-purple-700"
             >
               <Lock className="w-4 h-4 mr-2" />
-              Subscribe to Unlock Full Recipe
+              Subscribe for Print/Download
             </Button>
           )}
         </div>
