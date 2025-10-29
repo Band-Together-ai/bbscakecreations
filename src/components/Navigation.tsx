@@ -92,6 +92,9 @@ const Navigation = () => {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+                <DropdownMenuItem onClick={() => navigate("/gallery")} className="cursor-pointer">
+                  Gallery
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/tools")} className="cursor-pointer">
                   Kitchen Tools
                 </DropdownMenuItem>
@@ -203,6 +206,16 @@ const Navigation = () => {
             >
               <BookOpen className="w-4 h-4" />
               Recipes
+            </button>
+            <button
+              onClick={() => {
+                navigate("/gallery");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
+            >
+              <BookOpen className="w-4 h-4" />
+              Gallery
             </button>
             <button
               onClick={() => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { useChatSessionTracking } from "@/hooks/useChatSessionTracking";
 
 const Chat = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<any>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
@@ -41,6 +42,20 @@ const Chat = () => {
 
   // Track chat session
   useChatSessionTracking(user?.id || null, messages.length);
+
+  // Handle initial message from navigation state
+  useEffect(() => {
+    const state = location.state as { initialMessage?: string };
+    if (state?.initialMessage) {
+      setShowQuickStart(false);
+      // Delay sending to ensure component is fully mounted
+      setTimeout(() => {
+        sendMessageWithContent(state.initialMessage);
+      }, 500);
+      // Clear the state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   // TEMPORARILY DISABLED FOR TESTING
   // useEffect(() => {

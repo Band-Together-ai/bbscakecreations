@@ -1,8 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Smartphone, Home, Lock, Star, MessageCircle, Heart } from "lucide-react";
 
 const Instructions = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -73,42 +76,69 @@ const Instructions = () => {
               <Home className="w-6 h-6 text-ocean-wave" />
               How the App Works
             </CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              💬 Click any section below to chat with Sasha and learn more!
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Star className="w-5 h-5 text-coral mt-1 flex-shrink-0" />
+            <div 
+              className="flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-ocean-wave hover:bg-ocean-foam/20 cursor-pointer transition-all group"
+              onClick={() => navigate('/chat', { state: { initialMessage: 'Tell me more about browsing recipes and how the recipe collection works!' } })}
+            >
+              <Star className="w-5 h-5 text-coral mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
               <div>
-                <h4 className="font-semibold mb-1">Browse Recipes</h4>
+                <h4 className="font-semibold mb-1 group-hover:text-ocean-wave transition-colors">
+                  Browse Recipes 
+                  <span className="text-xs text-ocean-wave ml-2">→ Ask Sasha</span>
+                </h4>
                 <p className="text-muted-foreground text-sm">
                   Explore Brandia's collection of from-scratch cake recipes. Each recipe includes beautiful photos and detailed instructions.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Lock className="w-5 h-5 text-ocean-wave mt-1 flex-shrink-0" />
+            <div 
+              className="flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-ocean-wave hover:bg-ocean-foam/20 cursor-pointer transition-all group"
+              onClick={() => navigate('/chat', { state: { initialMessage: 'Explain the difference between free and subscription recipes. What do I get with each?' } })}
+            >
+              <Lock className="w-5 h-5 text-ocean-wave mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
               <div>
-                <h4 className="font-semibold mb-1">Free vs. Subscription Recipes</h4>
+                <h4 className="font-semibold mb-1 group-hover:text-ocean-wave transition-colors">
+                  Free vs. Subscription Recipes
+                  <span className="text-xs text-ocean-wave ml-2">→ Ask Sasha</span>
+                </h4>
                 <p className="text-muted-foreground text-sm">
                   During our launch phase, all recipes are free! Normally, the first 3 recipes are always free, and the rest require a subscription to view full ingredients and instructions.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <MessageCircle className="w-5 h-5 text-seaweed mt-1 flex-shrink-0" />
+            <div 
+              className="flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-ocean-wave hover:bg-ocean-foam/20 cursor-pointer transition-all group"
+              onClick={() => navigate('/chat', { state: { initialMessage: 'Tell me everything you can do as my AI baking assistant! What questions can I ask you?' } })}
+            >
+              <MessageCircle className="w-5 h-5 text-seaweed mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
               <div>
-                <h4 className="font-semibold mb-1">Chat with Sasha (AI Assistant)</h4>
+                <h4 className="font-semibold mb-1 group-hover:text-ocean-wave transition-colors">
+                  Chat with Sasha (AI Assistant)
+                  <span className="text-xs text-ocean-wave ml-2">→ Ask Sasha</span>
+                </h4>
                 <p className="text-muted-foreground text-sm">
                   Ask Sasha baking questions, get recipe modifications, troubleshoot problems, or learn new techniques. She's your personal baking coach!
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Heart className="w-5 h-5 text-pink-500 mt-1 flex-shrink-0" />
+            <div 
+              className="flex items-start gap-3 p-3 rounded-lg border border-transparent hover:border-ocean-wave hover:bg-ocean-foam/20 cursor-pointer transition-all group"
+              onClick={() => navigate('/chat', { state: { initialMessage: 'How does the tip jar work? How can I support Brandia?' } })}
+            >
+              <Heart className="w-5 h-5 text-pink-500 mt-1 flex-shrink-0 group-hover:scale-110 transition-transform" />
               <div>
-                <h4 className="font-semibold mb-1">Support Brandia</h4>
+                <h4 className="font-semibold mb-1 group-hover:text-ocean-wave transition-colors">
+                  Support Brandia
+                  <span className="text-xs text-ocean-wave ml-2">→ Ask Sasha</span>
+                </h4>
                 <p className="text-muted-foreground text-sm">
                   If you love a recipe, you can send a tip via Venmo. Every contribution helps keep the baking magic alive!
                 </p>
