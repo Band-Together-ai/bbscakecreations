@@ -26,7 +26,6 @@ const cakeImages = [
 const Gallery = () => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -44,72 +43,28 @@ const Gallery = () => {
               Every cake tells a story. Hand-crafted with love, adorned with live flowers, 
               and baked from scratch—no box mixes, no fondant, just pure magic.
             </p>
-            <p className="text-sm text-ocean-wave mt-2">
-              Hover over any cake to see it up close ✨
-            </p>
           </div>
 
-          {/* 3D Rotating Carousel */}
-          <div 
-            className="relative flex items-center justify-center"
-            style={{ 
-              height: '600px',
-              perspective: '1200px',
-              perspectiveOrigin: 'center center'
-            }}
-          >
-            <div 
-              className={`relative preserve-3d ${isPaused ? '' : 'animate-rotate-y'}`}
-              style={{ 
-                width: '300px',
-                height: '400px',
-                transformStyle: 'preserve-3d',
-              }}
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
-              {cakeImages.map((image, index) => {
-                const angle = (index / cakeImages.length) * 360;
-                const radius = 450; // Distance from center
-                
-                return (
-                  <Card
-                    key={index}
-                    className="absolute cursor-pointer transition-all duration-500 hover:scale-150 hover:translate-z-200 hover:shadow-wave overflow-hidden group"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      width: '280px',
-                      height: '280px',
-                      marginLeft: '-140px',
-                      marginTop: '-140px',
-                      transformStyle: 'preserve-3d',
-                      transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-                    }}
-                    onClick={() => setSelectedImage(image)}
-                  >
-                    <div className="relative w-full h-full">
-                      <img
-                        src={image}
-                        alt={`Brandia's Cake ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-500"
-                        style={{
-                          transform: `rotateY(${-angle}deg)`, // Keep image facing forward
-                        }}
-                      />
-                      <div 
-                        className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4"
-                        style={{
-                          transform: `rotateY(${-angle}deg)`, // Keep overlay facing forward
-                        }}
-                      >
-                        <p className="text-white font-fredoka text-sm">View Details</p>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
+          {/* Grid Gallery */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+            {cakeImages.map((image, index) => (
+              <Card
+                key={index}
+                className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-wave overflow-hidden group aspect-square"
+                onClick={() => setSelectedImage(image)}
+              >
+                <div className="relative w-full h-full">
+                  <img
+                    src={image}
+                    alt={`Brandia's Cake ${index + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                    <p className="text-white font-fredoka text-sm">View Details</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
 
           {/* Coming Soon Notice */}
