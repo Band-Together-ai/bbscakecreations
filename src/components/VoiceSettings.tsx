@@ -112,8 +112,8 @@ export const VoiceSettings = ({
         </Select>
       </div>
 
-      {/* Continuous Voice Input (Paid users only) */}
-      {(userRole === 'paid' || userRole === 'admin') && (
+      {/* Continuous Voice Input (Paid users only) - HIDDEN FOR NOW */}
+      {/* {(userRole === 'paid' || userRole === 'admin') && (
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label htmlFor="continuous-voice" className="text-sm font-medium">
@@ -130,7 +130,7 @@ export const VoiceSettings = ({
             disabled={isUpdating}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 };

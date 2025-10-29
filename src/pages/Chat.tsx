@@ -34,7 +34,7 @@ const Chat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [voiceReply, setVoiceReply] = useState(false);
+  const [voiceReply, setVoiceReply] = useState(true); // Default to enabled
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
