@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import WaveBackground from '@/components/WaveBackground';
@@ -26,6 +26,7 @@ const cakeImages = [
 const Gallery = () => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -43,45 +44,62 @@ const Gallery = () => {
               Every cake tells a story. Hand-crafted with love, adorned with live flowers, 
               and baked from scratch—no box mixes, no fondant, just pure magic.
             </p>
+            <p className="text-sm text-ocean-wave mt-2">
+              Hover over any cake to see it up close ✨
+            </p>
           </div>
 
-          {/* Spiral Staircase Gallery */}
-          <div className="relative" style={{ minHeight: '1500px' }}>
-            {cakeImages.map((image, index) => {
-              // Calculate spiral position
-              const angle = (index * 360) / cakeImages.length;
-              const radius = 150 + (index * 30); // Expands outward
-              const rotation = angle * (Math.PI / 180);
-              const x = Math.cos(rotation) * radius;
-              const y = index * 120; // Vertical spacing (going down like stairs)
-              const scale = 1 - (index * 0.02); // Slight size reduction as we go down
-              
-              return (
-                <Card
-                  key={index}
-                  className="absolute cursor-pointer transition-all duration-300 hover:scale-110 hover:z-50 hover:shadow-wave overflow-hidden group"
-                  style={{
-                    left: `calc(50% + ${x}px)`,
-                    top: `${y}px`,
-                    transform: `scale(${scale}) rotate(${angle * 0.1}deg)`,
-                    width: '280px',
-                    height: '280px',
-                  }}
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <div className="relative w-full h-full">
-                    <img
-                      src={image}
-                      alt={`Brandia's Cake ${index + 1}`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
-                      <p className="text-white font-fredoka text-sm">View Details</p>
+          {/* Spiral Staircase Gallery - Spinning Container */}
+          <div 
+            className="relative"
+            style={{ minHeight: '1500px' }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <div 
+              className={`relative w-full h-full ${isPaused ? '' : 'animate-spin-slow'}`}
+              style={{ 
+                animationDuration: '60s',
+                animationTimingFunction: 'linear',
+                animationIterationCount: 'infinite'
+              }}
+            >
+              {cakeImages.map((image, index) => {
+                // Calculate spiral position
+                const angle = (index * 360) / cakeImages.length;
+                const radius = 150 + (index * 30); // Expands outward
+                const rotation = angle * (Math.PI / 180);
+                const x = Math.cos(rotation) * radius;
+                const y = index * 120; // Vertical spacing (going down like stairs)
+                const scale = 1 - (index * 0.02); // Slight size reduction as we go down
+                
+                return (
+                  <Card
+                    key={index}
+                    className="absolute cursor-pointer transition-all duration-500 hover:scale-125 hover:rotate-0 hover:z-50 hover:shadow-wave overflow-hidden group"
+                    style={{
+                      left: `calc(50% + ${x}px)`,
+                      top: `${y}px`,
+                      transform: `scale(${scale}) rotate(${angle * 0.1}deg)`,
+                      width: '280px',
+                      height: '280px',
+                    }}
+                    onClick={() => setSelectedImage(image)}
+                  >
+                    <div className="relative w-full h-full">
+                      <img
+                        src={image}
+                        alt={`Brandia's Cake ${index + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                        <p className="text-white font-fredoka text-sm">View Details</p>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              );
-            })}
+                  </Card>
+                );
+              })}
+            </div>
           </div>
 
           {/* Coming Soon Notice */}
