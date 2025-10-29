@@ -233,4 +233,12 @@ All colors MUST be HSL.
   .transition-bounce {
     transition: var(--transition-bounce);
   }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .translate-z-200 {
+    transform: translateZ(200px);
+  }
 }

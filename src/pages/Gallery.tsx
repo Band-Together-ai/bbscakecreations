@@ -49,40 +49,42 @@ const Gallery = () => {
             </p>
           </div>
 
-          {/* Spiral Staircase Gallery - Spinning Container */}
+          {/* 3D Rotating Carousel */}
           <div 
-            className="relative"
-            style={{ minHeight: '1500px' }}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            className="relative flex items-center justify-center"
+            style={{ 
+              height: '600px',
+              perspective: '1200px',
+              perspectiveOrigin: 'center center'
+            }}
           >
             <div 
-              className={`relative w-full h-full ${isPaused ? '' : 'animate-spin-slow'}`}
+              className={`relative preserve-3d ${isPaused ? '' : 'animate-rotate-y'}`}
               style={{ 
-                animationDuration: '60s',
-                animationTimingFunction: 'linear',
-                animationIterationCount: 'infinite'
+                width: '300px',
+                height: '400px',
+                transformStyle: 'preserve-3d',
               }}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
             >
               {cakeImages.map((image, index) => {
-                // Calculate spiral position
-                const angle = (index * 360) / cakeImages.length;
-                const radius = 150 + (index * 30); // Expands outward
-                const rotation = angle * (Math.PI / 180);
-                const x = Math.cos(rotation) * radius;
-                const y = index * 120; // Vertical spacing (going down like stairs)
-                const scale = 1 - (index * 0.02); // Slight size reduction as we go down
+                const angle = (index / cakeImages.length) * 360;
+                const radius = 450; // Distance from center
                 
                 return (
                   <Card
                     key={index}
-                    className="absolute cursor-pointer transition-all duration-500 hover:scale-125 hover:rotate-0 hover:z-50 hover:shadow-wave overflow-hidden group"
+                    className="absolute cursor-pointer transition-all duration-500 hover:scale-150 hover:translate-z-200 hover:shadow-wave overflow-hidden group"
                     style={{
-                      left: `calc(50% + ${x}px)`,
-                      top: `${y}px`,
-                      transform: `scale(${scale}) rotate(${angle * 0.1}deg)`,
+                      left: '50%',
+                      top: '50%',
                       width: '280px',
                       height: '280px',
+                      marginLeft: '-140px',
+                      marginTop: '-140px',
+                      transformStyle: 'preserve-3d',
+                      transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
                     }}
                     onClick={() => setSelectedImage(image)}
                   >
@@ -90,9 +92,17 @@ const Gallery = () => {
                       <img
                         src={image}
                         alt={`Brandia's Cake ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500"
+                        style={{
+                          transform: `rotateY(${-angle}deg)`, // Keep image facing forward
+                        }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4"
+                        style={{
+                          transform: `rotateY(${-angle}deg)`, // Keep overlay facing forward
+                        }}
+                      >
                         <p className="text-white font-fredoka text-sm">View Details</p>
                       </div>
                     </div>

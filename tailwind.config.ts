@@ -83,19 +83,19 @@ export default {
             height: "0",
           },
         },
-        "spin-slow": {
+        "rotate-y": {
           from: {
-            transform: "rotate(0deg)",
+            transform: "rotateY(0deg)",
           },
           to: {
-            transform: "rotate(360deg)",
+            transform: "rotateY(360deg)",
           },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "spin-slow": "spin-slow 60s linear infinite",
+        "rotate-y": "rotate-y 30s linear infinite",
       },
     },
   },
