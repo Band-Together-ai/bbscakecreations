@@ -1,0 +1,22 @@
+-- Seed affiliate catalog with essential baking tools
+INSERT INTO public.affiliate_catalog (canonical_key, title, description, category, price_estimate, primary_url, is_active, display_order) VALUES
+('stand_mixer', 'KitchenAid Stand Mixer', 'Professional-grade stand mixer for all your baking needs. Perfect for cakes, cookies, and bread.', 'Appliances', '$300-400', 'https://www.amazon.com/s?k=kitchenaid+stand+mixer', true, 1),
+('hand_mixer', 'Hand Mixer', 'Lightweight and versatile electric hand mixer for quick mixing tasks.', 'Appliances', '$30-60', 'https://www.amazon.com/s?k=electric+hand+mixer', true, 2),
+('digital_scale', 'Digital Kitchen Scale', 'Precise digital scale for accurate measurements. Essential for professional baking results.', 'Measurement', '$20-40', 'https://www.amazon.com/s?k=digital+kitchen+scale', true, 3),
+('offset_spatula', 'Offset Spatula', 'Angled spatula perfect for frosting cakes and smoothing surfaces.', 'Decorating', '$10-20', 'https://www.amazon.com/s?k=offset+spatula', true, 4),
+('bench_scraper', 'Bench Scraper', 'Multi-purpose tool for cutting dough, scraping surfaces, and portioning.', 'Tools', '$10-15', 'https://www.amazon.com/s?k=bench+scraper', true, 5),
+('silicone_spatula', 'Silicone Spatula Set', 'Heat-resistant spatulas for mixing and folding. Essential kitchen tools.', 'Tools', '$15-25', 'https://www.amazon.com/s?k=silicone+spatula+set', true, 6),
+('whisk', 'Balloon Whisk', 'Wire whisk for incorporating air and mixing ingredients smoothly.', 'Tools', '$8-15', 'https://www.amazon.com/s?k=balloon+whisk', true, 7),
+('cake_pan', 'Cake Pan Set', 'Professional aluminum cake pans in various sizes. Even heating for perfect layers.', 'Bakeware', '$25-50', 'https://www.amazon.com/s?k=cake+pan+set', true, 8),
+('springform_pan', 'Springform Pan', 'Removable bottom pan perfect for cheesecakes and delicate cakes.', 'Bakeware', '$20-35', 'https://www.amazon.com/s?k=springform+pan', true, 9),
+('sheet_pan', 'Half Sheet Pan', 'Heavy-duty aluminum baking sheet. Perfect for cookies and sheet cakes.', 'Bakeware', '$15-25', 'https://www.amazon.com/s?k=half+sheet+pan', true, 10),
+('parchment_paper', 'Parchment Paper', 'Non-stick parchment for easy release and cleanup. Kitchen essential.', 'Supplies', '$10-15', 'https://www.amazon.com/s?k=parchment+paper+rolls', true, 11),
+('cooling_rack', 'Cooling Rack', 'Wire cooling rack for proper air circulation around baked goods.', 'Tools', '$15-25', 'https://www.amazon.com/s?k=cooling+rack', true, 12),
+('piping_bag', 'Piping Bags', 'Disposable or reusable bags for precise frosting application.', 'Decorating', '$10-20', 'https://www.amazon.com/s?k=piping+bags', true, 13),
+('piping_tips', 'Piping Tips Set', 'Assorted decorating tips for various frosting techniques and designs.', 'Decorating', '$15-30', 'https://www.amazon.com/s?k=piping+tips+set', true, 14),
+('cake_turntable', 'Cake Decorating Turntable', 'Rotating stand for smooth frosting and professional decoration.', 'Decorating', '$20-40', 'https://www.amazon.com/s?k=cake+turntable', true, 15),
+('oven_thermometer', 'Oven Thermometer', 'Ensure accurate oven temperature for consistent baking results.', 'Measurement', '$10-15', 'https://www.amazon.com/s?k=oven+thermometer', true, 16),
+('instant_thermometer', 'Instant-Read Thermometer', 'Quick temperature readings for perfect doneness every time.', 'Measurement', '$15-30', 'https://www.amazon.com/s?k=instant+read+thermometer', true, 17),
+('mixing_bowls', 'Mixing Bowl Set', 'Stainless steel or glass bowls in graduated sizes for all mixing needs.', 'Tools', '$25-45', 'https://www.amazon.com/s?k=mixing+bowl+set', true, 18),
+('measuring_cups', 'Measuring Cups & Spoons', 'Accurate dry and liquid measuring tools for precise recipes.', 'Measurement', '$15-25', 'https://www.amazon.com/s?k=measuring+cups+and+spoons', true, 19),
+('sifter', 'Flour Sifter', 'Remove lumps and aerate flour for lighter, fluffier baked goods.', 'Tools', '$10-20', 'https://www.amazon.com/s?k=flour+sifter', true, 20);

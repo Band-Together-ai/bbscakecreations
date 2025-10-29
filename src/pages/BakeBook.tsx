@@ -14,10 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/useUserRole";
-import { BookOpen, Search, Star, Archive, Sparkles } from "lucide-react";
+import { BookOpen, Search, Star, Archive, Sparkles, Scan } from "lucide-react";
 import { toast } from "sonner";
 import { TeaserBakeBook } from "@/components/TeaserBakeBook";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScanResultsModal } from "@/components/ScanResultsModal";
 
 interface BakeBookEntry {
   id: string;
@@ -44,6 +45,9 @@ const BakeBook = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [scanningId, setScanningId] = useState<string | null>(null);
+  const [scanResults, setScanResults] = useState<any[]>([]);
+  const [showScanModal, setShowScanModal] = useState(false);
 
   // Show teaser for unauthenticated users
   if (!isAuthenticated) {
@@ -106,6 +110,58 @@ const BakeBook = () => {
       toast.error("Failed to load BakeBook");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleScanEntry = async (entryId: string) => {
+    setScanningId(entryId);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.functions.invoke('scan-bakebook-entry', {
+        body: { bakebookEntryId: entryId, userId: user?.id }
+      });
+
+      if (error) throw error;
+      
+      setScanResults(data.suggestedTools || []);
+      setShowScanModal(true);
+      toast.success(`Found ${data.suggestedTools?.length || 0} tool recommendations!`);
+    } catch (error) {
+      console.error('Scan error:', error);
+      toast.error('Failed to scan recipe');
+    } finally {
+      setScanningId(null);
+    }
+  };
+
+  const handleAddToWishlist = async (catalogItemId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      let { data: wishlist } = await supabase.from("user_wishlists").select("id").single();
+      
+      if (!wishlist) {
+        const { data: newWishlist } = await supabase
+          .from("user_wishlists")
+          .insert({ user_id: user.id, name: "My Wishlist" })
+          .select()
+          .single();
+        wishlist = newWishlist;
+      }
+
+      if (!wishlist) throw new Error("Failed to create wishlist");
+
+      await supabase.from("wishlist_items").insert({
+        wishlist_id: wishlist.id,
+        catalog_item_id: catalogItemId,
+        priority: "medium"
+      });
+
+      toast.success("Added to wishlist!");
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      toast.error('Failed to add to wishlist');
     }
   };
 
@@ -216,8 +272,7 @@ const BakeBook = () => {
             {filteredEntries.map((entry) => (
               <Card
                 key={entry.id}
-                className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/recipes/${entry.recipe.id}`)}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {entry.recipe.image_url && (
                   <div className="h-48 overflow-hidden">
@@ -230,9 +285,25 @@ const BakeBook = () => {
                 )}
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-lg line-clamp-2">
+                    <h3 
+                      className="font-semibold text-lg line-clamp-2 cursor-pointer hover:text-ocean-wave"
+                      onClick={() => navigate(`/recipes/${entry.recipe.id}`)}
+                    >
                       {entry.recipe.title}
                     </h3>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleScanEntry(entry.id);
+                      }}
+                      disabled={scanningId === entry.id}
+                      className="gap-1 shrink-0"
+                    >
+                      <Scan className="w-3 h-3" />
+                      {scanningId === entry.id ? 'Scanning...' : 'Scan'}
+                    </Button>
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -274,6 +345,13 @@ const BakeBook = () => {
           </div>
         )}
       </div>
+
+      <ScanResultsModal
+        isOpen={showScanModal}
+        onClose={() => setShowScanModal(false)}
+        tools={scanResults}
+        onAddToWishlist={handleAddToWishlist}
+      />
     </div>
   );
 };

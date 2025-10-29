@@ -26,6 +26,7 @@ import Gallery from "./pages/Gallery";
 import Instructions from "./pages/Instructions";
 import HowItWorks from "./pages/HowItWorks";
 import BakeBook from "./pages/BakeBook";
+import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,11 @@ const AppContent = () => {
       <Route path="/bakebook" element={
         <ProtectedRoute>
           <BakeBook />
+        </ProtectedRoute>
+      } />
+      <Route path="/wishlist" element={
+        <ProtectedRoute>
+          <Wishlist />
         </ProtectedRoute>
       } />
       <Route path="/community" element={

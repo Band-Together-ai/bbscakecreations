@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useViewAs } from "@/contexts/ViewAsContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal, Eye, EyeOff, Book } from "lucide-react";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal, Eye, EyeOff, Book, Heart } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import {
 
 const Navigation = () => {
   const navigate = useNavigate();
-  const { isAdmin, isAuthenticated, role } = useUserRole();
+  const { isAdmin, isAuthenticated, role, canUseWishlists } = useUserRole();
   const { viewAsRole, isViewingAs, clearViewAs } = useViewAs();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -101,6 +101,15 @@ const Navigation = () => {
               <Book className="w-4 h-4" />
               BakeBook
             </button>
+            {canUseWishlists && (
+              <button
+                onClick={() => navigate("/wishlist")}
+                className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
+              >
+                <Heart className="w-4 h-4" />
+                Wishlist
+              </button>
+            )}
             <button
               onClick={() => navigate("/how-it-works")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
@@ -257,6 +266,18 @@ const Navigation = () => {
               <Book className="w-4 h-4" />
               BakeBook
             </button>
+            {canUseWishlists && (
+              <button
+                onClick={() => {
+                  navigate("/wishlist");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
+              >
+                <Heart className="w-4 h-4" />
+                Wishlist
+              </button>
+            )}
             <button
               onClick={() => {
                 navigate("/gallery");
