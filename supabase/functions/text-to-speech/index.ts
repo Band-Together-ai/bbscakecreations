@@ -13,17 +13,25 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🔊 Text-to-speech function called');
+    
     const { text, voice } = await req.json()
+    console.log('📝 Text length:', text?.length || 0, 'Voice:', voice || 'alloy');
 
     if (!text) {
+      console.error('❌ No text provided');
       throw new Error('Text is required')
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
+    console.log('🔑 OPENAI_API_KEY is set:', !!OPENAI_API_KEY);
+    
     if (!OPENAI_API_KEY) {
+      console.error('❌ OPENAI_API_KEY not configured');
       throw new Error('OPENAI_API_KEY is not configured')
     }
 
+    console.log('🌐 Calling OpenAI TTS API...');
     // Generate speech from text
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -39,16 +47,27 @@ serve(async (req) => {
       }),
     })
 
+    console.log('📥 OpenAI TTS response status:', response.status);
+
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error?.message || 'Failed to generate speech')
+      const errorText = await response.text();
+      console.error('❌ OpenAI TTS error:', response.status, errorText);
+      
+      if (response.status === 401) {
+        throw new Error('Authentication failed with OpenAI TTS. Please check API key.')
+      }
+      
+      throw new Error(`Failed to generate speech (${response.status}): ${errorText}`)
     }
 
+    console.log('🎵 Converting audio to base64...');
     // Convert audio buffer to base64
     const arrayBuffer = await response.arrayBuffer()
     const base64Audio = btoa(
       String.fromCharCode(...new Uint8Array(arrayBuffer))
     )
+    
+    console.log('✅ TTS successful, base64 length:', base64Audio.length);
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
@@ -58,6 +77,7 @@ serve(async (req) => {
     )
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
+    console.error('❌ TTS error:', msg);
     return new Response(
       JSON.stringify({ error: msg }),
       {

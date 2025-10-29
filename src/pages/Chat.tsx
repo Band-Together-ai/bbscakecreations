@@ -198,20 +198,40 @@ const Chat = () => {
 
   const speak = async (text: string) => {
     try {
+      console.log('🔊 Calling text-to-speech for:', text.substring(0, 50) + '...');
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text }
+        body: { text, voice: 'nova' } // Using 'nova' voice for a friendly female voice
       });
+      
       if (error) {
-        console.error('TTS error:', error);
-        toast.error('Failed to play voice');
+        console.error('❌ TTS error:', error);
+        toast.error('Voice playback failed: ' + error.message);
         return;
       }
+      
+      if (data?.error) {
+        console.error('❌ TTS returned error:', data.error);
+        toast.error('Voice generation failed: ' + data.error);
+        return;
+      }
+      
       if (data?.audioContent) {
+        console.log('✅ Playing audio, length:', data.audioContent.length);
         const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+        audio.onloadeddata = () => console.log('🎵 Audio loaded successfully');
+        audio.onerror = (e) => {
+          console.error('❌ Audio playback error:', e);
+          toast.error('Could not play audio');
+        };
         await audio.play();
+        toast.success('🔊 Playing voice response');
+      } else {
+        console.error('❌ No audio content in response');
+        toast.error('No audio received from server');
       }
     } catch (err) {
-      console.error('TTS exception:', err);
+      console.error('❌ TTS exception:', err);
+      toast.error('Voice failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
