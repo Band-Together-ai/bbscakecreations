@@ -1,34 +1,61 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import WaveBackground from '@/components/WaveBackground';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-// Dynamically import all cake images from assets
-const imageModules = import.meta.glob('@/assets/cake-*.jpg', { eager: true });
-const cakeImages = Object.entries(imageModules).map(([path, module]: [string, any]) => ({
-  src: module.default,
-  name: path.split('/').pop()?.replace('.jpg', '').replace('cake-', '').replace(/-/g, ' '),
-}));
-
-// Add individual cake images
-const additionalImages = [
-  { src: new URL('@/assets/carrot-cake.jpg', import.meta.url).href, name: 'Carrot Cake', hasRecipe: true },
-  { src: new URL('@/assets/chocolate-fudge-cake.jpg', import.meta.url).href, name: 'Chocolate Fudge', hasRecipe: true },
-  { src: new URL('@/assets/lemon-blueberry-cake.jpg', import.meta.url).href, name: 'Lemon Blueberry', hasRecipe: true },
-  { src: new URL('@/assets/red-velvet-cake.jpg', import.meta.url).href, name: 'Red Velvet', hasRecipe: true },
-  { src: new URL('@/assets/vanilla-layer-cake.jpg', import.meta.url).href, name: 'Vanilla Layer', hasRecipe: true },
-];
-
-const allCakeImages = [
-  ...additionalImages,
-  ...cakeImages.map(img => ({ ...img, hasRecipe: false }))
-];
+import { supabase } from '@/integrations/supabase/client';
 
 const Gallery = () => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<{ src: string; name?: string; hasRecipe?: boolean } | null>(null);
+  const [uploadedPhotos, setUploadedPhotos] = useState<{ name: string; url: string }[]>([]);
+  const [recipePhotos, setRecipePhotos] = useState<{ photo_url: string; recipe_id: string }[]>([]);
+
+  useEffect(() => {
+    fetchUploadedPhotos();
+    fetchRecipePhotos();
+  }, []);
+
+  const fetchUploadedPhotos = async () => {
+    const { data, error } = await supabase.storage
+      .from('recipe-photos')
+      .list('', { sortBy: { column: 'created_at', order: 'desc' } });
+
+    if (error) {
+      console.error("Error fetching photos:", error);
+      return;
+    }
+
+    if (data) {
+      const photosWithUrls = data.map(file => ({
+        name: file.name,
+        url: supabase.storage.from('recipe-photos').getPublicUrl(file.name).data.publicUrl
+      }));
+      setUploadedPhotos(photosWithUrls);
+    }
+  };
+
+  const fetchRecipePhotos = async () => {
+    const { data, error } = await supabase
+      .from('recipe_photos')
+      .select('photo_url, recipe_id');
+
+    if (error) {
+      console.error("Error fetching recipe photos:", error);
+      return;
+    }
+
+    if (data) {
+      setRecipePhotos(data);
+    }
+  };
+
+  const allCakeImages = uploadedPhotos.map(photo => ({
+    src: photo.url,
+    name: photo.name.replace('.jpg', '').replace('.png', '').replace(/-/g, ' '),
+    hasRecipe: recipePhotos.some(rp => rp.photo_url === photo.url)
+  }));
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
