@@ -16,6 +16,7 @@ import {
 import { useUserRole } from "@/hooks/useUserRole";
 import { BookOpen, Search, Star, Archive } from "lucide-react";
 import { toast } from "sonner";
+import { TeaserBakeBook } from "@/components/TeaserBakeBook";
 
 interface BakeBookEntry {
   id: string;
@@ -37,11 +38,21 @@ const FOLDERS = ["All", "Saved", "Favorites", "To Try", "Made It", "Holiday"];
 
 const BakeBook = () => {
   const navigate = useNavigate();
-  const { bakeBookLimit } = useUserRole();
+  const { isAuthenticated, bakeBookLimit } = useUserRole();
   const [entries, setEntries] = useState<BakeBookEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Show teaser for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <TeaserBakeBook />
+      </div>
+    );
+  }
 
   useEffect(() => {
     fetchEntries();

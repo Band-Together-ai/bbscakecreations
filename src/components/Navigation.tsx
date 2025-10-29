@@ -94,15 +94,13 @@ const Navigation = () => {
               <BookOpen className="w-4 h-4" />
               Recipes
             </button>
-            {isAuthenticated && (
-              <button
-                onClick={() => navigate("/bakebook")}
-                className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
-              >
-                <Book className="w-4 h-4" />
-                BakeBook
-              </button>
-            )}
+            <button
+              onClick={() => navigate("/bakebook")}
+              className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
+            >
+              <Book className="w-4 h-4" />
+              BakeBook
+            </button>
             <button
               onClick={() => navigate("/instructions")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
@@ -249,18 +247,16 @@ const Navigation = () => {
               <BookOpen className="w-4 h-4" />
               Recipes
             </button>
-            {isAuthenticated && (
-              <button
-                onClick={() => {
-                  navigate("/bakebook");
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
-              >
-                <Book className="w-4 h-4" />
-                BakeBook
-              </button>
-            )}
+            <button
+              onClick={() => {
+                navigate("/bakebook");
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
+            >
+              <Book className="w-4 h-4" />
+              BakeBook
+            </button>
             <button
               onClick={() => {
                 navigate("/gallery");
