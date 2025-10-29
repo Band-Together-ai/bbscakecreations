@@ -255,10 +255,10 @@ const Recipes = () => {
                         Gluten-Free
                       </div>
                     )}
-                    {(isAdmin || isCollaborator) && recipe.featured_position && (
+                    {(isAdmin || isCollaborator) && recipe.featured_position === 1 && (
                       <div className="inline-flex items-center gap-1 px-3 py-1 bg-coral/10 text-coral rounded-full text-sm font-fredoka w-fit">
                         <Star className="w-3 h-3" />
-                        {recipe.featured_position === 1 ? "Featured Cake ✨" : `Position ${recipe.featured_position}`}
+                        Featured Cake ✨
                       </div>
                     )}
                   </div>
