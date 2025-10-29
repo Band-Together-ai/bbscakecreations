@@ -486,7 +486,7 @@ ${recipe.instructions || 'Full instructions available with subscription'}
           </Button>
           
           {isAuthenticated && (
-            <RecipeSaveButton recipeId={recipe.id} canViewFullRecipe={canViewFullRecipe} />
+            <RecipeSaveButton recipeId={recipe.id} canViewFullRecipe={canViewFullRecipe} showLabel />
           )}
           
           {canViewFullRecipe ? (

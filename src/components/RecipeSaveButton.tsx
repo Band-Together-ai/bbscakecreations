@@ -14,12 +14,13 @@ import { useNavigate } from "react-router-dom";
 
 interface RecipeSaveButtonProps {
   recipeId: string;
-  canViewFullRecipe: boolean;
+  canViewFullRecipe: boolean; // kept for backward-compat, no longer gates visibility
+  showLabel?: boolean;
 }
 
 const FOLDERS = ["Saved", "Favorites", "To Try", "Made It", "Holiday"];
 
-export const RecipeSaveButton = ({ recipeId, canViewFullRecipe }: RecipeSaveButtonProps) => {
+export const RecipeSaveButton = ({ recipeId, canViewFullRecipe, showLabel = false }: RecipeSaveButtonProps) => {
   const [isSaved, setIsSaved] = useState(false);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -185,21 +186,17 @@ export const RecipeSaveButton = ({ recipeId, canViewFullRecipe }: RecipeSaveButt
     }
   };
 
-  if (!canViewFullRecipe) {
-    return null;
-  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant={isSaved ? "default" : "outline"}
-          size="icon"
           disabled={loading}
+          className="gap-2"
         >
-          <Heart
-            className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`}
-          />
+          <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
+          {showLabel && (isSaved ? (currentFolder ? `Saved: ${currentFolder}` : "Saved") : "Add to BakeBook")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
