@@ -24,6 +24,7 @@ import Tools from "./pages/Tools";
 import Favorites from "./pages/Favorites";
 import Gallery from "./pages/Gallery";
 import Instructions from "./pages/Instructions";
+import BakeBook from "./pages/BakeBook";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,11 @@ const AppContent = () => {
       <Route path="/tools" element={<Tools />} />
       <Route path="/favorites" element={<Favorites />} />
       <Route path="/gallery" element={<Gallery />} />
+      <Route path="/bakebook" element={
+        <ProtectedRoute>
+          <BakeBook />
+        </ProtectedRoute>
+      } />
       <Route path="/community" element={
         <ProtectedRoute>
           <Community />

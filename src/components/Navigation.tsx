@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useViewAs } from "@/contexts/ViewAsContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal, Eye, EyeOff } from "lucide-react";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal, Eye, EyeOff, Book } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
 import {
   DropdownMenu,
@@ -94,6 +94,15 @@ const Navigation = () => {
               <BookOpen className="w-4 h-4" />
               Recipes
             </button>
+            {isAuthenticated && (
+              <button
+                onClick={() => navigate("/bakebook")}
+                className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
+              >
+                <Book className="w-4 h-4" />
+                BakeBook
+              </button>
+            )}
             <button
               onClick={() => navigate("/instructions")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
@@ -240,6 +249,18 @@ const Navigation = () => {
               <BookOpen className="w-4 h-4" />
               Recipes
             </button>
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  navigate("/bakebook");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
+              >
+                <Book className="w-4 h-4" />
+                BakeBook
+              </button>
+            )}
             <button
               onClick={() => {
                 navigate("/gallery");

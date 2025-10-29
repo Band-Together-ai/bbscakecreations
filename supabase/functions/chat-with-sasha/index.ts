@@ -107,6 +107,50 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(50)
 
+    // Fetch user's BakeBook entries if authenticated
+    let bakeBookContext = '';
+    let bakeBookCount = 0;
+    if (userId) {
+      const { data: bakebookData } = await supabase
+        .from('user_bakebooks')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (bakebookData) {
+        const { data: entries, count } = await supabase
+          .from('bakebook_entries')
+          .select(`
+            id,
+            folder,
+            attempt_number,
+            pan_size,
+            recipe:recipes(id, title, is_base_recipe, base_recipe_id)
+          `, { count: 'exact' })
+          .eq('bakebook_id', bakebookData.id)
+          .eq('is_archived', false)
+          .order('saved_at', { ascending: false })
+          .limit(20);
+        
+        bakeBookCount = count || 0;
+        
+        if (entries && entries.length > 0) {
+          bakeBookContext = `\n\nUSER'S BAKEBOOK (${bakeBookCount} saved recipes):
+${entries.map(e => {
+  const recipe = e.recipe as any;
+  return `- ${recipe?.title || 'Unknown'} (${e.folder}${recipe?.is_base_recipe ? ', BASE recipe' : ''}${e.pan_size ? `, uses ${e.pan_size}` : ''}, made ${e.attempt_number}x)`;
+}).join('\n')}
+
+SASHA'S BAKEBOOK INTELLIGENCE:
+- If user asks about a VARIANT, suggest trying the BASE first for technique mastery
+- If user saves a BASE, celebrate and mention variants
+- For make-ahead recipes, offer staging plans (active time → freeze → thaw → decorate)
+- Track pan preferences and suggest compatible recipes
+`;
+        }
+      }
+    }
+
     if (recipesError) {
       console.error("Error fetching recipes:", recipesError);
     }
@@ -130,6 +174,19 @@ serve(async (req) => {
       if (storyNotes) trainingContext += `\n\nStories & Anecdotes:\n${storyNotes}`
     }
 
+    // Tier-aware nudges
+    let tierNudge = '';
+    if (!userId) {
+      tierNudge = `\n\nTIER: Free (0 BakeBook slots)
+At turn 8: "Hey there — I can help you plan this if you sign in (totally free). Want me to save this to your BakeBook?"`;
+    } else if (userRole === 'free' && bakeBookCount >= 8) {
+      tierNudge = `\n\nTIER: Registered (${bakeBookCount}/10 BakeBook slots)
+Gentle nudge: "Your BakeBook is almost full! Want unlimited saves + instant tool suggestions? Join the Home Bakers Club for $9.99/month. 💕"`;
+    } else if (['admin', 'collaborator', 'paid'].includes(userRole)) {
+      tierNudge = `\n\nTIER: ${userRole.toUpperCase()} — unlimited BakeBook, real-time scanning
+On save: "All set! I scanned your recipe. Want a multi-day staging plan? 🌊"`;
+    }
+
     console.log("Calling OpenAI GPT-4o with messages:", messages.length, ",", recipes?.length || 0, "recipes,", tools?.length || 0, "tools, and", trainingNotes?.length || 0, "training notes");
 
     // Build Sasha's system message with recipe/tool context
@@ -147,7 +204,9 @@ ${recipes.map(r => `**${r.title}** ${r.is_gluten_free ? '(Gluten-Free)' : '(Can 
 ${tools && tools.length > 0 ? `
 Recommended Tools: ${tools.map(t => t.name).join(', ')}
 ` : ''}
-${trainingContext}`;
+${trainingContext}
+${bakeBookContext}
+${tierNudge}`;
 
     // Prepare messages with conversation history
     const allMessages = [
