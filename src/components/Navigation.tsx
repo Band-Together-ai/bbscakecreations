@@ -2,9 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useViewAs } from "@/contexts/ViewAsContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal } from "lucide-react";
+import { LogOut, Home, BookOpen, Users, MessageSquare, User, Settings, Menu, X, Coffee, HelpCircle, MoreHorizontal, Eye, EyeOff } from "lucide-react";
 import logoHorizontal from "@/assets/logo-horizontal-transparent.png";
 import {
   DropdownMenu,
@@ -15,7 +16,8 @@ import {
 
 const Navigation = () => {
   const navigate = useNavigate();
-  const { isAdmin, isAuthenticated } = useUserRole();
+  const { isAdmin, isAuthenticated, role } = useUserRole();
+  const { viewAsRole, isViewingAs, clearViewAs } = useViewAs();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -24,7 +26,28 @@ const Navigation = () => {
   };
 
   return (
-    <header className="relative z-20 border-b border-border bg-card/80 backdrop-blur-sm">
+    <>
+      {/* View As Banner */}
+      {isViewingAs && (
+        <div className="bg-yellow-500 text-black px-4 py-2 text-center text-sm font-medium">
+          <div className="flex items-center justify-center gap-2">
+            <Eye className="h-4 w-4" />
+            <span>
+              Viewing as: <strong>{viewAsRole === 'unauthenticated' ? 'Not Logged In' : viewAsRole?.toUpperCase()}</strong>
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={clearViewAs}
+              className="h-6 ml-2 gap-1 text-black hover:text-black hover:bg-yellow-600"
+            >
+              <EyeOff className="h-3 w-3" />
+              Exit
+            </Button>
+          </div>
+        </div>
+      )}
+      <header className="relative z-20 border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="w-full px-3 py-3 md:px-4 md:py-4">
         <div className="flex items-center gap-3">
           <button
@@ -265,6 +288,7 @@ const Navigation = () => {
         )}
       </div>
     </header>
+    </>
   );
 };
 

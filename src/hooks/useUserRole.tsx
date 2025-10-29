@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useViewAs } from '@/contexts/ViewAsContext';
 
 type AppRole = 'admin' | 'collaborator' | 'paid' | 'free' | null;
 
 export const useUserRole = () => {
+  const { viewAsRole, isViewingAs } = useViewAs();
   const [role, setRole] = useState<AppRole>(null);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -87,16 +89,28 @@ export const useUserRole = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Override with viewAs if active (but don't allow viewing as unauthenticated with a real userId)
+  const effectiveRole = isViewingAs && viewAsRole !== 'unauthenticated' ? viewAsRole : role;
+  const effectiveUserId = isViewingAs && viewAsRole === 'unauthenticated' ? null : userId;
+  const effectiveIsAuthenticated = isViewingAs && viewAsRole === 'unauthenticated' ? false : userId !== null;
+  
+  // Recalculate hasFullAccess based on effective role
+  const effectiveHasFullAccess = effectiveRole === 'admin' || 
+                                  effectiveRole === 'collaborator' || 
+                                  effectiveRole === 'paid' || 
+                                  isPromo ||
+                                  hasFullAccess;
+
   return {
-    role,
-    userId,
+    role: effectiveRole,
+    userId: effectiveUserId,
     loading,
-    isAdmin: role === 'admin',
-    isCollaborator: role === 'collaborator',
-    isPaid: role === 'paid',
-    isFree: role === 'free',
-    isAuthenticated: userId !== null,
+    isAdmin: effectiveRole === 'admin',
+    isCollaborator: effectiveRole === 'collaborator',
+    isPaid: effectiveRole === 'paid',
+    isFree: effectiveRole === 'free',
+    isAuthenticated: effectiveIsAuthenticated,
     isPromo,
-    hasFullAccess,
+    hasFullAccess: effectiveHasFullAccess,
   };
 };

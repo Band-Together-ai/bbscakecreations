@@ -19,6 +19,7 @@ import { ToolsTab } from "@/components/admin/ToolsTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
 import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
 import { ProfilePhotoEditor } from "@/components/admin/ProfilePhotoEditor";
+import { ViewAsTab } from "@/components/admin/ViewAsTab";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -870,6 +871,7 @@ const Admin = () => {
             <TabsTrigger value="bakers">Bakers</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
+            <TabsTrigger value="viewas">View As</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -1766,6 +1768,11 @@ const Admin = () => {
           {/* BAKERS TAB */}
           <TabsContent value="bakers">
             <FavoriteBakersTab />
+          </TabsContent>
+
+          {/* VIEW AS TAB */}
+          <TabsContent value="viewas">
+            <ViewAsTab />
           </TabsContent>
 
           {/* SETTINGS TAB */}
