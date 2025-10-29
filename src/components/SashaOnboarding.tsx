@@ -77,14 +77,14 @@ export const SashaOnboarding = ({ onComplete }: OnboardingProps) => {
 
       const { error } = await supabase
         .from("user_profiles")
-        .update({
+        .upsert({
+          id: user.id,
           persona,
           experience_level: experience,
           goal_focus: goal,
           style_vibe: style,
           onboarding_completed: true
-        })
-        .eq("id", user.id);
+        });
 
       if (error) throw error;
 
