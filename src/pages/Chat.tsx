@@ -19,9 +19,10 @@ const Chat = () => {
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
       role: "assistant",
-      content: "Hey, it's so good to see you! Thanks for coming by!! 💕\n\nI'm Sasha, Brandia's AI baking assistant, and I'm here to help you bake anything you can dream of! Right now, I'm completely FREE to use while we're in beta.\n\nIn the future, we'll be introducing a flexible tip-based model or subscription options to keep me running and learning more baking magic. But for now, let's just have fun baking together!\n\nWhat are we going to create today? 🎂✨",
+      content: "Hey, it's so good to see you! Thanks for coming by!! 💕\n\nI'm Sasha, Brandia's AI baking assistant. I'm completely FREE while we're in beta—in the future, we'll introduce a tip-based model or subscription to keep learning more baking magic.\n\nBut first, let me ask:",
     },
   ]);
+  const [showQuickStart, setShowQuickStart] = useState(true);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -252,6 +253,16 @@ const Chat = () => {
     await sendMessageWithContent(message);
   };
 
+  const handleQuickChoice = async (choice: 'tour' | 'baking') => {
+    setShowQuickStart(false);
+    
+    if (choice === 'tour') {
+      await sendMessageWithContent("Yes, please show me what this app can do and share some best practices!");
+    } else {
+      await sendMessageWithContent("I'm ready! Let's talk baking, tools, or your favorite fails!");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       <Navigation />
@@ -301,6 +312,28 @@ const Chat = () => {
                            msg.content.find(c => c.type === 'text')?.text || '' : 
                            ''}
                       </p>
+                      
+                      {/* Quick choice buttons - only show on first message */}
+                      {idx === 0 && showQuickStart && msg.role === 'assistant' && (
+                        <div className="flex flex-col gap-2 mt-4">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="bg-white hover:bg-ocean-wave hover:text-white border-ocean-wave text-ocean-deep"
+                            onClick={() => handleQuickChoice('tour')}
+                          >
+                            ✨ Show me what this app can do
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="bg-white hover:bg-ocean-wave hover:text-white border-ocean-wave text-ocean-deep"
+                            onClick={() => handleQuickChoice('baking')}
+                          >
+                            🎂 Let's talk baking!
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
