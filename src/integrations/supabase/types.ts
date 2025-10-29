@@ -612,6 +612,30 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_photo_names: {
+        Row: {
+          created_at: string
+          custom_name: string
+          id: string
+          photo_url: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_name: string
+          id?: string
+          photo_url: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_name?: string
+          id?: string
+          photo_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
