@@ -485,17 +485,18 @@ ${recipe.instructions || 'Full instructions available with subscription'}
             Chat with Sasha
           </Button>
           
+          {isAuthenticated && (
+            <RecipeSaveButton recipeId={recipe.id} canViewFullRecipe={canViewFullRecipe} />
+          )}
+          
           {canViewFullRecipe ? (
-            <>
-              <Button
-                onClick={handleDownload}
-                variant="outline"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download Recipe
-              </Button>
-              <RecipeSaveButton recipeId={recipe.id} canViewFullRecipe={canViewFullRecipe} />
-            </>
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Recipe
+            </Button>
           ) : (
             <Button
               onClick={() => navigate("/auth")}
