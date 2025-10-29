@@ -3,29 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import WaveBackground from '@/components/WaveBackground';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-// Import all cake images
-import cake1 from '@/assets/cake-1.jpg';
-import cake2 from '@/assets/cake-2.jpg';
-import cake3 from '@/assets/cake-3.jpg';
-import cake4 from '@/assets/cake-4.jpg';
-import cake5 from '@/assets/cake-5.jpg';
-import cake6 from '@/assets/cake-6.jpg';
-import carrotCake from '@/assets/carrot-cake.jpg';
-import chocolateFudgeCake from '@/assets/chocolate-fudge-cake.jpg';
-import lemonBlueberryCake from '@/assets/lemon-blueberry-cake.jpg';
-import redVelvetCake from '@/assets/red-velvet-cake.jpg';
-import vanillaLayerCake from '@/assets/vanilla-layer-cake.jpg';
+// Dynamically import all cake images from assets
+const imageModules = import.meta.glob('@/assets/cake-*.jpg', { eager: true });
+const cakeImages = Object.entries(imageModules).map(([path, module]: [string, any]) => ({
+  src: module.default,
+  name: path.split('/').pop()?.replace('.jpg', '').replace('cake-', '').replace(/-/g, ' '),
+}));
 
-const cakeImages = [
-  cake1, cake2, cake3, cake4, cake5, cake6,
-  carrotCake, chocolateFudgeCake, lemonBlueberryCake,
-  redVelvetCake, vanillaLayerCake
+// Add individual cake images
+const additionalImages = [
+  { src: new URL('@/assets/carrot-cake.jpg', import.meta.url).href, name: 'Carrot Cake', hasRecipe: true },
+  { src: new URL('@/assets/chocolate-fudge-cake.jpg', import.meta.url).href, name: 'Chocolate Fudge', hasRecipe: true },
+  { src: new URL('@/assets/lemon-blueberry-cake.jpg', import.meta.url).href, name: 'Lemon Blueberry', hasRecipe: true },
+  { src: new URL('@/assets/red-velvet-cake.jpg', import.meta.url).href, name: 'Red Velvet', hasRecipe: true },
+  { src: new URL('@/assets/vanilla-layer-cake.jpg', import.meta.url).href, name: 'Vanilla Layer', hasRecipe: true },
+];
+
+const allCakeImages = [
+  ...additionalImages,
+  ...cakeImages.map(img => ({ ...img, hasRecipe: false }))
 ];
 
 const Gallery = () => {
   const navigate = useNavigate();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ src: string; name?: string; hasRecipe?: boolean } | null>(null);
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -47,7 +50,7 @@ const Gallery = () => {
 
           {/* Grid Gallery */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-            {cakeImages.map((image, index) => (
+            {allCakeImages.map((image, index) => (
               <Card
                 key={index}
                 className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-wave overflow-hidden group aspect-square"
@@ -55,12 +58,19 @@ const Gallery = () => {
               >
                 <div className="relative w-full h-full">
                   <img
-                    src={image}
-                    alt={`Brandia's Cake ${index + 1}`}
+                    src={image.src}
+                    alt={image.name || `Brandia's Cake ${index + 1}`}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
-                    <p className="text-white font-fredoka text-sm">View Details</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-ocean-deep/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end p-4 gap-2">
+                    <p className="text-white font-fredoka text-sm capitalize">
+                      {image.name || 'Beautiful Cake'}
+                    </p>
+                    {!image.hasRecipe && (
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/40">
+                        Recipe Coming Soon
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -89,10 +99,20 @@ const Gallery = () => {
         >
           <div className="relative max-w-4xl max-h-[90vh] animate-scale-in">
             <img
-              src={selectedImage}
-              alt="Selected cake"
+              src={selectedImage.src}
+              alt={selectedImage.name || "Selected cake"}
               className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-wave"
             />
+            <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-3">
+              <p className="text-white font-fredoka text-lg capitalize mb-1">
+                {selectedImage.name || 'Beautiful Cake'}
+              </p>
+              {!selectedImage.hasRecipe && (
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/40">
+                  Recipe Coming Soon
+                </Badge>
+              )}
+            </div>
             <button
               className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-sm transition-colors"
               onClick={(e) => {
