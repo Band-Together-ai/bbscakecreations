@@ -1,0 +1,120 @@
+/* UI V2 Coastal-Warm Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600;700&display=swap');
+
+:root.ui-v2 {
+  /* Coastal-Warm Colors */
+  --v2-linen: #FAF5EF;
+  --v2-warm-white: #FFFFFF;
+  --v2-coral: #F7A48C;
+  --v2-chocolate: #5B4A3A;
+  --v2-slate: #5E6A6E;
+  --v2-seafoam: #CFE6DE;
+  
+  /* Typography */
+  --v2-font-heading: 'Playfair Display', serif;
+  --v2-font-body: 'Lato', sans-serif;
+  --v2-body-size: 18px;
+  --v2-line-height: 1.5;
+  
+  /* Spacing */
+  --v2-gutter: 16px;
+  --v2-gutter-lg: 24px;
+  --v2-radius: 12px;
+  
+  /* Shadows */
+  --v2-shadow-card: 0 2px 12px rgba(91, 74, 58, 0.08);
+  --v2-shadow-button: 0 2px 8px rgba(247, 164, 140, 0.2);
+  
+  /* Touch targets */
+  --v2-touch-min: 44px;
+}
+
+.ui-v2 {
+  background-color: var(--v2-linen);
+  font-family: var(--v2-font-body);
+  font-size: var(--v2-body-size);
+  line-height: var(--v2-line-height);
+  color: var(--v2-chocolate);
+}
+
+.ui-v2 h1,
+.ui-v2 h2,
+.ui-v2 h3,
+.ui-v2 h4 {
+  font-family: var(--v2-font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ui-v2 h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ui-v2 h2 {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.ui-v2 h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ui-v2-card {
+  background: var(--v2-warm-white);
+  border-radius: var(--v2-radius);
+  box-shadow: var(--v2-shadow-card);
+  padding: var(--v2-gutter-lg);
+}
+
+.ui-v2-button {
+  min-height: var(--v2-touch-min);
+  border-radius: var(--v2-radius);
+  font-family: var(--v2-font-body);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.ui-v2-button-primary {
+  background-color: var(--v2-coral);
+  color: var(--v2-warm-white);
+  box-shadow: var(--v2-shadow-button);
+}
+
+.ui-v2-button-primary:hover {
+  background-color: #F58D6E;
+  transform: translateY(-1px);
+}
+
+.ui-v2-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: var(--v2-seafoam);
+  color: var(--v2-chocolate);
+}
+
+.ui-v2-subtext {
+  color: var(--v2-slate);
+  font-size: 16px;
+}
+
+/* Accessibility */
+.ui-v2 *:focus-visible {
+  outline: 2px solid var(--v2-coral);
+  outline-offset: 2px;
+}
+
+/* Mobile-first responsive utilities */
+@media (min-width: 768px) {
+  :root.ui-v2 {
+    --v2-body-size: 18px;
+    --v2-gutter: 20px;
+    --v2-gutter-lg: 32px;
+  }
+}

@@ -28,6 +28,9 @@ import HowItWorks from "./pages/HowItWorks";
 import BakeBook from "./pages/BakeBook";
 import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
+import RecipeDetailV2 from "./pages/RecipeDetailV2";
+import { UiToggle } from "./components/dev/UiToggle";
+import { featureFlags } from "./config/featureFlags";
 
 const queryClient = new QueryClient();
 
@@ -51,8 +54,10 @@ const AppContent = () => {
   usePageTracking(userId);
 
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
+    <>
+      <UiToggle />
+      <Routes>
+        <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/chat" element={<Chat />} />
       <Route path="/admin" element={
@@ -66,6 +71,7 @@ const AppContent = () => {
         </AdminRoute>
       } />
       <Route path="/recipes" element={<Recipes />} />
+      <Route path="/recipes/:id" element={featureFlags.UI_V2 ? <RecipeDetailV2 /> : <RecipeDetail />} />
       <Route path="/recipe/:id" element={<RecipeDetail />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/tools" element={<Tools />} />
@@ -90,7 +96,8 @@ const AppContent = () => {
       <Route path="/instructions" element={<Instructions />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </>
   );
 };
 
