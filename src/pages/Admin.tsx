@@ -923,17 +923,18 @@ const Admin = () => {
                           <div
                             key={photo.name}
                             onClick={() => togglePhotoSelection(photo)}
-                            className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all w-full ${
+                            className={`group relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all w-full ${
                               selectedPhotos.some(p => p.name === photo.name)
                                 ? 'border-ocean-wave ring-2 ring-ocean-wave'
                                 : 'border-transparent hover:border-ocean-wave/50'
                             }`}
-                            style={{ aspectRatio: '1/1' }}
                           >
+                            {/* Square ratio that's iOS-safe */}
+                            <div className="pt-[100%]" />
                             <img
                               src={photo.url}
                               alt={photo.name}
-                              className="w-full h-full object-cover"
+                              className="absolute inset-0 w-full h-full object-cover block"
                             />
                             {selectedPhotos.some(p => p.name === photo.name) && (
                               <div className="absolute top-2 right-2 bg-ocean-wave text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
