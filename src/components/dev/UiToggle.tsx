@@ -8,7 +8,7 @@ export const UiToggle = () => {
 
   useEffect(() => {
     // Check if UI_V2 is enabled
-    const isV2 = document.documentElement.classList.contains("ui-v2");
+    const isV2 = document.body.classList.contains("ui-v2");
     setUiVersion(isV2 ? "v2" : "v1");
   }, []);
 
@@ -16,12 +16,10 @@ export const UiToggle = () => {
     const newVersion = uiVersion === "v1" ? "v2" : "v1";
     
     if (newVersion === "v2") {
-      document.documentElement.classList.add("ui-v2");
+      document.body.classList.add("ui-v2");
     } else {
-      document.documentElement.classList.remove("ui-v2");
+      document.body.classList.remove("ui-v2");
     }
-    
-    setUiVersion(newVersion);
     
     // Show toast notification
     const toast = document.createElement("div");
