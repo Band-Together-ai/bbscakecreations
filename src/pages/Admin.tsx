@@ -1156,13 +1156,13 @@ const Admin = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[600px] pr-4">
-                    {recipes.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">
-                        No recipes yet. Add your first one!
-                      </p>
-                    ) : (
-                      <div className="space-y-4">
+                  {recipes.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No recipes yet. Add your first one!
+                    </p>
+                  ) : (
+                    <ScrollArea className="h-[800px]">
+                      <div className="space-y-4 pr-4">
                         {recipes.map((recipe) => {
                           const recipePhotosData = getRecipePhotos(recipe.id);
                           const headlinePhoto = getHeadlinePhoto(recipe.id);
@@ -1288,8 +1288,8 @@ const Admin = () => {
                           );
                         })}
                       </div>
-                    )}
-                  </ScrollArea>
+                    </ScrollArea>
+                  )}
                 </CardContent>
               </Card>
             </div>
