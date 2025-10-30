@@ -35,8 +35,35 @@
 }
 
 body.ui-v2 { 
-  background: var(--linen); 
-  color: var(--text); 
+  /* Complete Tailwind theme override for V2 */
+  --background: 30 69% 97%;            /* warm linen background */
+  --foreground: 28 25% 28%;            /* warm brown text */
+  --card: 0 0% 100%;
+  --card-foreground: 28 25% 28%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 28 25% 28%;
+  --primary: 14 85% 72%;               /* coral primary */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 160 30% 86%;            /* seafoam secondary */
+  --secondary-foreground: 28 25% 28%;
+  --muted: 160 30% 86%;                /* seafoam muted */
+  --muted-foreground: 28 25% 28%;
+  --accent: 14 85% 72%;                /* coral accent */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 2 85% 55%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 160 30% 75%;               /* seafoam border */
+  --input: 160 30% 75%;                /* seafoam input */
+  --ring: 14 85% 50%;                  /* coral ring */
+  --radius: 0.75rem;
+
+  /* Override ocean variables with V2 colors */
+  --ocean-deep: 14 85% 60%;            /* coral-based */
+  --ocean-wave: 160 30% 75%;           /* seafoam-based */
+  --ocean-foam: 30 69% 97%;            /* linen-based */
+  --ocean-shore: 30 69% 97%;           /* linen */
+
+  /* V2 typography */
   font-family: var(--v2-font-body);
   font-size: var(--v2-body-size);
   line-height: var(--v2-line-height);
