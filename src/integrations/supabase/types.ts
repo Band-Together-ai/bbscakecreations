@@ -270,6 +270,7 @@ export type Database = {
       baking_tools: {
         Row: {
           affiliate_link: string | null
+          brandia_pick: boolean | null
           brandia_take: string | null
           category: string
           created_at: string | null
@@ -281,9 +282,11 @@ export type Database = {
           name: string
           price_range: string | null
           updated_at: string | null
+          why_she_loves_it: string | null
         }
         Insert: {
           affiliate_link?: string | null
+          brandia_pick?: boolean | null
           brandia_take?: string | null
           category: string
           created_at?: string | null
@@ -295,9 +298,11 @@ export type Database = {
           name: string
           price_range?: string | null
           updated_at?: string | null
+          why_she_loves_it?: string | null
         }
         Update: {
           affiliate_link?: string | null
+          brandia_pick?: boolean | null
           brandia_take?: string | null
           category?: string
           created_at?: string | null
@@ -309,6 +314,7 @@ export type Database = {
           name?: string
           price_range?: string | null
           updated_at?: string | null
+          why_she_loves_it?: string | null
         }
         Relationships: []
       }
@@ -997,6 +1003,7 @@ export type Database = {
         Row: {
           author_id: string | null
           base_recipe_id: string | null
+          brandia_pick: boolean | null
           category: string | null
           created_at: string | null
           description: string | null
@@ -1022,10 +1029,12 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           variant_notes: string | null
+          why_she_loves_it: string | null
         }
         Insert: {
           author_id?: string | null
           base_recipe_id?: string | null
+          brandia_pick?: boolean | null
           category?: string | null
           created_at?: string | null
           description?: string | null
@@ -1051,10 +1060,12 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           variant_notes?: string | null
+          why_she_loves_it?: string | null
         }
         Update: {
           author_id?: string | null
           base_recipe_id?: string | null
+          brandia_pick?: boolean | null
           category?: string | null
           created_at?: string | null
           description?: string | null
@@ -1080,6 +1091,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           variant_notes?: string | null
+          why_she_loves_it?: string | null
         }
         Relationships: [
           {
@@ -1499,6 +1511,48 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      wellness: {
+        Row: {
+          affiliate_link: string | null
+          brandia_pick: boolean | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          name: string
+          updated_at: string | null
+          why_she_loves_it: string | null
+        }
+        Insert: {
+          affiliate_link?: string | null
+          brandia_pick?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          updated_at?: string | null
+          why_she_loves_it?: string | null
+        }
+        Update: {
+          affiliate_link?: string | null
+          brandia_pick?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          updated_at?: string | null
+          why_she_loves_it?: string | null
         }
         Relationships: []
       }

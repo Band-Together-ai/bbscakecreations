@@ -223,6 +223,36 @@ SASHA'S BAKEBOOK INTELLIGENCE:
       console.error("Error fetching tools:", toolsError);
     }
 
+    // Fetch Brandia's Go-Tos
+    const { data: brandiaGoTos } = await supabase
+      .from("baking_tools")
+      .select("name, why_she_loves_it, affiliate_link, category")
+      .eq("brandia_pick", true)
+      .limit(5);
+
+    const { data: brandiaRecipes } = await supabase
+      .from("recipes")
+      .select("title, why_she_loves_it")
+      .eq("brandia_pick", true)
+      .eq("is_public", true)
+      .limit(3);
+
+    let brandiaGoTosContext = '';
+    if ((brandiaGoTos && brandiaGoTos.length > 0) || (brandiaRecipes && brandiaRecipes.length > 0)) {
+      brandiaGoTosContext = `\n\nBRANDIA'S GO-TOS (Her Personal Favorites):
+${brandiaRecipes && brandiaRecipes.length > 0 ? `\nRecipes:
+${brandiaRecipes.map(r => `• ${r.title}${r.why_she_loves_it ? ` - "${r.why_she_loves_it}"` : ''}`).join('\n')}` : ''}
+${brandiaGoTos && brandiaGoTos.length > 0 ? `\nTools:
+${brandiaGoTos.map(t => `• ${t.name} (${t.category})${t.why_she_loves_it ? ` - "${t.why_she_loves_it}"` : ''}`).join('\n')}` : ''}
+
+BRANDIA'S GO-TOS PROTOCOL:
+• Reference these contextually when relevant to user's question
+• Example: "That cake uses her go-to chocolate base — the one she makes every birthday!"
+• When users ask "What does Brandia use?", share these favorites
+• Feel free to mention why she loves them if it adds value
+`;
+    }
+
     let trainingContext = ""
     if (trainingNotes && trainingNotes.length > 0) {
       const styleNotes = trainingNotes.filter(n => n.category === 'style').map(n => `• ${n.content}`).join('\n')
@@ -269,6 +299,7 @@ ${recipes.map(r => `**${r.title}** ${r.is_gluten_free ? '(Gluten-Free)' : '(Can 
 ${tools && tools.length > 0 ? `
 Recommended Tools: ${tools.map(t => t.name).join(', ')}
 ` : ''}
+${brandiaGoTosContext}
 ${trainingContext}
 ${inspirationContext}
 ${bakeBookContext}

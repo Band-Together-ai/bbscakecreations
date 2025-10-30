@@ -35,6 +35,8 @@ interface Recipe {
   make_ahead_window_days?: number | null;
   recommended_freeze_days?: number | null;
   thaw_time_hours?: number | null;
+  brandia_pick?: boolean;
+  why_she_loves_it?: string;
   staging_json?: Array<{
     stage: string;
     active_min?: number;
@@ -396,6 +398,21 @@ ${recipe.instructions || 'Full instructions available with subscription'}
             <Sparkles className="w-3 h-3 mr-1" />
             Built on Brandia's {baseRecipe.title}
           </Badge>
+        )}
+
+        {/* Brandia's Go-To Badge */}
+        {recipe.brandia_pick && (
+          <div className="mb-6">
+            <Badge className="bg-coral text-white border-none text-base px-4 py-2">
+              <Heart className="w-4 h-4 mr-2 fill-white" />
+              Brandia's Go-To
+            </Badge>
+            {recipe.why_she_loves_it && (
+              <p className="mt-3 text-sm italic text-muted-foreground">
+                💕 {recipe.why_she_loves_it}
+              </p>
+            )}
+          </div>
         )}
 
         {/* Time & Make-Ahead Info */}

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star, Loader2 } from "lucide-react";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { ToolsTab } from "@/components/admin/ToolsTab";
+import { WellnessTab } from "@/components/admin/WellnessTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
 import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
 import { SashaTrainingTab } from "@/components/admin/SashaTrainingTab";
@@ -64,6 +65,8 @@ const Admin = () => {
   const [isPublic, setIsPublic] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
   const [featuredPosition, setFeaturedPosition] = useState<number | null>(null);
+  const [brandiaPick, setBrandiaPick] = useState(false);
+  const [whySheLovesIt, setWhySheLovesIt] = useState("");
 
   // Profile settings state
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -308,6 +311,8 @@ const Admin = () => {
       is_public: isPublic,
       is_featured: isFeatured,
       featured_position: featuredPosition,
+      brandia_pick: brandiaPick,
+      why_she_loves_it: whySheLovesIt || null,
     };
 
     let recipeId = editingRecipe?.id;
@@ -364,6 +369,8 @@ const Admin = () => {
     setIsPublic(false);
     setIsFeatured(false);
     setFeaturedPosition(null);
+    setBrandiaPick(false);
+    setWhySheLovesIt("");
     setSelectedPhotos([]);
     setEditingRecipe(null);
   };
@@ -378,6 +385,8 @@ const Admin = () => {
     setIsPublic(recipe.is_public || false);
     setIsFeatured(recipe.is_featured || false);
     setFeaturedPosition(recipe.featured_position || null);
+    setBrandiaPick(recipe.brandia_pick || false);
+    setWhySheLovesIt(recipe.why_she_loves_it || "");
     
     // Extract link from instructions if present
     const linkMatch = recipe.instructions?.match(/Base recipe link: (.+)/);
@@ -946,6 +955,7 @@ const Admin = () => {
             <TabsTrigger value="sasha">Sasha Training</TabsTrigger>
             <TabsTrigger value="inspiration">Content I Love</TabsTrigger>
             <TabsTrigger value="tools">Tools</TabsTrigger>
+            <TabsTrigger value="wellness">Wellness</TabsTrigger>
             <TabsTrigger value="bakers">Bakers</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
@@ -1145,17 +1155,39 @@ const Admin = () => {
                               Public
                             </Label>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Switch
-                              checked={isFeatured}
-                              onCheckedChange={setIsFeatured}
-                              id="featured-recipe"
-                            />
-                            <Label htmlFor="featured-recipe" className="cursor-pointer">
-                              Featured
-                            </Label>
-                          </div>
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={isFeatured}
+                            onCheckedChange={setIsFeatured}
+                            id="featured-recipe"
+                          />
+                          <Label htmlFor="featured-recipe" className="cursor-pointer">
+                            Featured
+                          </Label>
                         </div>
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={brandiaPick}
+                            onCheckedChange={setBrandiaPick}
+                            id="brandia-pick"
+                          />
+                          <Label htmlFor="brandia-pick" className="cursor-pointer">
+                            Brandia's Go-To
+                          </Label>
+                        </div>
+                      </div>
+
+                      {brandiaPick && (
+                        <div className="space-y-2">
+                          <Label htmlFor="why-she-loves-it">Why She Loves It</Label>
+                          <Textarea
+                            id="why-she-loves-it"
+                            value={whySheLovesIt}
+                            onChange={(e) => setWhySheLovesIt(e.target.value)}
+                            placeholder="e.g., This is my go-to base for every celebration!"
+                          />
+                        </div>
+                      )}
 
                         <div className="space-y-2">
                           <Label>Landing Page Position</Label>
@@ -1876,6 +1908,11 @@ const Admin = () => {
           {/* TOOLS TAB */}
           <TabsContent value="tools">
             <ToolsTab />
+          </TabsContent>
+
+          {/* WELLNESS TAB */}
+          <TabsContent value="wellness">
+            <WellnessTab />
           </TabsContent>
 
           {/* BAKERS TAB */}

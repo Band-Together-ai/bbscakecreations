@@ -21,6 +21,7 @@ import Blog from "./pages/Blog";
 import Community from "./pages/Community";
 import About from "./pages/About";
 import Tools from "./pages/Tools";
+import Wellness from "./pages/Wellness";
 import Favorites from "./pages/Favorites";
 import Gallery from "./pages/Gallery";
 import Instructions from "./pages/Instructions";
@@ -57,7 +58,7 @@ const AppContent = () => {
     <>
       <UiToggle />
       <Routes>
-        <Route path="/" element={<Index />} />
+      <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/chat" element={<Chat />} />
       <Route path="/admin" element={
@@ -75,6 +76,7 @@ const AppContent = () => {
       <Route path="/recipe/:id" element={<RecipeDetail />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/tools" element={<Tools />} />
+      <Route path="/wellness" element={<Wellness />} />
       <Route path="/favorites" element={<Favorites />} />
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/bakebook" element={

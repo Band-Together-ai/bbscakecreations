@@ -18,6 +18,8 @@ interface BakingTool {
   price_range: string;
   brandia_take: string;
   is_featured: boolean;
+  brandia_pick: boolean;
+  why_she_loves_it: string;
 }
 
 const Tools = () => {
@@ -76,6 +78,7 @@ const Tools = () => {
     : tools.filter(t => t.category === selectedCategory);
 
   const featuredTools = tools.filter(t => t.is_featured);
+  const brandiaGoTos = tools.filter(t => t.brandia_pick);
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,15 +95,70 @@ const Tools = () => {
             </p>
           </div>
 
+          {/* Brandia's Go-Tos */}
+          {brandiaGoTos.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-fredoka font-bold flex items-center gap-2">
+                <Heart className="w-6 h-6 text-coral fill-coral" />
+                Brandia's Go-Tos
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {brandiaGoTos.map(tool => (
+                  <Card key={tool.id} className="hover:shadow-lg transition-shadow border-coral/20">
+                    <CardHeader>
+                      {tool.image_url && (
+                        <img 
+                          src={tool.image_url} 
+                          alt={tool.name}
+                          className="w-full h-48 object-cover rounded-md mb-4"
+                        />
+                      )}
+                      <CardTitle className="flex items-start justify-between gap-2">
+                        <span>{tool.name}</span>
+                        <Badge variant="default" className="shrink-0 bg-coral">Go-To</Badge>
+                      </CardTitle>
+                      {tool.price_range && (
+                        <CardDescription>{tool.price_range}</CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">{tool.description}</p>
+                      {tool.brandia_take && (
+                        <div className="bg-muted p-3 rounded-lg">
+                          <p className="text-sm font-fredoka text-coral">
+                            "BB says: {tool.brandia_take}"
+                          </p>
+                        </div>
+                      )}
+                      {tool.why_she_loves_it && (
+                        <div className="bg-muted p-3 rounded-lg border-l-4 border-coral">
+                          <p className="text-sm font-fredoka text-foreground">
+                            💕 {tool.why_she_loves_it}
+                          </p>
+                        </div>
+                      )}
+                      <Button 
+                        onClick={() => handleToolClick(tool)}
+                        className="w-full bg-coral hover:bg-coral/90"
+                      >
+                        Shop Now <ExternalLink className="w-4 h-4 ml-2" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Featured Tools */}
-          {featuredTools.length > 0 && (
+          {featuredTools.filter(t => !t.brandia_pick).length > 0 && (
             <div className="space-y-4">
               <h2 className="text-2xl font-fredoka font-bold flex items-center gap-2">
                 <Heart className="w-6 h-6 text-coral fill-coral" />
                 BB's Top Picks
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredTools.map(tool => (
+                {featuredTools.filter(t => !t.brandia_pick).map(tool => (
                   <Card key={tool.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       {tool.image_url && (
