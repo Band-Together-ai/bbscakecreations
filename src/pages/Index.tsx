@@ -433,7 +433,7 @@ const Index = () => {
                     <div
                       className="w-full h-full"
                       style={{
-                        backgroundImage: `url(${profileImage || brandiaProfile})`,
+                        backgroundImage: profileImage ? `url(${profileImage})` : 'none',
                         backgroundSize: `${profilePhotoScale}%`,
                         backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
                         backgroundRepeat: 'no-repeat',

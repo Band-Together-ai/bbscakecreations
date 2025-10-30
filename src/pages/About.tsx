@@ -88,7 +88,7 @@ const About = () => {
                 <div
                 className="w-full h-full"
                 style={{
-                  backgroundImage: `url(${profileImageUrl || brandiaProfile})`,
+                  backgroundImage: profileImageUrl ? `url(${profileImageUrl})` : `url(${brandiaProfile})`,
                   backgroundSize: `${profilePhotoScale}%`,
                   backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
                   backgroundRepeat: 'no-repeat',
