@@ -42,13 +42,13 @@ export const UiToggle = () => {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed bottom-24 left-4 z-40 md:top-4 md:bottom-auto md:left-auto md:right-4">
       {!isVisible ? (
         <Button
           size="sm"
           variant="outline"
           onClick={() => setIsVisible(true)}
-          className="shadow-lg"
+          className="shadow-lg bg-white"
           aria-label="Show UI version toggle"
         >
           <Eye className="w-4 h-4" />
