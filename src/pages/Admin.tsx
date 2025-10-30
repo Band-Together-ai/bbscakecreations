@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star } from "lucide-react";
+import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star, Loader2 } from "lucide-react";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { ToolsTab } from "@/components/admin/ToolsTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
@@ -55,6 +55,7 @@ const Admin = () => {
   const [recipeTitle, setRecipeTitle] = useState("");
   const [recipeDescription, setRecipeDescription] = useState("");
   const [recipeLink, setRecipeLink] = useState("");
+  const [isParsingRecipe, setIsParsingRecipe] = useState(false);
   const [recipeInstructions, setRecipeInstructions] = useState("");
   const [recipeCategory, setRecipeCategory] = useState("");
   const [recipeTags, setRecipeTags] = useState("");
@@ -229,6 +230,59 @@ const Admin = () => {
   //   setIsAdmin(true);
   //   setLoading(false);
   // };
+
+  const handleParseRecipe = async () => {
+    if (!recipeLink.trim()) {
+      toast.error("Please enter a recipe URL");
+      return;
+    }
+
+    setIsParsingRecipe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-recipe', {
+        body: { url: recipeLink }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Format ingredients as text
+      const ingredientsText = data.ingredients
+        .map((ing: any) => {
+          const parts = [];
+          if (ing.amount) parts.push(ing.amount);
+          if (ing.unit) parts.push(ing.unit);
+          parts.push(ing.ingredient);
+          if (ing.notes) parts.push(`(${ing.notes})`);
+          return parts.join(' ');
+        })
+        .join('\n');
+
+      // Format instructions as numbered list
+      const instructionsText = data.instructions
+        .map((step: string, index: number) => `${index + 1}. ${step}`)
+        .join('\n\n');
+
+      // Populate form fields
+      setRecipeInstructions(instructionsText);
+      
+      // Add ingredients to description
+      const currentDesc = recipeDescription.trim();
+      const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
+      setRecipeDescription(newDesc);
+
+      toast.success("Recipe parsed! Review and modify as needed.");
+    } catch (error) {
+      console.error('Parse recipe error:', error);
+      toast.error("Failed to parse recipe");
+    } finally {
+      setIsParsingRecipe(false);
+    }
+  };
 
   const handleSaveRecipe = async () => {
     if (!recipeTitle.trim()) {
@@ -1006,14 +1060,32 @@ const Admin = () => {
 
                       <div className="space-y-2">
                         <Label htmlFor="recipe-link">4. Base Recipe Link (Optional)</Label>
-                        <Input
-                          id="recipe-link"
-                          placeholder="https://allrecipes.com/..."
-                          value={recipeLink}
-                          onChange={(e) => setRecipeLink(e.target.value)}
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            id="recipe-link"
+                            placeholder="https://allrecipes.com/..."
+                            value={recipeLink}
+                            onChange={(e) => setRecipeLink(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={handleParseRecipe}
+                            disabled={!recipeLink.trim() || isParsingRecipe}
+                          >
+                            {isParsingRecipe ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Parsing...
+                              </>
+                            ) : (
+                              "Parse"
+                            )}
+                          </Button>
+                        </div>
                         <p className="text-xs text-muted-foreground">
-                          Link to the original recipe you're adapting
+                          Paste a recipe URL and click Parse to auto-fill ingredients & instructions
                         </p>
                       </div>
 

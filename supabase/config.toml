@@ -3,6 +3,9 @@ project_id = "qipbsrynlkcxrctwqgdf"
 [functions.analyze-inspiration]
 verify_jwt = true
 
+[functions.parse-recipe]
+verify_jwt = true
+
 [functions.chat-with-sasha]
 verify_jwt = true
 
