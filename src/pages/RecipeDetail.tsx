@@ -469,7 +469,7 @@ ${recipe.instructions || 'Full instructions available with subscription'}
         <div className="flex flex-wrap gap-4 mb-8">
           {(isAdmin || isCollaborator) && (
             <Button
-              onClick={() => navigate("/admin")}
+              onClick={() => navigate(`/admin?editRecipe=${id}`)}
               className="bg-ocean-wave hover:bg-ocean-deep"
             >
               <Edit className="w-4 h-4 mr-2" />

@@ -35,6 +35,7 @@ const Admin = () => {
   const location = useLocation();
   const { isAdmin, userId, loading: roleLoading } = useUserRole();
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("recipes");
 
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -121,6 +122,7 @@ const Admin = () => {
     if (editRecipeId && recipes.length > 0) {
       const recipeToEdit = recipes.find(r => r.id === editRecipeId);
       if (recipeToEdit) {
+        setActiveTab("recipes"); // Switch to recipes tab
         handleEditRecipe(recipeToEdit);
         // Clear the query param after loading
         navigate('/admin', { replace: true });
@@ -930,7 +932,7 @@ const Admin = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="recipes" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="w-full overflow-x-auto pb-2">
             <TabsList className="inline-flex flex-wrap w-full min-w-fit gap-1 h-auto p-2">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
