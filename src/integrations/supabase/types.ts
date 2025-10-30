@@ -636,6 +636,86 @@ export type Database = {
         }
         Relationships: []
       }
+      inspiration_bullets: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          source_id: string | null
+          tags: string[] | null
+          text: string
+          tier: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          source_id?: string | null
+          tags?: string[] | null
+          text: string
+          tier: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          source_id?: string | null
+          tags?: string[] | null
+          text?: string
+          tier?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspiration_bullets_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "inspiration_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspiration_sources: {
+        Row: {
+          added_by: string | null
+          admin_notes: string | null
+          approved: boolean | null
+          content_type: string | null
+          created_at: string | null
+          id: string
+          takeaways: Json | null
+          title: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          admin_notes?: string | null
+          approved?: boolean | null
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          takeaways?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          admin_notes?: string | null
+          approved?: boolean | null
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          takeaways?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string

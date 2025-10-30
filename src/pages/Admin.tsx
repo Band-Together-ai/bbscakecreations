@@ -19,6 +19,7 @@ import { ToolsTab } from "@/components/admin/ToolsTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
 import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
 import { SashaTrainingTab } from "@/components/admin/SashaTrainingTab";
+import { InspirationTab } from "@/components/admin/InspirationTab";
 import { ProfilePhotoEditor } from "@/components/admin/ProfilePhotoEditor";
 import { ViewAsTab } from "@/components/admin/ViewAsTab";
 import { CoffeeClicksTab } from "@/components/admin/CoffeeClicksTab";
@@ -887,6 +888,7 @@ const Admin = () => {
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="earlybird">Early Bird</TabsTrigger>
             <TabsTrigger value="sasha">Sasha Training</TabsTrigger>
+            <TabsTrigger value="inspiration">Content I Love</TabsTrigger>
             <TabsTrigger value="tools">Tools</TabsTrigger>
             <TabsTrigger value="bakers">Bakers</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
@@ -1790,6 +1792,11 @@ const Admin = () => {
           {/* SASHA TRAINING TAB */}
           <TabsContent value="sasha">
             <SashaTrainingTab />
+          </TabsContent>
+
+          {/* CONTENT I LOVE TAB */}
+          <TabsContent value="inspiration">
+            <InspirationTab />
           </TabsContent>
 
           {/* TOOLS TAB */}

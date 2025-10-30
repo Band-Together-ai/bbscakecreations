@@ -141,6 +141,37 @@ Adjust your tone and advice to match this persona. Keep it natural and conversat
       .order('created_at', { ascending: false })
       .limit(50)
 
+    // Fetch approved inspiration content
+    const { data: approvedInspo } = await supabase
+      .from('inspiration_bullets')
+      .select(`
+        id,
+        tier,
+        text,
+        tags,
+        source:inspiration_sources(title, url, approved)
+      `)
+      .eq('is_approved', true)
+      .order('tier', { ascending: true })
+      .limit(100);
+
+    let inspirationContext = '';
+    if (approvedInspo && approvedInspo.length > 0) {
+      const topTips = approvedInspo.filter(b => b.tier === 'top').map(b => `• ${b.text}`).join('\n');
+      const supportingTips = approvedInspo.filter(b => b.tier === 'supporting').map(b => `• ${b.text}`).join('\n');
+      
+      inspirationContext = `\n\nINSPIRATION FROM CONTENT I LOVE (Admin-approved):
+${topTips ? `Top Principles:\n${topTips}\n` : ''}
+${supportingTips ? `\nSupporting Tips:\n${supportingTips}` : ''}
+
+INSPIRATION PROTOCOL:
+• Use these principles as inspiration, never quote creator prose
+• When relevant to user's question, incorporate these teachings naturally
+• If asked about sources, offer courteous links when available
+• These are distilled principles in our own words - teach them confidently
+`;
+    }
+
     // Fetch user's BakeBook entries if authenticated
     let bakeBookContext = '';
     let bakeBookCount = 0;
@@ -239,6 +270,7 @@ ${tools && tools.length > 0 ? `
 Recommended Tools: ${tools.map(t => t.name).join(', ')}
 ` : ''}
 ${trainingContext}
+${inspirationContext}
 ${bakeBookContext}
 ${tierNudge}`;
 
