@@ -1,8 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Heart } from "lucide-react";
+import { ExternalLink, Heart, Package } from "lucide-react";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ToolSuggestionCardProps {
   tool: {
@@ -27,6 +28,8 @@ export const ToolSuggestionCard = ({
   showConfidence = false,
 }: ToolSuggestionCardProps) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const handleAddToWishlist = async () => {
     if (!onAddToWishlist) return;
@@ -43,15 +46,28 @@ export const ToolSuggestionCard = ({
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex gap-4">
-          {tool.image_url && (
-            <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+          <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-muted relative">
+            {imageLoading && tool.image_url && (
+              <Skeleton className="w-full h-full absolute inset-0" />
+            )}
+            {tool.image_url && !imageError ? (
               <img
                 src={tool.image_url}
                 alt={tool.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                onLoad={() => setImageLoading(false)}
+                onError={() => {
+                  setImageLoading(false);
+                  setImageError(true);
+                }}
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                <Package className="w-10 h-10 text-muted-foreground/40" />
+              </div>
+            )}
+          </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-2">
