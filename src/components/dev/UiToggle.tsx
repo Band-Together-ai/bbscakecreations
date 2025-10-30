@@ -8,8 +8,6 @@ export const UiToggle = () => {
   const [uiVersion, setUiVersion] = useState<"v1" | "v2">("v1");
   const [isVisible, setIsVisible] = useState(false);
 
-  if (!isAdmin) return null;
-
   useEffect(() => {
     // Check localStorage first, then fallback to body class
     const savedVersion = localStorage.getItem("ui-version") as "v1" | "v2" | null;
@@ -56,6 +54,8 @@ export const UiToggle = () => {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2000);
   };
+
+  if (!isAdmin) return null;
 
   return (
     <div className="fixed bottom-24 left-4 z-40 md:top-4 md:bottom-auto md:left-auto md:right-4">
