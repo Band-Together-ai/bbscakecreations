@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useUserRole } from "@/hooks/useUserRole";
 import { Eye, EyeOff } from "lucide-react";
 
 export const UiToggle = () => {
-  const { isAdmin } = useUserRole();
   const [uiVersion, setUiVersion] = useState<"v1" | "v2">("v1");
   const [isVisible, setIsVisible] = useState(false);
 
@@ -13,8 +11,6 @@ export const UiToggle = () => {
     const isV2 = document.documentElement.classList.contains("ui-v2");
     setUiVersion(isV2 ? "v2" : "v1");
   }, []);
-
-  if (!isAdmin) return null;
 
   const toggleVersion = () => {
     const newVersion = uiVersion === "v1" ? "v2" : "v1";
