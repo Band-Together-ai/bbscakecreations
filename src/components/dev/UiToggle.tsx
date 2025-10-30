@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export const UiToggle = () => {
+  const { isAdmin } = useUserRole();
   const [uiVersion, setUiVersion] = useState<"v1" | "v2">("v1");
   const [isVisible, setIsVisible] = useState(false);
+
+  if (!isAdmin) return null;
 
   useEffect(() => {
     // Check localStorage first, then fallback to body class
