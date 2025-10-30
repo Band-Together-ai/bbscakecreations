@@ -15,7 +15,7 @@ import cake1 from "@/assets/cake-1.jpg";
 import Autoplay from "embla-carousel-autoplay";
 
 const About = () => {
-  const [profileImageUrl, setProfileImageUrl] = useState(brandiaProfile);
+  const [profileImageUrl, setProfileImageUrl] = useState("");
   const [galleryImages, setGalleryImages] = useState<Array<{src: string, caption: string}>>([]);
   const [storyText, setStoryText] = useState<string>("");
   const [profilePhotoScale, setProfilePhotoScale] = useState<number>(100);
@@ -86,14 +86,14 @@ const About = () => {
             <div className="w-full max-w-md mx-auto mb-8">
               <div className="aspect-video rounded-2xl overflow-hidden shadow-wave ring-4 ring-ocean-wave/20">
                 <div
-                  className="w-full h-full"
-                  style={{
-                    backgroundImage: `url(${profileImageUrl})`,
-                    backgroundSize: `${profilePhotoScale}%`,
-                    backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
-                    backgroundRepeat: 'no-repeat',
-                  }}
-                />
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${profileImageUrl || brandiaProfile})`,
+                  backgroundSize: `${profilePhotoScale}%`,
+                  backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
+                  backgroundRepeat: 'no-repeat',
+                }}
+              />
               </div>
             </div>
             <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">

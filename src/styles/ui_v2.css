@@ -66,14 +66,14 @@ body.ui-v2 {
   margin-bottom: 0.5rem;
 }
 
-.card { 
+.ui-v2 .card { 
   background: var(--card); 
   border: 1px solid var(--border); 
   border-radius: 12px; 
   box-shadow: var(--shadow); 
 }
 
-.badge { 
+.ui-v2 .badge { 
   background: var(--seafoam); 
   color: var(--text); 
   border-radius: 999px; 
@@ -81,7 +81,7 @@ body.ui-v2 {
   font-weight: 600; 
 }
 
-.btn-primary { 
+.ui-v2 .btn-primary { 
   background: var(--coral); 
   color: #fff; 
   border: none; 
@@ -91,12 +91,12 @@ body.ui-v2 {
   box-shadow: 0 8px 20px rgba(247,164,140,.35); 
 }
 
-.btn-primary:hover, 
-.btn-primary:focus { 
+.ui-v2 .btn-primary:hover, 
+.ui-v2 .btn-primary:focus { 
   background: var(--coral-600); 
 }
 
-.btn-secondary { 
+.ui-v2 .btn-secondary { 
   background: var(--seafoam); 
   color: var(--text); 
   border: none; 
@@ -105,7 +105,7 @@ body.ui-v2 {
   font-weight: 600; 
 }
 
-.btn-secondary:hover { 
+.ui-v2 .btn-secondary:hover { 
   background: var(--seafoam-600); 
 }
 

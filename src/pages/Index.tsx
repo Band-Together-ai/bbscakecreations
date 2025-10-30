@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 const Index = () => {
   const navigate = useNavigate();
   const [featuredCakes, setFeaturedCakes] = useState<any[]>([]);
-  const [profileImage, setProfileImage] = useState(brandiaProfile);
+  const [profileImage, setProfileImage] = useState("");
   const [profileBio, setProfileBio] = useState(
     "Hi! I'm Brandia, the baker behind every scratch-made creation you see here. From ocean-inspired ombres to delicate herb-adorned layers, I believe every cake should tell a story—your story. Whether you need gluten-free magic or a classic from-scratch masterpiece, I'm here to bring your vision to life."
   );
@@ -433,7 +433,7 @@ const Index = () => {
                     <div
                       className="w-full h-full"
                       style={{
-                        backgroundImage: `url(${profileImage})`,
+                        backgroundImage: `url(${profileImage || brandiaProfile})`,
                         backgroundSize: `${profilePhotoScale}%`,
                         backgroundPosition: `${profilePhotoX}% ${profilePhotoY}%`,
                         backgroundRepeat: 'no-repeat',
