@@ -918,16 +918,17 @@ const Admin = () => {
                     <div className="space-y-2">
                       <Label>1. Select Photos for This Recipe</Label>
                       <p className="text-xs text-muted-foreground">Click to select multiple photos</p>
-                      <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2 border rounded-lg">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto p-2 border rounded-lg">
                         {uploadedPhotos.map((photo) => (
                           <div
                             key={photo.name}
                             onClick={() => togglePhotoSelection(photo)}
-                            className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all aspect-square ${
+                            className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all w-full ${
                               selectedPhotos.some(p => p.name === photo.name)
                                 ? 'border-ocean-wave ring-2 ring-ocean-wave'
                                 : 'border-transparent hover:border-ocean-wave/50'
                             }`}
+                            style={{ aspectRatio: '1/1' }}
                           >
                             <img
                               src={photo.url}
