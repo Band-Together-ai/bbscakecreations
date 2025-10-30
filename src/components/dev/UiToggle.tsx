@@ -7,19 +7,33 @@ export const UiToggle = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if UI_V2 is enabled
-    const isV2 = document.body.classList.contains("ui-v2");
-    setUiVersion(isV2 ? "v2" : "v1");
+    // Check localStorage first, then fallback to body class
+    const savedVersion = localStorage.getItem("ui-version") as "v1" | "v2" | null;
+    const version = savedVersion || (document.body.classList.contains("ui-v2") ? "v2" : "v1");
+    setUiVersion(version);
+    
+    // Apply the saved version
+    if (version === "v2") {
+      document.body.classList.add("ui-v2");
+    } else {
+      document.body.classList.remove("ui-v2");
+    }
   }, []);
 
   const toggleVersion = () => {
     const newVersion = uiVersion === "v1" ? "v2" : "v1";
     
+    // Save to localStorage
+    localStorage.setItem("ui-version", newVersion);
+    
+    // Apply to body
     if (newVersion === "v2") {
       document.body.classList.add("ui-v2");
     } else {
       document.body.classList.remove("ui-v2");
     }
+    
+    setUiVersion(newVersion);
     
     // Show toast notification
     const toast = document.createElement("div");

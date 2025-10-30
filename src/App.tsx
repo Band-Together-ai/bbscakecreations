@@ -49,12 +49,6 @@ const AppContent = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Toggle UI V2 body class
-  useEffect(() => {
-    document.body.classList.toggle("ui-v2", featureFlags.UI_V2 === true);
-    return () => document.body.classList.remove("ui-v2");
-  }, []);
-
   // Track user sessions and page views
   useSessionTracking(userId);
   usePageTracking(userId);
