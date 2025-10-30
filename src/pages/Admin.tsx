@@ -67,6 +67,7 @@ const Admin = () => {
   const [featuredPosition, setFeaturedPosition] = useState<number | null>(null);
   const [brandiaPick, setBrandiaPick] = useState(false);
   const [whySheLovesIt, setWhySheLovesIt] = useState("");
+  const [recipeIngredients, setRecipeIngredients] = useState<any[]>([]);
 
   // Profile settings state
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -255,7 +256,10 @@ const Admin = () => {
         return;
       }
 
-      // Format ingredients as text
+      // Store parsed ingredients as JSONB
+      setRecipeIngredients(data.ingredients || []);
+
+      // Format ingredients as text for display
       const ingredientsText = data.ingredients
         .map((ing: any) => {
           const parts = [];
@@ -275,7 +279,7 @@ const Admin = () => {
       // Populate form fields
       setRecipeInstructions(instructionsText);
       
-      // Add ingredients to description
+      // Add ingredients to description for reference
       const currentDesc = recipeDescription.trim();
       const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
       setRecipeDescription(newDesc);
@@ -305,6 +309,7 @@ const Admin = () => {
       title: recipeTitle,
       description: recipeDescription,
       instructions: recipeInstructions + (recipeLink ? `\n\nBase recipe link: ${recipeLink}` : ''),
+      ingredients: recipeIngredients.length > 0 ? recipeIngredients : null,
       category: recipeCategory || null,
       tags: recipeTags ? recipeTags.split(',').map(t => t.trim()) : null,
       is_gluten_free: isGlutenFree,
@@ -362,6 +367,7 @@ const Admin = () => {
     setRecipeTitle("");
     setRecipeDescription("");
     setRecipeInstructions("");
+    setRecipeIngredients([]);
     setRecipeCategory("");
     setRecipeTags("");
     setRecipeLink("");
@@ -387,6 +393,7 @@ const Admin = () => {
     setFeaturedPosition(recipe.featured_position || null);
     setBrandiaPick(recipe.brandia_pick || false);
     setWhySheLovesIt(recipe.why_she_loves_it || "");
+    setRecipeIngredients(recipe.ingredients || []);
     
     // Extract link from instructions if present
     const linkMatch = recipe.instructions?.match(/Base recipe link: (.+)/);
