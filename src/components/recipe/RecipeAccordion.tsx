@@ -71,11 +71,11 @@ export const RecipeAccordion = ({
             Ingredients
           </AccordionTrigger>
           <AccordionContent>
-            <ul className="space-y-2" role="list">
+            <ul id="ingredients-section" role="list">
               {parsedIngredients.map((ingredient: any, index: number) => (
-                <li key={index} className="flex items-start gap-2">
-                  <span className="text-[#F7A48C] mt-1">•</span>
-                  <span className="text-[#5B4A3A]">
+                <li key={index} className="ing-item">
+                  <input type="checkbox" aria-label={`Mark ${typeof ingredient === "string" ? ingredient : ingredient.item}`} />
+                  <span className="ing-text">
                     {typeof ingredient === "string"
                       ? ingredient
                       : `${ingredient.amount || ""} ${ingredient.unit || ""} ${ingredient.item}`.trim()}
@@ -94,49 +94,14 @@ export const RecipeAccordion = ({
             Steps
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4" role="list">
+            <ol className="steps-v2">
               {steps.map((step, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "flex gap-4 p-4 rounded-lg border-2 transition-colors cursor-pointer",
-                    checkedSteps.has(index)
-                      ? "border-[#CFE6DE] bg-[#CFE6DE]/20"
-                      : "border-gray-200"
-                  )}
-                  onClick={() => toggleStep(index)}
-                  role="listitem"
-                >
-                  <button
-                    className={cn(
-                      "flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                      checkedSteps.has(index)
-                        ? "bg-[#F7A48C] border-[#F7A48C]"
-                        : "border-gray-300"
-                    )}
-                    aria-label={`Mark step ${index + 1} as complete`}
-                    aria-pressed={checkedSteps.has(index)}
-                  >
-                    {checkedSteps.has(index) && (
-                      <Check className="w-4 h-4 text-white" />
-                    )}
-                  </button>
-                  <div className="flex-1">
-                    <span className="font-semibold text-[#5B4A3A] mr-2">
-                      {index + 1}.
-                    </span>
-                    <span
-                      className={cn(
-                        "text-[#5B4A3A]",
-                        checkedSteps.has(index) && "line-through opacity-60"
-                      )}
-                    >
-                      {step}
-                    </span>
-                  </div>
-                </div>
+                <li key={index} className="step-card">
+                  <span className="num">{index + 1}</span>
+                  <p>{step}</p>
+                </li>
               ))}
-            </div>
+            </ol>
           </AccordionContent>
         </AccordionItem>
       )}

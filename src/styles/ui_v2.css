@@ -2,14 +2,18 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600;700&display=swap');
 
-:root.ui-v2 {
-  /* Coastal-Warm Colors */
-  --v2-linen: #FAF5EF;
-  --v2-warm-white: #FFFFFF;
-  --v2-coral: #F7A48C;
-  --v2-chocolate: #5B4A3A;
-  --v2-slate: #5E6A6E;
-  --v2-seafoam: #CFE6DE;
+:root {
+  --linen: #FAF5EF;
+  --coral: #F7A48C;
+  --coral-600: #E88E75;
+  --seafoam: #CFE6DE;
+  --seafoam-600: #A9D4C6;
+
+  --text: #5B4A3A;
+  --subtext: #5E6A6E;
+  --card: #FFFFFF;
+  --border: rgba(0,0,0,.06);
+  --shadow: 0 8px 24px rgba(0,0,0,.06);
   
   /* Typography */
   --v2-font-heading: 'Playfair Display', serif;
@@ -30,12 +34,12 @@
   --v2-touch-min: 44px;
 }
 
-.ui-v2 {
-  background-color: var(--v2-linen);
+body.ui-v2 { 
+  background: var(--linen); 
+  color: var(--text); 
   font-family: var(--v2-font-body);
   font-size: var(--v2-body-size);
   line-height: var(--v2-line-height);
-  color: var(--v2-chocolate);
 }
 
 .ui-v2 h1,
@@ -43,7 +47,7 @@
 .ui-v2 h3,
 .ui-v2 h4 {
   font-family: var(--v2-font-heading);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
 }
 
@@ -62,57 +66,245 @@
   margin-bottom: 0.5rem;
 }
 
-.ui-v2-card {
-  background: var(--v2-warm-white);
-  border-radius: var(--v2-radius);
-  box-shadow: var(--v2-shadow-card);
-  padding: var(--v2-gutter-lg);
+.card { 
+  background: var(--card); 
+  border: 1px solid var(--border); 
+  border-radius: 12px; 
+  box-shadow: var(--shadow); 
 }
 
-.ui-v2-button {
-  min-height: var(--v2-touch-min);
-  border-radius: var(--v2-radius);
-  font-family: var(--v2-font-body);
-  font-weight: 600;
-  transition: all 0.2s ease;
+.badge { 
+  background: var(--seafoam); 
+  color: var(--text); 
+  border-radius: 999px; 
+  padding: 6px 10px; 
+  font-weight: 600; 
 }
 
-.ui-v2-button-primary {
-  background-color: var(--v2-coral);
-  color: var(--v2-warm-white);
-  box-shadow: var(--v2-shadow-button);
+.btn-primary { 
+  background: var(--coral); 
+  color: #fff; 
+  border: none; 
+  border-radius: 12px; 
+  padding: 12px 16px; 
+  font-weight: 700; 
+  box-shadow: 0 8px 20px rgba(247,164,140,.35); 
 }
 
-.ui-v2-button-primary:hover {
-  background-color: #F58D6E;
-  transform: translateY(-1px);
+.btn-primary:hover, 
+.btn-primary:focus { 
+  background: var(--coral-600); 
 }
 
-.ui-v2-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  background-color: var(--v2-seafoam);
-  color: var(--v2-chocolate);
+.btn-secondary { 
+  background: var(--seafoam); 
+  color: var(--text); 
+  border: none; 
+  border-radius: 12px; 
+  padding: 10px 14px; 
+  font-weight: 600; 
 }
 
-.ui-v2-subtext {
-  color: var(--v2-slate);
-  font-size: 16px;
+.btn-secondary:hover { 
+  background: var(--seafoam-600); 
+}
+
+/* Bottom nav V2 */
+.bottom-nav-v2 { 
+  position: fixed; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  z-index: 40; 
+  background: var(--card); 
+  border-top: 1px solid var(--seafoam-600); 
+}
+
+.bottom-nav-v2 .item { 
+  color: var(--text); 
+}
+
+.bottom-nav-v2 .item.active { 
+  color: var(--coral); 
+}
+
+/* HERO */
+.hero-v2 { 
+  position: relative; 
+  width: 100%; 
+  height: 75vh; 
+}
+
+@media (min-width: 768px) { 
+  .hero-v2 { 
+    height: 60vh; 
+  } 
+}
+
+.hero-img { 
+  position: absolute; 
+  inset: 0; 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+}
+
+.hero-gradient { 
+  position: absolute; 
+  inset: 0; 
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 85%); 
+}
+
+.hero-title { 
+  position: absolute; 
+  left: 16px; 
+  right: 16px; 
+  bottom: 16px; 
+  color: #fff; 
+  font-family: var(--v2-font-heading); 
+  font-weight: 700; 
+  line-height: 1.1; 
+  font-size: clamp(2.2rem, 6vw, 4.2rem); 
+  text-shadow: 0 2px 12px rgba(0,0,0,.35); 
+}
+
+/* SUMMARY */
+.summary-v2 { 
+  margin: -28px 16px 12px; 
+  padding: 16px; 
+  background: var(--seafoam); 
+  border: 1px solid var(--border); 
+  border-radius: 16px; 
+  box-shadow: var(--shadow); 
+}
+
+.summary-v2 .chips { 
+  display: flex; 
+  gap: 12px; 
+  flex-wrap: wrap; 
+}
+
+.summary-v2 .chip { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  background: #fff; 
+  border-radius: 12px; 
+  padding: 10px 12px; 
+}
+
+.summary-v2 .chip b { 
+  font-size: 20px; 
+  color: var(--text); 
+}
+
+.summary-v2 .chip small { 
+  color: var(--subtext); 
+}
+
+/* STORY INTRO */
+.story-intro-v2 { 
+  margin: 16px; 
+  padding: 16px; 
+  background: #fff; 
+  border-radius: 12px; 
+  border: 1px solid var(--border); 
+}
+
+.story-intro-v2 .byline { 
+  color: var(--subtext); 
+  margin-bottom: 6px; 
+}
+
+.story-intro-v2 .link { 
+  color: var(--coral); 
+  background: none; 
+  border: none; 
+  font-weight: 600; 
+  cursor: pointer;
+}
+
+/* INGREDIENTS */
+.ing-item { 
+  display: flex; 
+  gap: 12px; 
+  align-items: flex-start; 
+  padding: 8px 0; 
+}
+
+.ing-text { 
+  font-size: 20px; 
+  line-height: 1.8; 
+  color: var(--text); 
+}
+
+/* STEPS */
+.steps-v2 { 
+  list-style: none; 
+  padding: 0; 
+  margin: 0; 
+  display: grid; 
+  gap: 16px; 
+}
+
+.step-card { 
+  display: flex; 
+  gap: 12px; 
+  background: #fff; 
+  border: 1px solid var(--border); 
+  border-radius: 12px; 
+  padding: 14px; 
+}
+
+.step-card .num { 
+  min-width: 32px; 
+  height: 32px; 
+  border-radius: 50%; 
+  background: var(--coral); 
+  color: #fff; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 700; 
+}
+
+.step-card p { 
+  margin: 0; 
+  font-size: 18px; 
+  line-height: 1.7; 
+  color: var(--text); 
+}
+
+/* Jump button */
+.jump-btn { 
+  position: sticky; 
+  bottom: 72px; 
+  margin: 0 16px; 
+  padding: 12px 16px; 
+  width: calc(100% - 32px); 
+  background: var(--coral); 
+  color: #fff; 
+  border: none; 
+  border-radius: 12px; 
+  font-weight: 700; 
+  box-shadow: 0 8px 20px rgba(247,164,140,.4); 
+  z-index: 20; 
+  cursor: pointer;
+}
+
+.jump-btn:hover {
+  background: var(--coral-600);
 }
 
 /* Accessibility */
 .ui-v2 *:focus-visible {
-  outline: 2px solid var(--v2-coral);
+  outline: 2px solid var(--coral);
   outline-offset: 2px;
 }
 
 /* Mobile-first responsive utilities */
 @media (min-width: 768px) {
-  :root.ui-v2 {
+  :root {
     --v2-body-size: 18px;
     --v2-gutter: 20px;
     --v2-gutter-lg: 32px;

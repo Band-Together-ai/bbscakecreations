@@ -1,8 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { RecipeHeaderHero } from "@/components/recipe/RecipeHeaderHero";
-import { RecipeSummaryCard } from "@/components/recipe/RecipeSummaryCard";
+import { RecipeHeaderHeroV2 } from "@/components/recipe/RecipeHeaderHeroV2";
+import { RecipeSummaryCardV2 } from "@/components/recipe/RecipeSummaryCardV2";
+import { RecipeStoryIntro } from "@/components/recipe/RecipeStoryIntro";
+import { JumpToRecipeButton } from "@/components/recipe/JumpToRecipeButton";
 import { RecipeBadges } from "@/components/recipe/RecipeBadges";
 import { RecipeAccordion } from "@/components/recipe/RecipeAccordion";
 import { RecipeStagingStrip } from "@/components/recipe/RecipeStagingStrip";
@@ -104,26 +106,39 @@ export default function RecipeDetailV2() {
   // Parse tools if available (not in schema yet - placeholder)
   const tools: any[] = [];
 
+  // Calculate time values for summary card
+  const prepMinutes = recipe.prep_active_minutes || 0;
+  const bakeMinutes = recipe.prep_passive_minutes || 0;
+  const totalMinutes = prepMinutes + bakeMinutes;
+
   return (
     <div className="ui-v2 min-h-screen pb-20">
-      <RecipeHeaderHero
+      <RecipeHeaderHeroV2
         title={recipe.title}
         imageUrl={recipe.image_url || "/placeholder.svg"}
-        subheader={recipe.description}
+      />
+
+      <RecipeSummaryCardV2
+        prep={prepMinutes ? `${prepMinutes}m` : "-"}
+        bake={bakeMinutes ? `${bakeMinutes}m` : "-"}
+        total={totalMinutes ? `${totalMinutes}m` : "-"}
+        servings="-"
+        difficulty="Medium"
       />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
+        <RecipeStoryIntro 
+          author={undefined}
+          story={undefined}
+        />
+
+        <JumpToRecipeButton />
+
         <RecipeBadges
           isBase={recipe.is_base_recipe}
           baseName={baseRecipe?.title}
           prepActiveMinutes={recipe.prep_active_minutes}
           makeAhead={recipe.make_ahead}
-          savesCount={savesData}
-        />
-
-        <RecipeSummaryCard
-          prepActiveMinutes={recipe.prep_active_minutes}
-          prepPassiveMinutes={recipe.prep_passive_minutes}
           savesCount={savesData}
         />
 
