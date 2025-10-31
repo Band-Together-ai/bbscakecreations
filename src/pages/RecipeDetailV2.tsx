@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { RecipeHeaderHeroV2 } from "@/components/recipe/RecipeHeaderHeroV2";
+import { RecipePhotoCarousel } from "@/components/recipe/RecipePhotoCarousel";
 import { RecipeSummaryCardV2 } from "@/components/recipe/RecipeSummaryCardV2";
 import { RecipeStoryIntro } from "@/components/recipe/RecipeStoryIntro";
 import { JumpToRecipeButton } from "@/components/recipe/JumpToRecipeButton";
@@ -114,29 +114,27 @@ export default function RecipeDetailV2() {
   const bakeMinutes = recipe.prep_passive_minutes || 0;
   const totalMinutes = prepMinutes + bakeMinutes;
 
-  // Get hero image - try image_url first, then headline photo, then first photo
-  const getHeroImage = () => {
-    if (recipe.image_url) return recipe.image_url;
-    const headlinePhoto = recipe.recipe_photos?.find((p: any) => p.is_headline);
-    if (headlinePhoto) return headlinePhoto.photo_url;
-    if (recipe.recipe_photos && recipe.recipe_photos.length > 0) {
-      return (recipe.recipe_photos as any[])[0].photo_url;
-    }
-    return "/placeholder.svg";
-  };
+  // Sort photos to put headline first
+  const sortedPhotos = recipe.recipe_photos 
+    ? [...recipe.recipe_photos].sort((a: any, b: any) => {
+        if (a.is_headline && !b.is_headline) return -1;
+        if (!a.is_headline && b.is_headline) return 1;
+        return 0;
+      })
+    : [];
 
   return (
     <div className="ui-v2 min-h-screen pb-20">
-      <RecipeHeaderHeroV2
+      <RecipePhotoCarousel
+        photos={sortedPhotos}
         title={recipe.title}
-        imageUrl={getHeroImage()}
       />
 
       <RecipeSummaryCardV2
-        prep={prepMinutes ? `${prepMinutes}m` : "-"}
-        bake={bakeMinutes ? `${bakeMinutes}m` : "-"}
-        total={totalMinutes ? `${totalMinutes}m` : "-"}
-        servings="-"
+        prep={prepMinutes ? `${prepMinutes}m` : undefined}
+        bake={bakeMinutes ? `${bakeMinutes}m` : undefined}
+        total={totalMinutes ? `${totalMinutes}m` : undefined}
+        servings={undefined}
         difficulty="Medium"
       />
 
