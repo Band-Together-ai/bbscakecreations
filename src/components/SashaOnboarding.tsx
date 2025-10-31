@@ -98,6 +98,35 @@ export const SashaOnboarding = ({ onComplete }: OnboardingProps) => {
     }
   };
 
+  const handleSkip = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("user_profiles")
+        .upsert({
+          id: user.id,
+          persona: "explorer",
+          experience_level: "confident",
+          goal_focus: "fun",
+          style_vibe: "creative",
+          onboarding_completed: true
+        });
+
+      if (error) throw error;
+
+      toast.success("Skipped onboarding - you can always chat with me to update your preferences!");
+      onComplete();
+    } catch (error) {
+      console.error("Onboarding error:", error);
+      toast.error("Failed to save profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (step === 0) {
     return (
       <Card className="max-w-2xl mx-auto">
@@ -127,6 +156,14 @@ export const SashaOnboarding = ({ onComplete }: OnboardingProps) => {
               </Button>
             ))}
           </div>
+          <Button
+            variant="ghost"
+            onClick={handleSkip}
+            disabled={loading}
+            className="w-full text-muted-foreground"
+          >
+            Skip for now
+          </Button>
         </CardContent>
       </Card>
     );
