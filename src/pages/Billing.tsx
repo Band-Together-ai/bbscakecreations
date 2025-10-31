@@ -11,44 +11,50 @@ import { Check, Loader2 } from "lucide-react";
 
 const tiers = [
   {
-    name: "Weekend Baker",
+    name: "Kitchen Guest",
+    displayName: "Kitchen Guest",
     role: "free",
     price: "Free",
     priceId: null,
     features: [
-      "Browse all recipes",
-      "Limited BakeBook (10 recipes)",
-      "Basic chat with Sasha",
+      "Top 10 recipes",
+      "15 messages with Sasha",
       "View baking tools",
+      "Browse community",
     ],
   },
   {
-    name: "Everyday Baker",
-    role: "paid",
-    price: "$5/month",
-    priceId: "STRIPE_PRICE_EVERYDAY", // Replace with actual price ID
+    name: "Home Baker+",
+    displayName: "Home Baker+",
+    role: "tier1",
+    price: "$3/month",
+    priceId: "STRIPE_PRICE_TIER1", // Replace with actual Stripe price ID
     features: [
-      "Everything in Weekend Baker",
+      "All recipes free (always!)",
       "Unlimited BakeBook saves",
-      "Instant grocery lists",
-      "Full chat access with Sasha",
-      "Tool suggestions & links",
-      "Recipe ratings & reviews",
+      "Text recipe scanning",
+      "Unlimited Sasha chat",
+      "Wishlists & tool suggestions",
+      "Remix recipes your way",
+      "Grocery-ready lists",
     ],
+    gratitude: "We appreciate you more than you know.",
   },
   {
-    name: "Pro-at-Home",
-    role: "paid",
-    price: "$9/month",
-    priceId: "STRIPE_PRICE_PRO", // Replace with actual price ID
+    name: "Master Mixer",
+    displayName: "Master Mixer",
+    role: "tier2",
+    price: "$6/month",
+    priceId: "STRIPE_PRICE_TIER2", // Replace with actual Stripe price ID
     features: [
-      "Everything in Everyday Baker",
+      "Everything in Home Baker+",
+      "Photo recipe scanning",
+      "Voice chat with Sasha",
       "Early access to new recipes",
-      "Advanced baking analytics",
-      "Recipe modifications tracking",
-      "Priority chat support",
-      "Collaborator tools access",
+      "Advanced remix with AI suggestions",
+      "Priority support",
     ],
+    gratitude: "You're the reason the magic keeps growing.",
   },
 ];
 
@@ -145,13 +151,17 @@ export default function Billing() {
       <Navigation />
       <main className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Home Bakers Club
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Welcome to the Kitchen!
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose your perfect baking companion tier. Cancel anytime. 💕
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
+            Every recipe here is free — because generosity tastes better.
           </p>
-          {isAuthenticated && role === 'paid' && (
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            But if you'd like to keep the oven warm and unlock more creative tools,<br />
+            join the <span className="font-semibold text-foreground">Home Bakers Club.</span>
+          </p>
+          {isAuthenticated && (role === 'tier1' || role === 'tier2' || role === 'paid') && (
             <div className="mt-6">
               <Badge variant="default" className="text-lg px-6 py-2">
                 ⭐ Active Member
@@ -161,12 +171,12 @@ export default function Billing() {
         </div>
 
         {/* Current Plan Management */}
-        {isAuthenticated && role === 'paid' && (
+        {isAuthenticated && (role === 'tier1' || role === 'tier2' || role === 'paid') && (
           <Card className="mb-8 border-primary">
             <CardHeader>
               <CardTitle>Manage Your Subscription</CardTitle>
               <CardDescription>
-                Update payment method, view invoices, or cancel your subscription
+                Update payment method, view invoices, or make changes
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -193,6 +203,7 @@ export default function Billing() {
           {tiers.map((tier) => {
             const isCurrentTier = tier.role === role;
             const canUpgrade = tier.priceId && tier.role !== 'free';
+            const gratitude = (tier as any).gratitude;
 
             return (
               <Card 
@@ -201,12 +212,17 @@ export default function Billing() {
               >
                 {isCurrentTier && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="px-4 py-1">Current Plan</Badge>
+                    <Badge className="px-4 py-1">Your Plan</Badge>
                   </div>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                  <CardTitle className="text-2xl">{tier.displayName || tier.name}</CardTitle>
                   <div className="text-3xl font-bold mt-2">{tier.price}</div>
+                  {gratitude && (
+                    <p className="text-sm text-muted-foreground italic mt-2">
+                      {gratitude}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
@@ -230,11 +246,11 @@ export default function Billing() {
                           Loading...
                         </>
                       ) : (
-                        `Start ${tier.name}`
+                        `Join ${tier.displayName || tier.name}`
                       )}
                     </Button>
                   )}
-                  {isCurrentTier && tier.role === 'paid' && (
+                  {isCurrentTier && (tier.role === 'tier1' || tier.role === 'tier2' || tier.role === 'paid') && (
                     <Button
                       onClick={handlePortal}
                       disabled={loadingPortal}
@@ -257,6 +273,9 @@ export default function Billing() {
           <p className="text-muted-foreground mb-6">
             All subscriptions include instant access, automatic updates, and can be canceled anytime.
             Your recipes and BakeBook are always yours to keep.
+          </p>
+          <p className="text-sm text-muted-foreground mb-8 italic">
+            💌 Thank you for being part of our kitchen family. Your creativity inspires every update.
           </p>
           {!isAuthenticated && (
             <Button onClick={() => navigate('/auth')} size="lg">
