@@ -320,6 +320,9 @@ const Admin = () => {
       why_she_loves_it: whySheLovesIt || null,
     };
 
+    console.log('Saving recipe with ingredients:', recipeIngredients);
+    console.log('Recipe data:', recipeData);
+
     let recipeId = editingRecipe?.id;
 
     if (editingRecipe) {

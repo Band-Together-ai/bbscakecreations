@@ -73,8 +73,8 @@ const AppContent = () => {
         </AdminRoute>
       } />
       <Route path="/recipes" element={<Recipes />} />
-      <Route path="/recipes/:id" element={featureFlags.UI_V2 ? <RecipeDetailV2 /> : <RecipeDetail />} />
-      <Route path="/recipe/:id" element={<RecipeDetail />} />
+      <Route path="/recipes/:id" element={<RecipeDetailV2 />} />
+      <Route path="/recipe/:id" element={<RecipeDetailV2 />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/tools" element={<Tools />} />
           <Route path="/wellness" element={<Wellness />} />
