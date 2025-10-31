@@ -83,7 +83,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const systemPrompt = `You are a recipe extraction assistant. Extract ingredients and instructions from the provided content.
+    const systemPrompt = `You are a recipe extraction assistant. Extract ingredients and instructions from the provided content, and intelligently detect if the recipe contains BOTH cake/baked good AND frosting/icing components.
 
 CRITICAL RULES:
 1. Extract ingredients as a structured JSON array with: ingredient, amount, unit, notes
@@ -93,18 +93,38 @@ CRITICAL RULES:
 5. If content mentions variations or substitutions, include those as notes
 6. Do NOT add commentary or extra text - just extract what's there
 
+SEPARATION DETECTION:
+- If the recipe contains BOTH a baked component (cake, cookies, etc.) AND a frosting/icing/topping component, set hasSeparation: true
+- Keywords for frosting section: "frosting", "icing", "buttercream", "ganache", "glaze", "topping", "assembly", "decoration"
+- Keywords for cake section: "batter", "bake at", "cake layers", "preheat oven", "flour", "eggs"
+- Provide a confidence score (0-1) for the separation
+
 Return ONLY valid JSON in this exact format:
 {
-  "ingredients": [
-    {"ingredient": "flour", "amount": "2", "unit": "cups", "notes": "all-purpose"},
-    {"ingredient": "sugar", "amount": "1", "unit": "cup", "notes": ""}
-  ],
-  "instructions": [
-    "Preheat oven to 350°F",
-    "Mix dry ingredients in a bowl",
-    "..."
-  ]
-}`;
+  "hasSeparation": false,
+  "confidence": 0.0,
+  "cakePart": {
+    "ingredients": [
+      {"ingredient": "flour", "amount": "2", "unit": "cups", "notes": "all-purpose"}
+    ],
+    "instructions": [
+      "Preheat oven to 350°F",
+      "Mix dry ingredients in a bowl"
+    ]
+  },
+  "frostingPart": {
+    "ingredients": [
+      {"ingredient": "butter", "amount": "1", "unit": "cup", "notes": "softened"}
+    ],
+    "instructions": [
+      "Beat butter until fluffy",
+      "Add powdered sugar gradually"
+    ]
+  },
+  "assemblyInstructions": "Once cake is cooled, frost with buttercream..."
+}
+
+If hasSeparation is false, put everything in cakePart and leave frostingPart empty.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -151,8 +171,11 @@ Return ONLY valid JSON in this exact format:
     }
 
     return new Response(JSON.stringify({
-      ingredients: parsed.ingredients || [],
-      instructions: parsed.instructions || [],
+      hasSeparation: parsed.hasSeparation || false,
+      confidence: parsed.confidence || 0,
+      cakePart: parsed.cakePart || { ingredients: [], instructions: [] },
+      frostingPart: parsed.frostingPart || { ingredients: [], instructions: [] },
+      assemblyInstructions: parsed.assemblyInstructions || '',
       source_url: url || null,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

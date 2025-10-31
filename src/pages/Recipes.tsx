@@ -45,6 +45,7 @@ const Recipes = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [user, setUser] = useState<any>(null);
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [recipeFilter, setRecipeFilter] = useState<'all' | 'base_cakes' | 'frostings'>('all');
   const [replaceDialogData, setReplaceDialogData] = useState<{
     recipeId: string;
     position: number;
@@ -61,18 +62,29 @@ const Recipes = () => {
     });
 
     fetchRecipes();
-  }, []);
+  }, [recipeFilter]);
 
   const fetchRecipes = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("recipes")
       .select(`
         *,
         recipe_photos(photo_url, is_headline)
       `)
-      .eq("is_public", true)
+      .eq("is_public", true);
+
+    // Apply filter based on recipe type
+    if (recipeFilter === 'base_cakes') {
+      query = query.eq('recipe_type', 'base_cake');
+    } else if (recipeFilter === 'frostings') {
+      query = query.eq('recipe_type', 'frosting');
+    }
+
+    query = query
       .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching recipes:", error);
@@ -208,7 +220,7 @@ const Recipes = () => {
       </AlertDialog>
 
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
             Brandia's Recipe Collection
           </h1>
@@ -216,6 +228,33 @@ const Recipes = () => {
             Featured recipes & landing page picks are FREE during beta. Everything else unlocks with subscription!
           </p>
         </div>
+
+        {/* Recipe Type Filters */}
+        {(isAdmin || isCollaborator) && (
+          <div className="flex justify-center gap-2 mb-8">
+            <Button
+              variant={recipeFilter === 'all' ? 'default' : 'outline'}
+              onClick={() => setRecipeFilter('all')}
+              className={recipeFilter === 'all' ? 'gradient-ocean text-primary-foreground' : ''}
+            >
+              All Recipes
+            </Button>
+            <Button
+              variant={recipeFilter === 'base_cakes' ? 'default' : 'outline'}
+              onClick={() => setRecipeFilter('base_cakes')}
+              className={recipeFilter === 'base_cakes' ? 'gradient-ocean text-primary-foreground' : ''}
+            >
+              🎂 Base Cakes Only
+            </Button>
+            <Button
+              variant={recipeFilter === 'frostings' ? 'default' : 'outline'}
+              onClick={() => setRecipeFilter('frostings')}
+              className={recipeFilter === 'frostings' ? 'gradient-ocean text-primary-foreground' : ''}
+            >
+              🧁 Frostings Only
+            </Button>
+          </div>
+        )}
 
         {recipes.length === 0 ? (
           <div className="text-center py-20">

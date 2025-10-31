@@ -39,16 +39,49 @@ export default function RecipeDetailV2() {
     },
   });
 
-  // Fetch base recipe name if variant
+  // Fetch base recipe if variant
   const { data: baseRecipe } = useQuery({
     queryKey: ["baseRecipe", recipe?.base_recipe_id],
     enabled: !!recipe?.base_recipe_id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("recipes")
-        .select("title")
+        .select("*")
         .eq("id", recipe.base_recipe_id)
         .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch frosting recipe if variant
+  const { data: frostingRecipe } = useQuery({
+    queryKey: ["frostingRecipe", recipe?.frosting_recipe_id],
+    enabled: !!recipe?.frosting_recipe_id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("recipes")
+        .select("*")
+        .eq("id", recipe.frosting_recipe_id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch related variants that use the same base (if this is a variant)
+  const { data: relatedVariants } = useQuery({
+    queryKey: ["relatedVariants", recipe?.base_recipe_id],
+    enabled: !!recipe?.base_recipe_id && recipe?.recipe_type === 'variant',
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("recipes")
+        .select("id, title")
+        .eq("base_recipe_id", recipe.base_recipe_id)
+        .neq("id", id)
+        .limit(5);
 
       if (error) throw error;
       return data;
@@ -146,6 +179,26 @@ export default function RecipeDetailV2() {
 
         <JumpToRecipeButton />
 
+        {/* Related Variants Note (if this is a variant) */}
+        {recipe.recipe_type === 'variant' && relatedVariants && relatedVariants.length > 0 && (
+          <div className="ui-v2-card mb-6 p-4 bg-ocean-wave/5 border border-ocean-wave/20">
+            <p className="text-sm text-ocean-deep">
+              💡 This cake uses <strong>{baseRecipe?.base_name || baseRecipe?.title}</strong> also seen in:{' '}
+              {relatedVariants.map((v, i) => (
+                <span key={v.id}>
+                  <a 
+                    href={`/recipe/${v.id}`}
+                    className="text-ocean hover:underline font-medium"
+                  >
+                    {v.title}
+                  </a>
+                  {i < relatedVariants.length - 1 && ', '}
+                </span>
+              ))}
+            </p>
+          </div>
+        )}
+
         <RecipeBadges
           isBase={recipe.is_base_recipe}
           baseName={baseRecipe?.title}
@@ -181,8 +234,13 @@ export default function RecipeDetailV2() {
         </div>
 
         <RecipeAccordion
+          recipeType={recipe.recipe_type}
           ingredients={recipe.ingredients}
           instructions={recipe.instructions}
+          baseRecipe={baseRecipe}
+          frostingRecipe={frostingRecipe}
+          assemblyInstructions={recipe.assembly_instructions}
+          variantNotes={recipe.variant_notes}
           tools={tools}
           insights={
             <div className="space-y-4">

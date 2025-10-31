@@ -999,9 +999,58 @@ export type Database = {
           },
         ]
       }
+      recipe_versions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          ingredients: Json | null
+          instructions: string | null
+          is_current: boolean | null
+          notes: string | null
+          recipe_id: string | null
+          staging_json: Json | null
+          version_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          ingredients?: Json | null
+          instructions?: string | null
+          is_current?: boolean | null
+          notes?: string | null
+          recipe_id?: string | null
+          staging_json?: Json | null
+          version_number: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          ingredients?: Json | null
+          instructions?: string | null
+          is_current?: boolean | null
+          notes?: string | null
+          recipe_id?: string | null
+          staging_json?: Json | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_versions_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
+          assembly_instructions: string | null
           author_id: string | null
+          base_name: string | null
           base_recipe_id: string | null
           brandia_pick: boolean | null
           category: string | null
@@ -1009,18 +1058,21 @@ export type Database = {
           description: string | null
           display_order: number | null
           featured_position: number | null
+          frosting_recipe_id: string | null
           id: string
           image_url: string | null
           ingredients: Json | null
           instructions: string | null
           is_base_recipe: boolean | null
           is_featured: boolean | null
+          is_featured_base: boolean | null
           is_gluten_free: boolean | null
           is_public: boolean | null
           make_ahead: boolean | null
           make_ahead_window_days: number | null
           prep_active_minutes: number | null
           prep_passive_minutes: number | null
+          recipe_type: Database["public"]["Enums"]["recipe_type"] | null
           recommended_freeze_days: number | null
           staging_json: Json | null
           tags: string[] | null
@@ -1032,7 +1084,9 @@ export type Database = {
           why_she_loves_it: string | null
         }
         Insert: {
+          assembly_instructions?: string | null
           author_id?: string | null
+          base_name?: string | null
           base_recipe_id?: string | null
           brandia_pick?: boolean | null
           category?: string | null
@@ -1040,18 +1094,21 @@ export type Database = {
           description?: string | null
           display_order?: number | null
           featured_position?: number | null
+          frosting_recipe_id?: string | null
           id?: string
           image_url?: string | null
           ingredients?: Json | null
           instructions?: string | null
           is_base_recipe?: boolean | null
           is_featured?: boolean | null
+          is_featured_base?: boolean | null
           is_gluten_free?: boolean | null
           is_public?: boolean | null
           make_ahead?: boolean | null
           make_ahead_window_days?: number | null
           prep_active_minutes?: number | null
           prep_passive_minutes?: number | null
+          recipe_type?: Database["public"]["Enums"]["recipe_type"] | null
           recommended_freeze_days?: number | null
           staging_json?: Json | null
           tags?: string[] | null
@@ -1063,7 +1120,9 @@ export type Database = {
           why_she_loves_it?: string | null
         }
         Update: {
+          assembly_instructions?: string | null
           author_id?: string | null
+          base_name?: string | null
           base_recipe_id?: string | null
           brandia_pick?: boolean | null
           category?: string | null
@@ -1071,18 +1130,21 @@ export type Database = {
           description?: string | null
           display_order?: number | null
           featured_position?: number | null
+          frosting_recipe_id?: string | null
           id?: string
           image_url?: string | null
           ingredients?: Json | null
           instructions?: string | null
           is_base_recipe?: boolean | null
           is_featured?: boolean | null
+          is_featured_base?: boolean | null
           is_gluten_free?: boolean | null
           is_public?: boolean | null
           make_ahead?: boolean | null
           make_ahead_window_days?: number | null
           prep_active_minutes?: number | null
           prep_passive_minutes?: number | null
+          recipe_type?: Database["public"]["Enums"]["recipe_type"] | null
           recommended_freeze_days?: number | null
           staging_json?: Json | null
           tags?: string[] | null
@@ -1097,6 +1159,13 @@ export type Database = {
           {
             foreignKeyName: "recipes_base_recipe_id_fkey"
             columns: ["base_recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipes_frosting_recipe_id_fkey"
+            columns: ["frosting_recipe_id"]
             isOneToOne: false
             referencedRelation: "recipes"
             referencedColumns: ["id"]
@@ -1651,6 +1720,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "collaborator" | "paid" | "free"
+      recipe_type: "complete" | "base_cake" | "frosting" | "variant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1779,6 +1849,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "collaborator", "paid", "free"],
+      recipe_type: ["complete", "base_cake", "frosting", "variant"],
     },
   },
 } as const

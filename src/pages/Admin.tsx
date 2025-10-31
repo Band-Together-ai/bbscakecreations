@@ -68,6 +68,17 @@ const Admin = () => {
   const [brandiaPick, setBrandiaPick] = useState(false);
   const [whySheLovesIt, setWhySheLovesIt] = useState("");
   const [recipeIngredients, setRecipeIngredients] = useState<any[]>([]);
+  
+  // Recipe type and base/frosting system state
+  const [recipeType, setRecipeType] = useState<'complete' | 'base_cake' | 'frosting' | 'variant'>('complete');
+  const [isFeaturedBase, setIsFeaturedBase] = useState(false);
+  const [baseName, setBaseName] = useState("");
+  const [baseRecipeId, setBaseRecipeId] = useState("");
+  const [frostingRecipeId, setFrostingRecipeId] = useState("");
+  const [variantNotes, setVariantNotes] = useState("");
+  const [assemblyInstructions, setAssemblyInstructions] = useState("");
+  const [showSeparationModal, setShowSeparationModal] = useState(false);
+  const [parsedRecipeData, setParsedRecipeData] = useState<any>(null);
 
   // Profile settings state
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -256,11 +267,16 @@ const Admin = () => {
         return;
       }
 
-      // Store parsed ingredients as JSONB
-      setRecipeIngredients(data.ingredients || []);
+      // Check if separation was detected
+      if (data.hasSeparation && data.confidence > 0.3) {
+        setParsedRecipeData(data);
+        setShowSeparationModal(true);
+        return;
+      }
 
-      // Format ingredients as text for display
-      const ingredientsText = data.ingredients
+      // No separation or low confidence - treat as complete recipe
+      setRecipeIngredients(data.cakePart?.ingredients || data.ingredients || []);
+      const ingredientsText = (data.cakePart?.ingredients || data.ingredients || [])
         .map((ing: any) => {
           const parts = [];
           if (ing.amount) parts.push(ing.amount);
@@ -271,15 +287,11 @@ const Admin = () => {
         })
         .join('\n');
 
-      // Format instructions as numbered list
-      const instructionsText = data.instructions
+      const instructionsText = (data.cakePart?.instructions || data.instructions || [])
         .map((step: string, index: number) => `${index + 1}. ${step}`)
         .join('\n\n');
 
-      // Populate form fields
       setRecipeInstructions(instructionsText);
-      
-      // Add ingredients to description for reference
       const currentDesc = recipeDescription.trim();
       const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
       setRecipeDescription(newDesc);
