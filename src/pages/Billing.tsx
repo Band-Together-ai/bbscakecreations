@@ -161,7 +161,7 @@ export default function Billing() {
             But if you'd like to keep the oven warm and unlock more creative tools,<br />
             join the <span className="font-semibold text-foreground">Home Bakers Club.</span>
           </p>
-          {isAuthenticated && (role === 'tier1' || role === 'tier2' || role === 'paid') && (
+          {isAuthenticated && role === 'paid' && (
             <div className="mt-6">
               <Badge variant="default" className="text-lg px-6 py-2">
                 ⭐ Active Member
@@ -171,7 +171,7 @@ export default function Billing() {
         </div>
 
         {/* Current Plan Management */}
-        {isAuthenticated && (role === 'tier1' || role === 'tier2' || role === 'paid') && (
+        {isAuthenticated && role === 'paid' && (
           <Card className="mb-8 border-primary">
             <CardHeader>
               <CardTitle>Manage Your Subscription</CardTitle>
@@ -250,7 +250,7 @@ export default function Billing() {
                       )}
                     </Button>
                   )}
-                  {isCurrentTier && (tier.role === 'tier1' || tier.role === 'tier2' || tier.role === 'paid') && (
+                  {isCurrentTier && role === 'paid' && (
                     <Button
                       onClick={handlePortal}
                       disabled={loadingPortal}
