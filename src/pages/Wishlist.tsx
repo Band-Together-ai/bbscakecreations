@@ -28,12 +28,15 @@ interface WishlistItem {
 
 const Wishlist = () => {
   const navigate = useNavigate();
-  const { canUseWishlists, isAuthenticated } = useUserRole();
+  const { canUseWishlists, isAuthenticated, loading: roleLoading } = useUserRole();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [wishlistId, setWishlistId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for role to load before checking permissions
+    if (roleLoading) return;
+
     if (!isAuthenticated) {
       navigate("/auth");
       return;
@@ -46,7 +49,7 @@ const Wishlist = () => {
     }
 
     fetchWishlist();
-  }, [isAuthenticated, canUseWishlists, navigate]);
+  }, [isAuthenticated, canUseWishlists, navigate, roleLoading]);
 
   const fetchWishlist = async () => {
     try {
