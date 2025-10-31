@@ -163,11 +163,21 @@ const Index = () => {
         const headlinePhoto = recipe.recipe_photos.find((p: any) => p.is_headline);
         image = headlinePhoto?.photo_url || recipe.recipe_photos[0].photo_url;
       }
+
+      // Create a short, safe teaser from description (plain text, max 140 chars)
+      const rawDesc: string = recipe.description || "";
+      const plain = rawDesc
+        .replace(/<[^>]+>/g, " ") // strip HTML
+        .replace(/ingredients?:\s*/i, "") // remove leading Ingredients:
+        .replace(/\s+/g, " ")
+        .trim();
+      const teaser = plain.length > 140 ? plain.slice(0, 140).trimEnd() + "…" : plain;
+
       return {
         id: recipe.id,
         image: image || cake1,
         title: recipe.title,
-        description: recipe.description || "",
+        description: teaser,
       };
     };
 
