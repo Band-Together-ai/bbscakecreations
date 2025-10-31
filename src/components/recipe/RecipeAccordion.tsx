@@ -9,9 +9,11 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface Ingredient {
-  item: string;
+  ingredient?: string;
+  item?: string;
   amount?: string;
   unit?: string;
+  notes?: string;
   group?: string;
 }
 
@@ -72,16 +74,20 @@ export const RecipeAccordion = ({
           </AccordionTrigger>
           <AccordionContent>
             <ul id="ingredients-section" role="list">
-              {parsedIngredients.map((ingredient: any, index: number) => (
-                <li key={index} className="ing-item">
-                  <input type="checkbox" aria-label={`Mark ${typeof ingredient === "string" ? ingredient : ingredient.item}`} />
-                  <span className="ing-text">
-                    {typeof ingredient === "string"
-                      ? ingredient
-                      : `${ingredient.amount || ""} ${ingredient.unit || ""} ${ingredient.item}`.trim()}
-                  </span>
-                </li>
-              ))}
+              {parsedIngredients.map((ingredient: any, index: number) => {
+                const ingredientName = ingredient.ingredient || ingredient.item || "";
+                const label = typeof ingredient === "string" ? ingredient : ingredientName;
+                const displayText = typeof ingredient === "string"
+                  ? ingredient
+                  : `${ingredient.amount || ""} ${ingredient.unit || ""} ${ingredientName}${ingredient.notes ? ` (${ingredient.notes})` : ""}`.trim();
+                
+                return (
+                  <li key={index} className="ing-item">
+                    <input type="checkbox" aria-label={`Mark ${label}`} />
+                    <span className="ing-text">{displayText}</span>
+                  </li>
+                );
+              })}
             </ul>
           </AccordionContent>
         </AccordionItem>
