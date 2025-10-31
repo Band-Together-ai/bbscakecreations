@@ -137,8 +137,8 @@ export const SashaOnboarding = ({ onComplete }: OnboardingProps) => {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-center text-muted-foreground">
-            I'm Sasha — your baking sidekick, sprinkle cheerleader, and secret ingredient to stress-free cakes.
-            Before we roll up our sleeves, tell me a little about you so I can tailor your BakeBook and tips just right.
+            I'm Sasha — your baking companion! Welcome to Brandia's Kitchen. 
+            Before we start, tell me a little about you so I can help you bake with confidence and joy.
           </p>
           <div className="grid grid-cols-1 gap-3">
             {PERSONA_OPTIONS.map((option) => (

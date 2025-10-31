@@ -14,13 +14,15 @@ const tiers = [
     name: "Kitchen Guest",
     displayName: "Kitchen Guest",
     role: "free",
-    price: "Free",
+    price: "Free Forever",
     priceId: null,
+    description: "You're welcome in the kitchen! All recipes are open — no paywalls here.",
     features: [
-      "Top 10 recipes",
-      "15 messages with Sasha",
-      "View baking tools",
-      "Browse community",
+      "All recipes free (always!)",
+      "Enjoy every recipe",
+      "Light help from Sasha",
+      "Save 10 favorites to your BakeBook",
+      "Community access",
     ],
   },
   {
@@ -29,16 +31,16 @@ const tiers = [
     role: "tier1",
     price: "$3/month",
     priceId: "price_1SO1gmJhxVTv3kKItOP0ecec", // Home Baker+ $3/month
+    description: "Your own BakeBook comes alive. Save unlimited recipes, chat with Sasha to scan text recipes, and remix your favorites.",
     features: [
       "All recipes free (always!)",
       "Unlimited BakeBook saves",
-      "Text recipe scanning",
-      "Unlimited Sasha chat",
-      "Wishlists & tool suggestions",
-      "Remix recipes your way",
-      "Grocery-ready lists",
+      "Chat with Sasha to scan text recipes",
+      "Recipe wishlists",
+      "Remix your favorites",
+      "Like having a digital sous-chef",
     ],
-    gratitude: "We appreciate you more than you know.",
+    gratitude: "Your membership helps Brandia keep creating — thank you for being part of this sweet little corner of the world.",
   },
   {
     name: "Master Mixer",
@@ -46,15 +48,16 @@ const tiers = [
     role: "tier2",
     price: "$6/month",
     priceId: "price_1SO1hWJhxVTv3kKId4l0tkVj", // Master Mixer $6/month
+    description: "You've earned your apron stripes! Get photo scanning, voice chat, advanced remixing, and early access to new recipes.",
     features: [
       "Everything in Home Baker+",
       "Photo recipe scanning",
       "Voice chat with Sasha",
+      "AI remix suggestions",
       "Early access to new recipes",
-      "Advanced remix with AI suggestions",
-      "Priority support",
+      "You're not just baking — you're mastering your craft",
     ],
-    gratitude: "You're the reason the magic keeps growing.",
+    gratitude: "Your membership helps Brandia keep creating — thank you for being part of this sweet little corner of the world.",
   },
 ];
 
@@ -151,20 +154,19 @@ export default function Billing() {
       <Navigation />
       <main className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Welcome to the Kitchen!
+          <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-6">
+            Join Brandia's Kitchen
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-            Every recipe here is free — because generosity tastes better.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-2">
+            Every recipe is free, but your support keeps the oven warm! 🌊
           </p>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            But if you'd like to keep the oven warm and unlock more creative tools,<br />
-            join the <span className="font-semibold text-foreground">Home Bakers Club.</span>
+            Be part of something sweet. Every tier is a thank-you for being part of this community.
           </p>
           {isAuthenticated && role === 'paid' && (
             <div className="mt-6">
               <Badge variant="default" className="text-lg px-6 py-2">
-                ⭐ Active Member
+                🌊 Home Baker+ or Master Mixer
               </Badge>
             </div>
           )}
@@ -172,11 +174,11 @@ export default function Billing() {
 
         {/* Current Plan Management */}
         {isAuthenticated && role === 'paid' && (
-          <Card className="mb-8 border-primary">
+          <Card className="mb-8 border-primary shadow-wave">
             <CardHeader>
-              <CardTitle>Manage Your Subscription</CardTitle>
+              <CardTitle className="font-fredoka">Manage Your Subscription</CardTitle>
               <CardDescription>
-                Update payment method, view invoices, or make changes
+                Update payment method, view invoices, or switch plans
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -184,6 +186,7 @@ export default function Billing() {
                 onClick={handlePortal}
                 disabled={loadingPortal}
                 size="lg"
+                className="gradient-ocean text-white"
               >
                 {loadingPortal ? (
                   <>
@@ -204,40 +207,48 @@ export default function Billing() {
             const isCurrentTier = tier.role === role;
             const canUpgrade = tier.priceId && tier.role !== 'free';
             const gratitude = (tier as any).gratitude;
+            const description = (tier as any).description;
 
             return (
               <Card 
                 key={tier.name}
-                className={`relative ${isCurrentTier ? 'border-primary shadow-lg' : ''}`}
+                className={`relative shadow-wave ${isCurrentTier ? 'border-primary ring-2 ring-primary/20' : ''}`}
               >
                 {isCurrentTier && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="px-4 py-1">Your Plan</Badge>
+                    <Badge className="px-4 py-1 bg-gradient-ocean text-white">Your Plan</Badge>
                   </div>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-2xl">{tier.displayName || tier.name}</CardTitle>
-                  <div className="text-3xl font-bold mt-2">{tier.price}</div>
-                  {gratitude && (
-                    <p className="text-sm text-muted-foreground italic mt-2">
-                      {gratitude}
+                  <CardTitle className="text-2xl font-fredoka text-ocean-deep">
+                    {tier.displayName || tier.name}
+                  </CardTitle>
+                  <div className="text-3xl font-bold text-ocean-wave mt-2">{tier.price}</div>
+                  {description && (
+                    <p className="text-sm text-muted-foreground mt-3">
+                      {description}
                     </p>
                   )}
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
                     {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <li key={feature} className="flex items-start gap-2 text-sm">
+                        <Check className="h-5 w-5 text-coral shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
+                  {gratitude && (
+                    <p className="text-xs text-muted-foreground italic mb-4 p-3 bg-ocean-foam/10 rounded-lg border border-ocean-foam/20">
+                      💌 {gratitude}
+                    </p>
+                  )}
                   {canUpgrade && !isCurrentTier && (
                     <Button
                       onClick={() => handleCheckout(tier.priceId!)}
                       disabled={loadingCheckout === tier.priceId}
-                      className="w-full"
+                      className="w-full gradient-ocean text-white shadow-wave"
                       size="lg"
                     >
                       {loadingCheckout === tier.priceId ? (
@@ -246,7 +257,7 @@ export default function Billing() {
                           Loading...
                         </>
                       ) : (
-                        `Join ${tier.displayName || tier.name}`
+                        `Join the Kitchen`
                       )}
                     </Button>
                   )}
@@ -269,16 +280,20 @@ export default function Billing() {
 
         {/* Info Section */}
         <div className="mt-16 text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold mb-4">Questions?</h2>
+          <h2 className="text-2xl font-fredoka text-ocean-deep mb-4">Questions?</h2>
           <p className="text-muted-foreground mb-6">
-            All subscriptions include instant access, automatic updates, and can be canceled anytime.
-            Your recipes and BakeBook are always yours to keep.
+            All memberships include instant access, automatic updates, and can be canceled anytime.
+            Your recipes and BakeBook are always yours to keep — no matter what.
           </p>
-          <p className="text-sm text-muted-foreground mb-8 italic">
+          <p className="text-base text-muted-foreground mb-8 font-quicksand italic">
             💌 Thank you for being part of our kitchen family. Your creativity inspires every update.
           </p>
           {!isAuthenticated && (
-            <Button onClick={() => navigate('/auth')} size="lg">
+            <Button 
+              onClick={() => navigate('/auth')} 
+              size="lg"
+              className="gradient-ocean text-white shadow-wave"
+            >
               Sign In to Get Started
             </Button>
           )}

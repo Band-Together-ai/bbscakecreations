@@ -33,10 +33,10 @@ const HowItWorks = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
-                🌊 Welcome to Brandia's Baking App!
+                🌊 Welcome to Brandia's Kitchen!
               </h1>
               <p className="text-lg text-muted-foreground">
-                Right now you're browsing as a guest. Here's what you can do:
+                You're browsing as a Kitchen Guest. Here's what you can enjoy:
               </p>
             </div>
 
@@ -59,15 +59,15 @@ const HowItWorks = () => {
                 </div>
 
                 <div className="mt-6 pt-6 border-t">
-                  <h3 className="text-xl font-semibold mb-4">Want More? Sign Up (It's Free!):</h3>
+                  <h3 className="text-xl font-semibold mb-4">Want to save recipes? Join for free!</h3>
                   <div className="space-y-3 mb-6">
                     <div className="flex items-start gap-3">
                       <BookOpen className="w-5 h-5 text-coral mt-1" />
-                      <p>✓ Save up to 10 recipes to your BakeBook</p>
+                      <p>✓ Save up to 10 favorites to your BakeBook</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <MessageSquare className="w-5 h-5 text-coral mt-1" />
-                      <p>✓ Unlimited chat with Sasha</p>
+                      <p>✓ Unlimited chat with Sasha for baking help</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <Star className="w-5 h-5 text-coral mt-1" />
@@ -80,7 +80,7 @@ const HowItWorks = () => {
                     className="w-full gradient-ocean text-white shadow-wave"
                     size="lg"
                   >
-                    Sign Up Free
+                    Join the Kitchen (Free)
                   </Button>
                 </div>
 
@@ -99,10 +99,10 @@ const HowItWorks = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
-                🌊 Your Free Account
+                🧁 You're a Kitchen Guest!
               </h1>
               <p className="text-lg text-muted-foreground">
-                You're signed in! Here's everything you have access to:
+                Welcome! Here's everything in your free account:
               </p>
             </div>
 
@@ -139,7 +139,7 @@ const HowItWorks = () => {
 
                 <div className="mt-6 pt-6 border-t">
                   <h3 className="text-xl font-semibold mb-4">
-                    Ready for More? Join the Home Bakers Club ($9.99/month):
+                    Ready for More? Become a Home Baker+ ($3/month):
                   </h3>
                   <div className="space-y-3 mb-6">
                     <div className="flex items-start gap-3">
@@ -147,25 +147,25 @@ const HowItWorks = () => {
                       <p>✓ Unlimited BakeBook saves</p>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Camera className="w-5 h-5 text-coral mt-1" />
-                      <p>✓ Real-time recipe scanning from photos</p>
+                      <MessageSquare className="w-5 h-5 text-coral mt-1" />
+                      <p>✓ Text recipe scanning</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <ShoppingBag className="w-5 h-5 text-coral mt-1" />
-                      <p>✓ Tool wishlists with affiliate recommendations</p>
+                      <p>✓ Recipe wishlists and remix tools</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <Sparkles className="w-5 h-5 text-coral mt-1" />
-                      <p>✓ Priority support</p>
+                      <p>✓ Like having a digital sous-chef</p>
                     </div>
                   </div>
 
                   <Button 
-                    onClick={() => navigate("/chat")} 
+                    onClick={() => navigate("/billing")} 
                     className="w-full gradient-ocean text-white shadow-wave"
                     size="lg"
                   >
-                    Upgrade to Home Bakers Club
+                    Unlock Your BakeBook
                   </Button>
                 </div>
 
@@ -184,10 +184,10 @@ const HowItWorks = () => {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4">
-                💕 Welcome to the Home Bakers Club!
+                🍪 You're a Home Baker+!
               </h1>
               <p className="text-lg text-muted-foreground">
-                You're a full member! Here's everything you can do:
+                Your BakeBook is alive! Here's everything you can do:
               </p>
             </div>
 
@@ -248,10 +248,10 @@ const HowItWorks = () => {
             <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
                 <TestTube className="w-10 h-10 text-ocean-wave" />
-                Collaborator Access
+                👩‍🍳 You're a Collaborator!
               </h1>
               <p className="text-lg text-muted-foreground">
-                You're helping Brandia test and refine features!
+                Part of the inner kitchen circle — beta tester, recipe editor, and creative partner!
               </p>
             </div>
 
@@ -261,15 +261,15 @@ const HowItWorks = () => {
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-ocean-wave mt-1" />
-                    <p>✓ Everything from Home Bakers Club</p>
+                    <p>✓ All Master Mixer features</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <TestTube className="w-5 h-5 text-ocean-wave mt-1" />
-                    <p>✓ Early access to new features</p>
+                    <p>✓ Early access to new recipes and features</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <Eye className="w-5 h-5 text-ocean-wave mt-1" />
-                    <p>✓ Admin-level recipe viewing (you can see draft recipes)</p>
+                    <p>✓ See draft recipes before they go live</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <MessageSquare className="w-5 h-5 text-ocean-wave mt-1" />
@@ -280,7 +280,7 @@ const HowItWorks = () => {
                 <div className="mt-6 pt-6 border-t">
                   <h3 className="text-xl font-semibold mb-4">Your Role:</h3>
                   <p className="text-muted-foreground">
-                    Help test new baking tools, features, and recipes before they go live.
+                    Help shape what's next in Brandia's kitchen by testing new tools, features, and recipes before they launch.
                   </p>
                 </div>
 

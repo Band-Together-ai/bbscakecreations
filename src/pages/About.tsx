@@ -226,14 +226,14 @@ const About = () => {
           <Card className="shadow-float bg-gradient-to-br from-ocean-foam/20 to-coral/10">
             <CardContent className="p-8 md:p-12 text-center">
               <h2 className="text-3xl font-fredoka text-ocean-deep mb-2">Meet Sasha</h2>
-              <p className="text-base text-ocean-wave font-quicksand mb-4">BB's AI Baking Companion</p>
+              <p className="text-base text-ocean-wave font-quicksand mb-4">Your AI Baking Companion</p>
               <p className="text-lg text-foreground max-w-2xl mx-auto">
                 Sasha is my AI companion—trained on my voice notes, recipe uploads, and baking 
                 philosophy. She captures my warm, no-nonsense approach and helps you create
                 your own masterpieces with the same from-scratch magic I pour into every layer.
               </p>
               <p className="text-coral font-fredoka text-xl mt-6">
-                "Ready to get messy in the kitchen?"
+                "Hi, I'm Sasha! Welcome to Brandia's Kitchen — what are we baking today?"
               </p>
             </CardContent>
           </Card>
