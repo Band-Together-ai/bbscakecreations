@@ -27,7 +27,10 @@ export default function RecipeDetailV2() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("recipes")
-        .select("*")
+        .select(`
+          *,
+          recipe_photos(photo_url, is_headline)
+        `)
         .eq("id", id)
         .single();
 
@@ -111,11 +114,22 @@ export default function RecipeDetailV2() {
   const bakeMinutes = recipe.prep_passive_minutes || 0;
   const totalMinutes = prepMinutes + bakeMinutes;
 
+  // Get hero image - try image_url first, then headline photo, then first photo
+  const getHeroImage = () => {
+    if (recipe.image_url) return recipe.image_url;
+    const headlinePhoto = recipe.recipe_photos?.find((p: any) => p.is_headline);
+    if (headlinePhoto) return headlinePhoto.photo_url;
+    if (recipe.recipe_photos && recipe.recipe_photos.length > 0) {
+      return (recipe.recipe_photos as any[])[0].photo_url;
+    }
+    return "/placeholder.svg";
+  };
+
   return (
     <div className="ui-v2 min-h-screen pb-20">
       <RecipeHeaderHeroV2
         title={recipe.title}
-        imageUrl={recipe.image_url || "/placeholder.svg"}
+        imageUrl={getHeroImage()}
       />
 
       <RecipeSummaryCardV2

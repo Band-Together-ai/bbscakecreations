@@ -267,7 +267,11 @@ const Recipes = () => {
                   <CardTitle className="font-fredoka text-2xl text-ocean-deep">
                     {recipe.title}
                   </CardTitle>
-                  <CardDescription>{recipe.description}</CardDescription>
+                  {recipe.description && !recipe.description.startsWith('INGREDIENTS:') && (
+                    <CardDescription className="line-clamp-3">
+                      {recipe.description}
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent>
                   {isAdmin || isCollaborator ? (
