@@ -28,7 +28,7 @@ const tiers = [
     displayName: "Home Baker+",
     role: "tier1",
     price: "$3/month",
-    priceId: "STRIPE_PRICE_TIER1", // Replace with actual Stripe price ID
+    priceId: "price_1SO1gmJhxVTv3kKItOP0ecec", // Home Baker+ $3/month
     features: [
       "All recipes free (always!)",
       "Unlimited BakeBook saves",
@@ -45,7 +45,7 @@ const tiers = [
     displayName: "Master Mixer",
     role: "tier2",
     price: "$6/month",
-    priceId: "STRIPE_PRICE_TIER2", // Replace with actual Stripe price ID
+    priceId: "price_1SO1hWJhxVTv3kKId4l0tkVj", // Master Mixer $6/month
     features: [
       "Everything in Home Baker+",
       "Photo recipe scanning",
