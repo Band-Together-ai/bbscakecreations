@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Upload, Link as LinkIcon, Mic, Video, UserPlus, MessageSquare, Square, Trash2, Star, Loader2 } from "lucide-react";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { ToolsTab } from "@/components/admin/ToolsTab";
+import { PhotoManagementTab } from "@/components/admin/PhotoManagementTab";
 import { WellnessTab } from "@/components/admin/WellnessTab";
 import { FavoriteBakersTab } from "@/components/admin/FavoriteBakersTab";
 import { EarlyBirdTab } from "@/components/admin/EarlyBirdTab";
@@ -968,6 +969,7 @@ const Admin = () => {
             <TabsList className="inline-flex flex-wrap w-full min-w-fit gap-1 h-auto p-2">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="photos">Photos</TabsTrigger>
+            <TabsTrigger value="photo-manage">Manage Photos</TabsTrigger>
             <TabsTrigger value="about">About Me</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
@@ -1482,6 +1484,21 @@ const Admin = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* PHOTO MANAGEMENT TAB */}
+          <TabsContent value="photo-manage">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-fredoka">Photo Management</CardTitle>
+                <CardDescription>
+                  Move photos between buckets (Recipe Photos, Profile Photos, Product Photos) or delete them
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PhotoManagementTab />
               </CardContent>
             </Card>
           </TabsContent>
