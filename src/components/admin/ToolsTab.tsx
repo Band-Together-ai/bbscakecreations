@@ -54,7 +54,7 @@ export const ToolsTab = () => {
     toast.info("Uploading image...");
 
     const { error: uploadError } = await supabase.storage
-      .from('recipe-photos')
+      .from('product-photos')
       .upload(fileName, file);
 
     if (uploadError) {
@@ -63,7 +63,7 @@ export const ToolsTab = () => {
       return;
     }
 
-    const { data } = supabase.storage.from('recipe-photos').getPublicUrl(fileName);
+    const { data } = supabase.storage.from('product-photos').getPublicUrl(fileName);
     setImageUrl(data.publicUrl);
     toast.success("Image uploaded!");
   };
