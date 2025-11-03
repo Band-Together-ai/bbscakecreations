@@ -13,7 +13,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 const TrainSasha = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, loading } = useUserRole();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([
     {
@@ -25,11 +25,11 @@ const TrainSasha = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (!loading && !isAdmin) {
       toast.error("Admin access required");
       navigate("/");
     }
-  }, [isAdmin, navigate]);
+  }, [isAdmin, loading, navigate]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -85,7 +85,7 @@ const TrainSasha = () => {
     }
   };
 
-  if (!isAdmin) {
+  if (loading || !isAdmin) {
     return null;
   }
 
