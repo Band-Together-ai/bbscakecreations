@@ -1,12 +1,37 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+const ACTIVITY_CHECK_INTERVAL = 30000; // 30 seconds
+
 export const useSessionTracking = (userId: string | null) => {
   const sessionIdRef = useRef<string | null>(null);
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!userId) return;
+
+    const updateLastActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    // Track user activity
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    activityEvents.forEach(event => {
+      window.addEventListener(event, updateLastActivity);
+    });
+
+    const checkInactivity = async () => {
+      const timeSinceActivity = Date.now() - lastActivityRef.current;
+      
+      if (timeSinceActivity >= INACTIVITY_TIMEOUT) {
+        // Log out user due to inactivity
+        await endSession();
+        await supabase.auth.signOut();
+      }
+    };
 
     const startSession = async () => {
       try {
@@ -30,7 +55,10 @@ export const useSessionTracking = (userId: string | null) => {
                 .update({ last_activity: new Date().toISOString() })
                 .eq('id', sessionIdRef.current);
             }
-          }, 30000);
+          }, ACTIVITY_CHECK_INTERVAL);
+
+          // Check for inactivity every 30 seconds
+          inactivityTimeoutRef.current = setInterval(checkInactivity, ACTIVITY_CHECK_INTERVAL);
         }
       } catch (error) {
         console.error('Session tracking error:', error);
@@ -61,8 +89,14 @@ export const useSessionTracking = (userId: string | null) => {
     return () => {
       endSession();
       window.removeEventListener('beforeunload', endSession);
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, updateLastActivity);
+      });
       if (activityIntervalRef.current) {
         clearInterval(activityIntervalRef.current);
+      }
+      if (inactivityTimeoutRef.current) {
+        clearInterval(inactivityTimeoutRef.current);
       }
     };
   }, [userId]);
