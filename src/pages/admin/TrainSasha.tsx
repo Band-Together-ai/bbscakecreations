@@ -10,6 +10,7 @@ import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
 import { Send, ArrowLeft } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { VoiceRecorder, VoicePlayback } from "@/components/VoiceRecorder";
 
 const TrainSasha = () => {
   const navigate = useNavigate();
@@ -129,13 +130,16 @@ const TrainSasha = () => {
                     }`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 flex items-start gap-2 ${
                         msg.role === "user"
                           ? "bg-ocean-wave text-white"
                           : "bg-ocean-foam text-ocean-deep"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap flex-1">{msg.content}</p>
+                      {msg.role === "assistant" && msg.content !== "..." && (
+                        <VoicePlayback text={msg.content} />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -144,6 +148,10 @@ const TrainSasha = () => {
             </ScrollArea>
 
             <form onSubmit={handleSendMessage} className="flex gap-2 mt-4">
+              <VoiceRecorder 
+                onTranscription={(text) => setMessage(text)}
+                disabled={isLoading}
+              />
               <Input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
