@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { MessageSquare, Users } from "lucide-react";
+import { MessageSquare, Users, Heart, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { FloatingCTA } from "@/components/FloatingCTA";
 
 interface ForumPost {
   id: string;
@@ -77,28 +78,73 @@ const Community = () => {
       <Navigation />
 
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Users className="w-12 h-12 text-ocean-wave" />
-            <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent">
-              Cake Builder Community
-            </h1>
-          </div>
-          <p className="text-xl text-dolphin max-w-2xl mx-auto mb-6">
-            A chatty space for swapping stories, tips, and celebrating each other's baking triumphs
-          </p>
-          
-          {user && !showNewPost && (
+        {/* Hero Section - Only for non-authenticated users */}
+        {!user && (
+          <div className="max-w-4xl mx-auto mb-16 text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Users className="w-12 h-12 text-ocean-wave" />
+              <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent">
+                Join the Cake Builder Community
+              </h1>
+            </div>
+            <p className="text-xl text-dolphin mb-8">
+              Connect, share, and learn from fellow home bakers who get it
+            </p>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
+              <div className="p-4 rounded-lg bg-ocean-foam/30 border border-ocean-wave/20">
+                <Users className="w-6 h-6 text-ocean-wave mx-auto mb-2" />
+                <div className="text-2xl font-fredoka text-ocean-deep">{posts.length * 3}+</div>
+                <div className="text-sm text-muted-foreground">Bakers</div>
+              </div>
+              <div className="p-4 rounded-lg bg-ocean-foam/30 border border-ocean-wave/20">
+                <MessageSquare className="w-6 h-6 text-ocean-wave mx-auto mb-2" />
+                <div className="text-2xl font-fredoka text-ocean-deep">{posts.length}</div>
+                <div className="text-sm text-muted-foreground">Discussions</div>
+              </div>
+              <div className="p-4 rounded-lg bg-ocean-foam/30 border border-ocean-wave/20">
+                <Heart className="w-6 h-6 text-ocean-wave mx-auto mb-2" />
+                <div className="text-2xl font-fredoka text-ocean-deep">{posts.length * 5}+</div>
+                <div className="text-sm text-muted-foreground">Tips Shared</div>
+              </div>
+            </div>
+
             <Button
-              onClick={() => setShowNewPost(true)}
+              onClick={() => navigate("/auth")}
               className="gradient-ocean text-primary-foreground"
               size="lg"
             >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              Start a Discussion
+              Sign Up to Join the Conversation
             </Button>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Authenticated user header */}
+        {user && (
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Users className="w-12 h-12 text-ocean-wave" />
+              <h1 className="text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent">
+                Cake Builder Community
+              </h1>
+            </div>
+            <p className="text-xl text-dolphin max-w-2xl mx-auto mb-6">
+              A chatty space for swapping stories, tips, and celebrating each other's baking triumphs
+            </p>
+            
+            {!showNewPost && (
+              <Button
+                onClick={() => setShowNewPost(true)}
+                className="gradient-ocean text-primary-foreground"
+                size="lg"
+              >
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Start a Discussion
+              </Button>
+            )}
+          </div>
+        )}
 
         <div className="max-w-4xl mx-auto space-y-8">
           {showNewPost && (
@@ -174,6 +220,8 @@ const Community = () => {
           )}
         </div>
       </div>
+      
+      <FloatingCTA page="community" />
     </div>
   );
 };

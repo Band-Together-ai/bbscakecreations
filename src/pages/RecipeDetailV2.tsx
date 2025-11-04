@@ -11,15 +11,19 @@ import { RecipeStagingStrip } from "@/components/recipe/RecipeStagingStrip";
 import { StickySaveButton } from "@/components/bakebook/StickySaveButton";
 import { FabAskSasha } from "@/components/sasha/FabAskSasha";
 import { BottomNavV2 } from "@/components/nav/BottomNavV2";
-import { Share2, ShoppingCart } from "lucide-react";
+import { Share2, ShoppingCart, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/useUserRole";
+import { AuthModal } from "@/components/AuthModal";
 import "../styles/ui_v2.css";
 
 export default function RecipeDetailV2() {
   const { id } = useParams();
   const [isSaved, setIsSaved] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isAuthenticated } = useUserRole();
 
   // Fetch recipe
   const { data: recipe, isLoading } = useQuery({
@@ -233,30 +237,79 @@ export default function RecipeDetailV2() {
           </Button>
         </div>
 
-        <RecipeAccordion
-          recipeType={recipe.recipe_type}
-          ingredients={recipe.ingredients}
-          instructions={recipe.instructions}
-          baseRecipe={baseRecipe}
-          frostingRecipe={frostingRecipe}
-          assemblyInstructions={recipe.assembly_instructions}
-          variantNotes={recipe.variant_notes}
-          tools={tools}
-          insights={
-            <div className="space-y-4">
-              <p className="text-[#5E6A6E] italic">
-                I'll fetch tool tips when you're ready.
-              </p>
-              <p className="text-sm text-[#5E6A6E]">
-                Join the community — more tips coming soon.
-              </p>
+        {/* Instructions Lock Overlay for Non-Authenticated Users */}
+        {!isAuthenticated ? (
+          <div className="relative">
+            {/* Show ingredients publicly */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-fredoka text-ocean-deep mb-4">Ingredients</h2>
+              <div className="prose prose-sm max-w-none">
+                <p className="whitespace-pre-wrap">{String(recipe.ingredients || '')}</p>
+              </div>
             </div>
-          }
-        />
+
+            {/* Locked Instructions */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background z-10 backdrop-blur-sm rounded-lg" />
+              <div className="blur-sm pointer-events-none">
+                <h2 className="text-2xl font-fredoka text-ocean-deep mb-4">Instructions</h2>
+                <div className="prose prose-sm max-w-none">
+                  <p className="whitespace-pre-wrap">{String(recipe.instructions || '').substring(0, 200)}...</p>
+                </div>
+              </div>
+              
+              {/* Lock CTA */}
+              <div className="absolute inset-0 z-20 flex items-center justify-center">
+                <div className="text-center bg-background/95 p-8 rounded-lg shadow-float max-w-md border border-ocean-wave/30">
+                  <Lock className="w-12 h-12 text-ocean-wave mx-auto mb-4" />
+                  <h3 className="text-xl font-fredoka text-ocean-deep mb-2">
+                    Sign up free to unlock Brandia's instructions & secret tips
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Save recipes, chat with Sasha, and join the community
+                  </p>
+                  <Button
+                    onClick={() => setShowAuthModal(true)}
+                    className="gradient-ocean text-primary-foreground"
+                    size="lg"
+                  >
+                    Sign Up Free
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <RecipeAccordion
+            recipeType={recipe.recipe_type}
+            ingredients={recipe.ingredients}
+            instructions={recipe.instructions}
+            baseRecipe={baseRecipe}
+            frostingRecipe={frostingRecipe}
+            assemblyInstructions={recipe.assembly_instructions}
+            variantNotes={recipe.variant_notes}
+            tools={tools}
+            insights={
+              <div className="space-y-4">
+                <p className="text-[#5E6A6E] italic">
+                  I'll fetch tool tips when you're ready.
+                </p>
+                <p className="text-sm text-[#5E6A6E]">
+                  Join the community — more tips coming soon.
+                </p>
+              </div>
+            }
+          />
+        )}
       </main>
 
       <FabAskSasha recipeId={id} />
       <BottomNavV2 />
+      
+      <AuthModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+      />
     </div>
   );
 }

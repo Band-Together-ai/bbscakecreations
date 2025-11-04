@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthModal } from "./AuthModal";
 
 interface FloatingCTAProps {
-  page?: "recipes" | "chat" | "bakebook" | "tools" | "default";
+  page?: "recipes" | "chat" | "bakebook" | "tools" | "community" | "default";
 }
 
 export const FloatingCTA = ({ page = "default" }: FloatingCTAProps) => {
@@ -66,6 +66,11 @@ export const FloatingCTA = ({ page = "default" }: FloatingCTAProps) => {
       icon: <ChefHat className="w-5 h-5" />,
       text: "Unlock all baking tools with a free account!",
       cta: "Sign Up Free",
+    },
+    community: {
+      icon: <MessageCircle className="w-5 h-5" />,
+      text: "Join the conversation with fellow bakers!",
+      cta: "Sign Up to Join",
     },
     default: {
       icon: <Book className="w-5 h-5" />,

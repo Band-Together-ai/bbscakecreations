@@ -17,6 +17,9 @@ import { useChatSessionTracking } from "@/hooks/useChatSessionTracking";
 import { VoiceSettings } from "@/components/VoiceSettings";
 import { useUserRole } from "@/hooks/useUserRole";
 import { SashaOnboarding } from "@/components/SashaOnboarding";
+import { WelcomeWizard } from "@/components/WelcomeWizard";
+import { AuthModal } from "@/components/AuthModal";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -26,6 +29,10 @@ const Chat = () => {
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
   const [checkingOnboarding, setCheckingOnboarding] = useState<boolean>(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [guestMessageCount, setGuestMessageCount] = useState(0);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
@@ -53,6 +60,24 @@ const Chat = () => {
   // Track chat session
   useChatSessionTracking(userId || null, messages.length);
   
+  // Check guest mode on mount
+  useEffect(() => {
+    if (!userId) {
+      setIsGuestMode(true);
+      const guestMessages = localStorage.getItem('guest_messages');
+      if (guestMessages) {
+        try {
+          const parsed = JSON.parse(guestMessages);
+          setGuestMessageCount(parsed.length);
+          setMessages([...messages, ...parsed]);
+        } catch (e) {
+          console.error('Error parsing guest messages:', e);
+        }
+      }
+      setCheckingOnboarding(false);
+    }
+  }, [userId]);
+
   // Fetch user profile with voice preferences and onboarding status
   const fetchUserProfile = async () => {
     if (!userId) {
@@ -74,10 +99,10 @@ const Chat = () => {
     
     setUserProfile(data);
 
-    // Check onboarding status
+    // Check onboarding and welcome wizard status
     const { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
-      .select('onboarding_completed')
+      .select('onboarding_completed, welcome_wizard_completed')
       .eq('id', userId)
       .maybeSingle();
     
@@ -86,6 +111,7 @@ const Chat = () => {
     }
     
     setNeedsOnboarding(!profileData?.onboarding_completed);
+    setShowWelcomeWizard(profileData?.onboarding_completed && !profileData?.welcome_wizard_completed);
     setCheckingOnboarding(false);
   };
   
@@ -351,6 +377,14 @@ const Chat = () => {
   const sendMessageWithContent = async (content: string) => {
     if (!content.trim() && !uploadedImage) return;
 
+    // Guest mode: limit to 3 messages
+    if (isGuestMode) {
+      if (guestMessageCount >= 3) {
+        setShowAuthModal(true);
+        return;
+      }
+    }
+
     const userMessage: { role: string; content: string | Array<any>; image?: string } = {
       role: 'user',
       content: content,
@@ -373,6 +407,14 @@ const Chat = () => {
     setMessages((prev) => [...prev, userMessage, { role: 'assistant', content: '...' }]);
     setMessage('');
     setUploadedImage(null);
+
+    // Save guest messages to localStorage
+    if (isGuestMode) {
+      const guestMessages = JSON.parse(localStorage.getItem('guest_messages') || '[]');
+      guestMessages.push(userMessage);
+      localStorage.setItem('guest_messages', JSON.stringify(guestMessages));
+      setGuestMessageCount(guestMessages.length);
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-with-sasha', {
@@ -398,6 +440,13 @@ const Chat = () => {
       };
       setMessages((prev) => [...prev.slice(0, -1), aiResponse]);
 
+      // Save AI response for guests too
+      if (isGuestMode) {
+        const guestMessages = JSON.parse(localStorage.getItem('guest_messages') || '[]');
+        guestMessages.push(aiResponse);
+        localStorage.setItem('guest_messages', JSON.stringify(guestMessages));
+      }
+
       if (voiceReply && typeof aiResponse.content === 'string') {
         speak(aiResponse.content);
       }
@@ -406,6 +455,25 @@ const Chat = () => {
       toast.error('Something went wrong. Please try again.');
       setMessages((prev) => prev.slice(0, -1));
     }
+  };
+
+  const handleAuthSuccess = async () => {
+    // Migrate guest messages to real conversation
+    const guestMessages = localStorage.getItem('guest_messages');
+    if (guestMessages) {
+      try {
+        const parsed = JSON.parse(guestMessages);
+        // User is now authenticated, conversation will be created
+        localStorage.removeItem('guest_messages');
+        setIsGuestMode(false);
+        setGuestMessageCount(0);
+        toast.success("Welcome! Your conversation has been saved.");
+        window.location.reload(); // Refresh to initialize auth state
+      } catch (e) {
+        console.error('Error migrating messages:', e);
+      }
+    }
+    setShowAuthModal(false);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -439,8 +507,39 @@ const Chat = () => {
         </div>
       ) : (
         <>
+          {/* Welcome Wizard */}
+          <WelcomeWizard 
+            open={showWelcomeWizard}
+            onComplete={() => setShowWelcomeWizard(false)}
+          />
+
+          {/* Auth Modal for Guest Users */}
+          <AuthModal
+            open={showAuthModal}
+            onOpenChange={setShowAuthModal}
+            onSuccess={handleAuthSuccess}
+          />
+
           {/* Main chat area */}
           <div className="flex-1 container mx-auto px-4 py-8 flex flex-col relative z-10">
+            {/* Guest Mode Banner */}
+            {isGuestMode && (
+              <Alert className="mb-4 border-ocean-wave/30 bg-ocean-foam/50">
+                <AlertDescription className="flex items-center justify-between">
+                  <span className="text-sm">
+                    🌊 Chatting as guest ({3 - guestMessageCount} messages left) • <strong>Sign up free</strong> to save conversations!
+                  </span>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowAuthModal(true)}
+                    className="gradient-ocean text-primary-foreground"
+                  >
+                    Sign Up
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
         <Card className="flex-1 flex flex-col shadow-float">
           <CardHeader>
             <CardTitle className="font-fredoka text-ocean-deep">

@@ -1477,6 +1477,7 @@ export type Database = {
           persona: string | null
           style_vibe: string | null
           updated_at: string | null
+          welcome_wizard_completed: boolean | null
         }
         Insert: {
           created_at?: string | null
@@ -1488,6 +1489,7 @@ export type Database = {
           persona?: string | null
           style_vibe?: string | null
           updated_at?: string | null
+          welcome_wizard_completed?: boolean | null
         }
         Update: {
           created_at?: string | null
@@ -1499,6 +1501,7 @@ export type Database = {
           persona?: string | null
           style_vibe?: string | null
           updated_at?: string | null
+          welcome_wizard_completed?: boolean | null
         }
         Relationships: []
       }
