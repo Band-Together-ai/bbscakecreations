@@ -34,12 +34,35 @@ const Navigation = () => {
         page_path: window.location.pathname,
         user_agent: navigator.userAgent
       });
-      console.log('Coffee click tracked');
     } catch (error) {
       console.error('Error tracking coffee click:', error);
     }
     
-    toast.info("Tip jar coming soon! 💕");
+    // Fetch Venmo settings
+    const { data: supportSettings } = await supabase
+      .from('support_settings')
+      .select('*')
+      .single();
+    
+    if (!supportSettings?.venmo_username || !supportSettings?.is_enabled) {
+      toast.info("Tip jar coming soon! 💕");
+      return;
+    }
+    
+    // Increment thank you count
+    await supabase.rpc('increment_thank_you_count');
+    
+    // Open Venmo with $5 default
+    const amount = 5;
+    const venmoUrl = `venmo://paycharge?txn=pay&recipients=${supportSettings.venmo_username}&amount=${amount}&note=Thanks for your recipes! ☕❤️`;
+    window.location.href = venmoUrl;
+    
+    // Web fallback
+    setTimeout(() => {
+      window.open(`https://venmo.com/${supportSettings.venmo_username}?txn=pay&amount=${amount}`, '_blank');
+    }, 500);
+    
+    toast.success("Opening Venmo... ☕");
   };
 
   return (
