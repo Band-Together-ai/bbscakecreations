@@ -1,10 +1,12 @@
 import { Home, BookOpen, MessageCircle, Wrench, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { path: "/", icon: Home, label: "Home" },
-  { path: "/bakebook", icon: BookOpen, label: "BakeBook" },
+  { path: "/bakebook", authPath: "/my-bakebook", icon: BookOpen, label: "BakeBook" },
   { path: "/chat", icon: MessageCircle, label: "Sasha" },
   { path: "/tools", icon: Wrench, label: "Tools" },
   { path: "/admin", icon: User, label: "Profile" },
@@ -12,6 +14,19 @@ const navItems = [
 
 export const BottomNavV2 = () => {
   const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <nav
@@ -23,12 +38,13 @@ export const BottomNavV2 = () => {
       <div className="flex justify-around items-center h-16 max-w-screen-xl mx-auto px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const targetPath = isAuthenticated && item.authPath ? item.authPath : item.path;
+          const isActive = location.pathname === targetPath || location.pathname === item.path || (item.authPath && location.pathname === item.authPath);
           
           return (
             <Link
               key={item.path}
-              to={item.path}
+              to={targetPath}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-[44px]",
                 "transition-colors duration-200",

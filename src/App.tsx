@@ -28,6 +28,7 @@ import Gallery from "./pages/Gallery";
 import Instructions from "./pages/Instructions";
 import HowItWorks from "./pages/HowItWorks";
 import BakeBook from "./pages/BakeBook";
+import BakeBookLanding from "./pages/BakeBookLanding";
 import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
 import RecipeDetailV2 from "./pages/RecipeDetailV2";
@@ -81,7 +82,8 @@ const AppContent = () => {
           <Route path="/billing" element={<Billing />} />
       <Route path="/favorites" element={<Favorites />} />
       <Route path="/gallery" element={<Gallery />} />
-      <Route path="/bakebook" element={
+      <Route path="/bakebook" element={<BakeBookLanding />} />
+      <Route path="/my-bakebook" element={
         <ProtectedRoute>
           <BakeBook />
         </ProtectedRoute>
