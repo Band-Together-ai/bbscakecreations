@@ -1469,6 +1469,7 @@ export type Database = {
       user_profiles: {
         Row: {
           created_at: string | null
+          entry_point: string | null
           experience_level: string | null
           goal_focus: string | null
           id: string
@@ -1479,6 +1480,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          entry_point?: string | null
           experience_level?: string | null
           goal_focus?: string | null
           id: string
@@ -1489,6 +1491,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          entry_point?: string | null
           experience_level?: string | null
           goal_focus?: string | null
           id?: string

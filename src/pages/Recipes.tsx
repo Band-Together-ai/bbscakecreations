@@ -7,6 +7,7 @@ import { Lock, Sparkles, Edit, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
+import { FloatingCTA } from "@/components/FloatingCTA";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -411,6 +412,7 @@ const Recipes = () => {
           </div>
         )}
       </div>
+      {!user && <FloatingCTA page="recipes" />}
     </div>
   );
 };

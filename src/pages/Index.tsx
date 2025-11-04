@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import WaveBackground from "@/components/WaveBackground";
 import Navigation from "@/components/Navigation";
 import { ArrowRight, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Sparkles, Heart, Wheat } from "lucide-react";
+import { FloatingCTA } from "@/components/FloatingCTA";
 
 import logoSquare from "@/assets/logo-square-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -602,6 +603,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      <FloatingCTA page="default" />
     </div>
   );
 };

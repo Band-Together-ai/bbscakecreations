@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Star, Lock } from "lucide-react";
+import { BookOpen, Star, Lock, Book, MessageCircle } from "lucide-react";
 import { AuthModal } from "./AuthModal";
 
 interface FeaturedRecipe {
@@ -70,127 +70,247 @@ export const TeaserBakeBook = () => {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        {/* Hero Banner */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
-            <BookOpen className="w-10 h-10 text-ocean-wave" />
+        {/* Hero Section */}
+        <section className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-6 animate-fade-in">
             Your Personal BakeBook
           </h1>
-          <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-            This is what your BakeBook could look like! Save recipes, track your
-            attempts, rate results, and organize everything in custom folders.
+          <p className="text-xl text-dolphin mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            Organize, save, and perfect your favorite recipes in your digital baking companion
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
+          <div className="flex gap-4 justify-center mb-12 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            <Button 
               onClick={() => setShowAuthModal(true)}
-              className="gradient-ocean text-white shadow-wave"
-            >
-              Sign Up Free - Get 10 Slots
-            </Button>
-            <Button
+              className="gradient-ocean text-white shadow-wave hover:scale-105 transition-bounce"
               size="lg"
+            >
+              Start Free BakeBook
+            </Button>
+            <Button 
               variant="outline"
+              size="lg"
+              className="border-ocean-mist text-ocean-deep hover:bg-ocean-mist/20"
               onClick={() => navigate("/instructions")}
             >
               Learn More
             </Button>
           </div>
-        </div>
+          
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap gap-6 justify-center text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="text-ocean-wave">✓</span>
+              <span>Free During Beta</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-ocean-wave">✓</span>
+              <span>No Credit Card Required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-ocean-wave">✓</span>
+              <span>Save Up to 10 Recipes Free</span>
+            </div>
+          </div>
+        </section>
 
-        {/* Sample Recipe Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teaserRecipes.map((recipe) => (
-            <Card
-              key={recipe.id}
-              className="overflow-hidden cursor-pointer group relative"
-              onClick={() => setShowAuthModal(true)}
-            >
-              {/* Hover Overlay - Desktop */}
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center hidden md:flex">
-                <div className="text-center text-white">
-                  <Lock className="w-12 h-12 mx-auto mb-2" />
-                  <p className="font-semibold text-lg">Sign up to unlock</p>
-                  <p className="text-sm">Start saving recipes like this</p>
+        {/* What's Included Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-fredoka text-ocean-deep text-center mb-12">
+            What's Included in Your Free BakeBook
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <Card className="text-center hover:shadow-wave transition-smooth">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-ocean-mist/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Book className="w-6 h-6 text-ocean-deep" />
                 </div>
-              </div>
-
-              {/* Lock Badge - Mobile */}
-              <div className="absolute top-4 right-4 z-10 md:hidden">
-                <Badge className="bg-black/70 text-white border-none">
-                  <Lock className="w-3 h-3 mr-1" />
-                  Locked
-                </Badge>
-              </div>
-
-              {recipe.image_url && (
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={recipe.image_url}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-lg line-clamp-2">
-                    {recipe.title}
-                  </h3>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge variant="outline">{recipe.folder}</Badge>
-                  {recipe.category && (
-                    <Badge variant="secondary">{recipe.category}</Badge>
-                  )}
-                </div>
-
-                {recipe.user_rating > 0 && (
-                  <div className="flex items-center gap-1 mb-2">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < recipe.user_rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <div className="text-sm text-muted-foreground">
-                  {recipe.attempt_number > 0 && (
-                    <p>Made {recipe.attempt_number}x</p>
-                  )}
-                  {recipe.last_made && <p>Last made: {recipe.last_made}</p>}
-                </div>
+                <h3 className="font-semibold text-ocean-deep mb-2">Save 10 Recipes</h3>
+                <p className="text-sm text-muted-foreground">
+                  Organize your favorite recipes in custom folders
+                </p>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            
+            <Card className="text-center hover:shadow-wave transition-smooth">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-ocean-mist/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="w-6 h-6 text-ocean-deep" />
+                </div>
+                <h3 className="font-semibold text-ocean-deep mb-2">Rate & Review</h3>
+                <p className="text-sm text-muted-foreground">
+                  Track your attempts and rate each recipe
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center hover:shadow-wave transition-smooth">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 bg-ocean-mist/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="w-6 h-6 text-ocean-deep" />
+                </div>
+                <h3 className="font-semibold text-ocean-deep mb-2">Ask Sasha</h3>
+                <p className="text-sm text-muted-foreground">
+                  Get AI-powered baking tips and substitutions
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Feature Comparison */}
+        <section className="mb-16 bg-ocean-mist/10 rounded-3xl p-8">
+          <h2 className="text-3xl font-fredoka text-ocean-deep text-center mb-12">
+            Free vs Premium
+          </h2>
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-lg shadow-float p-6 space-y-4">
+              <div className="flex justify-between items-center pb-4 border-b border-ocean-mist">
+                <span className="font-semibold">Feature</span>
+                <div className="flex gap-8">
+                  <span className="font-semibold text-ocean-deep">Free</span>
+                  <span className="font-semibold text-ocean-wave">Premium</span>
+                </div>
+              </div>
+              
+              {[
+                { feature: "Saved Recipes", free: "10", premium: "Unlimited" },
+                { feature: "Recipe Folders", free: "3", premium: "Unlimited" },
+                { feature: "Chat with Sasha", free: "✓", premium: "✓" },
+                { feature: "Recipe Scanner", free: "5/month", premium: "Unlimited" },
+                { feature: "Wishlist Items", free: "✓", premium: "✓" },
+                { feature: "Private Recipes", free: "—", premium: "✓" },
+              ].map((row, idx) => (
+                <div key={idx} className="flex justify-between items-center py-2">
+                  <span className="text-ocean-deep">{row.feature}</span>
+                  <div className="flex gap-8">
+                    <span className="text-center w-16">{row.free}</span>
+                    <span className="text-center w-16 text-ocean-wave font-semibold">{row.premium}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Recipe Preview Grid */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-fredoka text-ocean-deep text-center mb-12">
+            Preview: What Your BakeBook Could Look Like
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {teaserRecipes.map((recipe) => (
+              <Card 
+                key={recipe.id} 
+                className="overflow-hidden hover:shadow-wave transition-smooth cursor-pointer relative group"
+                onClick={() => setShowAuthModal(true)}
+              >
+                {/* Lock Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ocean-deep/40 to-ocean-deep/80 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-smooth">
+                  <div className="text-center text-white p-6">
+                    <Lock className="w-12 h-12 mx-auto mb-2" />
+                    <p className="font-semibold mb-2">Sign up to unlock</p>
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      className="bg-white text-ocean-deep hover:bg-ocean-mist"
+                    >
+                      Create Free Account
+                    </Button>
+                  </div>
+                </div>
+
+                {recipe.image_url && (
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img 
+                      src={recipe.image_url} 
+                      alt={recipe.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+                    />
+                  </div>
+                )}
+                <CardContent className="p-4">
+                  <Badge variant="secondary" className="mb-2">
+                    {recipe.folder}
+                  </Badge>
+                  <h3 className="font-semibold text-ocean-deep mb-2 line-clamp-1">
+                    {recipe.title}
+                  </h3>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      <span>{recipe.user_rating}/5</span>
+                    </div>
+                    {recipe.attempt_number > 0 && (
+                      <span>Attempt #{recipe.attempt_number}</span>
+                    )}
+                  </div>
+                  {recipe.last_made && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Last made: {recipe.last_made}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-fredoka text-ocean-deep text-center mb-12">
+            Frequently Asked Questions
+          </h2>
+          <div className="max-w-2xl mx-auto space-y-4">
+            {[
+              {
+                q: "Is BakeBook really free?",
+                a: "Yes! The free tier includes 10 saved recipes, custom folders, and access to Sasha. It's perfect for home bakers who want to organize their favorites."
+              },
+              {
+                q: "Can I upload my own recipes?",
+                a: "Absolutely! You can scan recipes from photos, import from URLs, or type them manually. Sasha helps organize everything automatically."
+              },
+              {
+                q: "What happens if I want to save more than 10 recipes?",
+                a: "You can upgrade to Premium anytime for unlimited recipes, private storage, and enhanced features. But 10 recipes is plenty to get started!"
+              },
+              {
+                q: "Can I access my BakeBook on mobile?",
+                a: "Yes! Your BakeBook works on any device with a web browser - desktop, tablet, or phone."
+              },
+            ].map((faq, idx) => (
+              <Card key={idx} className="hover:shadow-wave transition-smooth">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-ocean-deep mb-2">{faq.q}</h3>
+                  <p className="text-sm text-muted-foreground">{faq.a}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
 
         {/* Bottom CTA */}
-        <div className="mt-12 text-center bg-gradient-to-r from-ocean-wave/10 to-coral/10 rounded-lg p-8">
-          <h2 className="text-2xl font-fredoka mb-2">Ready to build your own BakeBook?</h2>
-          <p className="text-muted-foreground mb-4">
-            Save up to 10 recipes, track attempts, rate & review - all for free!
+        <section className="text-center">
+          <h2 className="text-4xl font-fredoka gradient-ocean bg-clip-text text-transparent mb-6">
+            Ready to Start Your Baking Journey?
+          </h2>
+          <p className="text-xl text-dolphin mb-8 max-w-xl mx-auto">
+            Create your free account and organize your first 10 recipes today
           </p>
-          <Button
-            size="lg"
+          <Button 
             onClick={() => setShowAuthModal(true)}
-            className="gradient-ocean text-white shadow-wave"
+            size="lg"
+            className="gradient-ocean text-white shadow-wave hover:scale-105 transition-bounce"
           >
-            Create Free Account
+            Create Free BakeBook Account
           </Button>
-        </div>
+        </section>
       </div>
 
-      <AuthModal
-        open={showAuthModal}
+      <AuthModal 
+        open={showAuthModal} 
         onOpenChange={setShowAuthModal}
+        onSuccess={() => navigate("/my-bakebook")}
       />
     </>
   );

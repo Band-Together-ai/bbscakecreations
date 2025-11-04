@@ -30,18 +30,40 @@ export const AuthModal = ({ open, onOpenChange, onSuccess }: AuthModalProps) => 
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        // Get entry point from session storage
+        const entryPoint = sessionStorage.getItem("signup_entry_point") || "direct";
+        
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/bakebook`,
+            data: {
+              entry_point: entryPoint,
+            },
           },
         });
         if (error) throw error;
+        
+        // Store entry_point in user_profiles
+        if (data.user) {
+          await supabase
+            .from("user_profiles")
+            .update({ 
+              entry_point: entryPoint,
+              onboarding_completed: false 
+            })
+            .eq("id", data.user.id);
+        }
+        
         toast.success("Welcome! Your BakeBook is ready! 🌊");
         onOpenChange(false);
+        
+        // Clear entry point from session storage
+        sessionStorage.removeItem("signup_entry_point");
+        
         if (onSuccess) onSuccess();
-        // Refresh page to show authenticated BakeBook
+        // Refresh to trigger onboarding
         window.location.reload();
       } else {
         const { error } = await supabase.auth.signInWithPassword({
