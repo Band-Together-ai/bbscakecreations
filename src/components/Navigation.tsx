@@ -95,7 +95,7 @@ const Navigation = () => {
               Recipes
             </button>
             <button
-              onClick={() => navigate("/bakebook")}
+              onClick={() => navigate(isAuthenticated ? "/my-bakebook" : "/bakebook")}
               className="flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors"
             >
               <Book className="w-4 h-4" />
@@ -258,7 +258,7 @@ const Navigation = () => {
             </button>
             <button
               onClick={() => {
-                navigate("/bakebook");
+                navigate(isAuthenticated ? "/my-bakebook" : "/bakebook");
                 setIsMobileMenuOpen(false);
               }}
               className="w-full flex items-center gap-2 text-ocean-deep hover:text-ocean-wave transition-colors py-2 px-2 rounded hover:bg-muted"
