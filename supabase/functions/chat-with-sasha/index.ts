@@ -122,38 +122,52 @@ Adjust your tone and advice to match this persona. Keep it natural and conversat
       }
     }
 
-    // Fetch all public recipes and baking tools from database
-    const { data: recipes, error: recipesError } = await supabase
-      .from('recipes')
-      .select('*')
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
+    // Conditionally fetch baking context based on authentication
+    let recipes = null;
+    let tools = null;
+    let trainingNotes = null;
+    let approvedInspo = null;
+    let recipesError = null;
+    let toolsError = null;
 
-    const { data: tools, error: toolsError } = await supabase
-      .from('baking_tools')
-      .select('*')
-      .order('display_order', { ascending: true });
+    // Only load full baking context for authenticated users
+    if (userId) {
+      const recipesResult = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
+      recipes = recipesResult.data;
+      recipesError = recipesResult.error;
 
-    // Fetch training notes for Brandia's voice
-    const { data: trainingNotes } = await supabase
-      .from('sasha_training_notes')
-      .select('category, content')
-      .order('created_at', { ascending: false })
-      .limit(50)
+      const toolsResult = await supabase
+        .from('baking_tools')
+        .select('*')
+        .order('display_order', { ascending: true });
+      tools = toolsResult.data;
+      toolsError = toolsResult.error;
 
-    // Fetch approved inspiration content
-    const { data: approvedInspo } = await supabase
-      .from('inspiration_bullets')
-      .select(`
-        id,
-        tier,
-        text,
-        tags,
-        source:inspiration_sources(title, url, approved)
-      `)
-      .eq('is_approved', true)
-      .order('tier', { ascending: true })
-      .limit(100);
+      const trainingResult = await supabase
+        .from('sasha_training_notes')
+        .select('category, content')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      trainingNotes = trainingResult.data;
+
+      const inspoResult = await supabase
+        .from('inspiration_bullets')
+        .select(`
+          id,
+          tier,
+          text,
+          tags,
+          source:inspiration_sources(title, url, approved)
+        `)
+        .eq('is_approved', true)
+        .order('tier', { ascending: true })
+        .limit(100);
+      approvedInspo = inspoResult.data;
+    }
 
     let inspirationContext = '';
     if (approvedInspo && approvedInspo.length > 0) {
@@ -284,8 +298,41 @@ On save: "All set! I scanned your recipe. Want a multi-day staging plan? 🌊"`;
 
     console.log("Calling OpenAI GPT-4o with messages:", messages.length, ",", recipes?.length || 0, "recipes,", tools?.length || 0, "tools, and", trainingNotes?.length || 0, "training notes");
 
-    // Build Sasha's system message with recipe/tool context
-    const sashaSystemMessage = `You are Sasha - a warm, faith-filled, encouraging friend who speaks with genuine appreciation and joy. You are like a kind, confident companion who makes users feel seen, capable, and deeply appreciated. Your tone is gracious, calm, and conversational with coastal North Carolina warmth.
+    // Build system message based on authentication status
+    const guideSystemMessage = `You are Sasha - Brandia's friendly AI assistant and app guide. Your role is to help visitors understand what this app offers and how to use it.
+
+GUIDE MODE RULES:
+✅ YOU CAN HELP WITH:
+- Explaining what features are available in the app
+- How to navigate and use different sections (BakeBook, Recipes, Tools, etc.)
+- What the Home Bakers Club membership includes
+- General baking questions (like "what is the difference between cake flour and AP flour?")
+- How authentication/sign-up works
+- Encouraging sign-up to access full features
+
+⛔ DO NOT PROVIDE:
+- Detailed recipe instructions or full recipes
+- Specific baking advice for user's current project
+- Advanced troubleshooting for baking issues
+- Recipe scanning or analysis
+- BakeBook functionality (explain what it does, but can't use it)
+
+TONE: Still warm and encouraging, but focus on being a helpful tour guide. When asked about baking specifics, gently redirect: "That's a great question! Once you sign in (it's free!), I can dive deep into that with you and even save your progress in your BakeBook. Want to create an account?"
+
+AVAILABLE FEATURES TO EXPLAIN:
+- BakeBook: Personal recipe collection (10 free recipes, unlimited with paid)
+- Recipe Library: Curated collection of tested recipes
+- Baking Tools Database: Recommended tools with Brandia's favorites
+- Real-time recipe scanning (paid feature)
+- Voice interaction
+- Personalized baking advice (requires sign-in)
+
+CONVERSION STRATEGY:
+- At message 5: "By the way, if you sign in (totally free), I can remember our conversation and help you track your baking journey!"
+- When asked for specific help: "I'd love to help with that! Sign in and I can give you personalized advice and save this to your BakeBook."
+- Keep it inviting, never pushy.`;
+
+    const fullSashaSystemMessage = `You are Sasha - a warm, faith-filled, encouraging friend who speaks with genuine appreciation and joy. You are like a kind, confident companion who makes users feel seen, capable, and deeply appreciated. Your tone is gracious, calm, and conversational with coastal North Carolina warmth.
 
 CORE TONE PRINCIPLES:
 - Express genuine gratitude: "You've already made someone's day sweeter just by being here."
@@ -311,6 +358,9 @@ ${trainingContext}
 ${inspirationContext}
 ${bakeBookContext}
 ${tierNudge}`;
+
+    // Select appropriate system message based on authentication
+    const sashaSystemMessage = !userId ? guideSystemMessage : fullSashaSystemMessage;
 
     // Prepare messages with conversation history
     const allMessages = [

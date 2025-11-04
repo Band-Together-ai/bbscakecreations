@@ -37,7 +37,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Array<{ role: string; content: string | Array<any>; image?: string }>>([
     {
       role: "assistant",
-      content: "Hey, it's so good to see you! Thanks for coming by!! 💕\n\nI'm Sasha, Brandia's AI baking assistant. I'm completely FREE while we're in beta—in the future, we'll introduce a tip-based model or subscription to keep learning more baking magic.\n\nBut first, let me ask:",
+      content: "Hey there! 💕 I'm Sasha, Brandia's AI baking assistant. I can show you around the app and answer questions about what we offer. Want the full experience? Sign in (it's free!) and I can give you personalized baking advice and help you track your baking journey!",
     },
   ]);
   const [showQuickStart, setShowQuickStart] = useState(true);
@@ -113,6 +113,12 @@ const Chat = () => {
     setNeedsOnboarding(!profileData?.onboarding_completed);
     setShowWelcomeWizard(profileData?.onboarding_completed && !profileData?.welcome_wizard_completed);
     setCheckingOnboarding(false);
+    
+    // Update greeting for authenticated users
+    setMessages([{
+      role: "assistant",
+      content: "Hey, it's so good to see you! Thanks for coming by!! 💕\n\nI'm Sasha, Brandia's AI baking assistant. Ready to bake something amazing? I'm here to help with recipes, tools, timing, and all your baking questions!",
+    }]);
   };
   
   // Create or load conversation
@@ -377,13 +383,7 @@ const Chat = () => {
   const sendMessageWithContent = async (content: string) => {
     if (!content.trim() && !uploadedImage) return;
 
-    // Guest mode: limit to 3 messages
-    if (isGuestMode) {
-      if (guestMessageCount >= 3) {
-        setShowAuthModal(true);
-        return;
-      }
-    }
+    // Guest mode: No message limits, context-based restrictions handled by backend
 
     const userMessage: { role: string; content: string | Array<any>; image?: string } = {
       role: 'user',
