@@ -51,6 +51,7 @@ const Chat = () => {
   const [voiceReply, setVoiceReply] = useState(true); // Default to enabled
   const [currentlySpeaking, setCurrentlySpeaking] = useState<string>("");
   const [recipeModModalOpen, setRecipeModModalOpen] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -103,6 +104,12 @@ const Chat = () => {
     }
     
     setUserProfile(data);
+    
+    // Set playback speed from profile (type will update after migration)
+    const speed = (data as any)?.playback_speed;
+    if (speed) {
+      setPlaybackSpeed(speed);
+    }
 
     // Check onboarding and welcome wizard status
     const { data: profileData, error: profileError } = await supabase
@@ -346,6 +353,24 @@ const Chat = () => {
 
   const speak = async (text: string) => {
     setCurrentlySpeaking(text);
+  };
+
+  const handleSpeedChange = async (newSpeed: number) => {
+    setPlaybackSpeed(newSpeed);
+    
+    // Save to database if user is authenticated
+    if (userId) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ playback_speed: newSpeed })
+          .eq('id', userId);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error saving playback speed:', error);
+      }
+    }
   };
 
   const sendMessageWithContent = async (content: string) => {
@@ -613,6 +638,7 @@ const Chat = () => {
                   continuousVoiceEnabled={userProfile.continuous_voice_enabled || false}
                   userId={userId}
                   onUpdate={fetchUserProfile}
+                  playbackSpeed={playbackSpeed}
                 />
               )}
               
@@ -623,6 +649,8 @@ const Chat = () => {
                   <VoicePlayback 
                     text={currentlySpeaking} 
                     voice={userProfile?.voice_preference || 'nova'}
+                    speed={playbackSpeed}
+                    onSpeedChange={handleSpeedChange}
                   />
                 </div>
               )}
