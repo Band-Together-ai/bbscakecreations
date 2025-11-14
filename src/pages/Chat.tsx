@@ -21,6 +21,8 @@ import { WelcomeWizard } from "@/components/WelcomeWizard";
 import { AuthModal } from "@/components/AuthModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { VoicePlayback } from "@/components/VoiceRecorder";
+import { RecipeModificationModal } from "@/components/RecipeModificationModal";
+import { Edit } from "lucide-react";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -48,13 +50,14 @@ const Chat = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [voiceReply, setVoiceReply] = useState(true); // Default to enabled
   const [currentlySpeaking, setCurrentlySpeaking] = useState<string>("");
+  const [recipeModModalOpen, setRecipeModModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Get user role
-  const { role: userRole, userId } = useUserRole();
+  const { role: userRole, userId, hasFullAccess } = useUserRole();
 
   // Get tip jar session info
   const { sessionId, remainingMinutes, isActive, refetch } = useTipJarSession(userId || null);
@@ -657,6 +660,17 @@ const Chat = () => {
                     <LinkIcon className="w-4 h-4" />
                     Add Recipe from Link
                   </Button>
+                  {(userRole === 'admin' || hasFullAccess) && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold"
+                      onClick={() => setRecipeModModalOpen(true)}
+                    >
+                      <Edit className="w-4 h-4" />
+                      Modify Recipe
+                    </Button>
+                  )}
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -696,6 +710,14 @@ const Chat = () => {
       </div>
         </>
       )}
+
+      {/* Recipe Modification Modal */}
+      <RecipeModificationModal
+        open={recipeModModalOpen}
+        onOpenChange={setRecipeModModalOpen}
+        userRole={userRole || ''}
+        userId={userId || ''}
+      />
     </div>
   );
 };
