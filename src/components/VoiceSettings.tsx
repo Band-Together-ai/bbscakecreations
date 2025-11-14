@@ -12,6 +12,7 @@ interface VoiceSettingsProps {
   continuousVoiceEnabled: boolean;
   userId: string;
   onUpdate: () => void;
+  playbackSpeed?: number;
 }
 
 const VOICE_OPTIONS = [
@@ -29,12 +30,15 @@ export const VoiceSettings = ({
   voicePreference, 
   continuousVoiceEnabled,
   userId,
-  onUpdate 
+  onUpdate,
+  playbackSpeed = 1.0
 }: VoiceSettingsProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Check if user has premium access (admin, paid, or lifetime patron)
   const hasPremiumAccess = userRole === 'admin' || userRole === 'paid' || isLifetimePatron;
+
+  const speedOptions = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
   const handleVoiceChange = async (newVoice: string) => {
     setIsUpdating(true);
@@ -76,6 +80,26 @@ export const VoiceSettings = ({
     }
   };
 
+  const handleSpeedChange = async (newSpeed: number) => {
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ playback_speed: newSpeed })
+        .eq('id', userId);
+
+      if (error) throw error;
+      
+      toast.success(`Playback speed set to ${newSpeed}x`);
+      onUpdate();
+    } catch (error) {
+      console.error('Error updating playback speed:', error);
+      toast.error('Failed to update playback speed');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (!hasPremiumAccess) {
     return null;
   }
@@ -110,6 +134,35 @@ export const VoiceSettings = ({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Playback Speed Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="speed-select" className="text-sm font-medium">
+          Playback Speed
+        </Label>
+        <Select
+          value={playbackSpeed.toString()}
+          onValueChange={(value) => handleSpeedChange(parseFloat(value))}
+          disabled={isUpdating}
+        >
+          <SelectTrigger id="speed-select" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {speedOptions.map((speed) => (
+              <SelectItem key={speed} value={speed.toString()}>
+                <span className="font-medium">{speed}x</span>
+                {speed === 1.0 && <span className="text-xs text-muted-foreground ml-2">(Normal)</span>}
+                {speed < 1.0 && <span className="text-xs text-muted-foreground ml-2">(Slower)</span>}
+                {speed > 1.0 && <span className="text-xs text-muted-foreground ml-2">(Faster)</span>}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Control how fast Sasha speaks
+        </p>
       </div>
 
       {/* Continuous Voice Input (Paid users only) - HIDDEN FOR NOW */}

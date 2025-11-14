@@ -104,11 +104,21 @@ export const VoiceRecorder = ({ onTranscription, disabled }: VoiceRecorderProps)
 interface VoicePlaybackProps {
   text: string;
   voice?: string;
+  speed?: number;
+  onSpeedChange?: (speed: number) => void;
 }
 
-export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
+export const VoicePlayback = ({ 
+  text, 
+  voice = "nova", 
+  speed = 1.0,
+  onSpeedChange 
+}: VoicePlaybackProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const speedOptions = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
   // Cleanup audio on unmount or when navigating away
   useEffect(() => {
@@ -135,6 +145,8 @@ export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
     }
 
     setIsPlaying(true);
+    toast.info("🔊 Generating audio...");
+    
     try {
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { text, voice }
@@ -152,6 +164,18 @@ export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
         const audio = new Audio(audioUrl);
         audioRef.current = audio;
         
+        // Apply playback speed
+        audio.playbackRate = speed;
+        
+        audio.onloadeddata = () => {
+          // Start playing immediately when audio is ready
+          audio.play().catch(err => {
+            console.error('Playback error:', err);
+            toast.error("Error playing audio");
+            setIsPlaying(false);
+          });
+        };
+        
         audio.onended = () => {
           setIsPlaying(false);
           audioRef.current = null;
@@ -164,8 +188,6 @@ export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
           URL.revokeObjectURL(audioUrl);
           toast.error("Error playing audio");
         };
-
-        await audio.play();
       }
     } catch (error) {
       console.error('TTS error:', error);
@@ -174,20 +196,63 @@ export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
     }
   };
 
+  const handleSpeedChange = (newSpeed: number) => {
+    // Update current audio if playing
+    if (audioRef.current) {
+      audioRef.current.playbackRate = newSpeed;
+    }
+    // Notify parent to save preference
+    onSpeedChange?.(newSpeed);
+    setShowSpeedMenu(false);
+    toast.success(`Speed set to ${newSpeed}x`);
+  };
+
   return (
-    <Button
-      variant={isPlaying ? "destructive" : "ghost"}
-      size="icon"
-      onClick={playAudio}
-      disabled={!text}
-      className="h-8 w-8"
-      title={isPlaying ? "Stop speaking" : "Listen to response"}
-    >
-      {isPlaying ? (
-        <X className="w-4 h-4" />
-      ) : (
-        <Volume2 className="w-4 h-4" />
+    <div className="flex items-center gap-1 relative">
+      <Button
+        variant={isPlaying ? "destructive" : "ghost"}
+        size="icon"
+        onClick={playAudio}
+        disabled={!text}
+        className="h-8 w-8"
+        title={isPlaying ? "Stop speaking" : "Listen to response"}
+      >
+        {isPlaying ? (
+          <X className="w-4 h-4" />
+        ) : (
+          <Volume2 className="w-4 h-4" />
+        )}
+      </Button>
+      
+      {onSpeedChange && (
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+            className="h-8 px-2 text-xs"
+            title="Playback speed"
+          >
+            {speed}x
+          </Button>
+          
+          {showSpeedMenu && (
+            <div className="absolute top-full left-0 mt-1 bg-popover border rounded-md shadow-lg z-50 min-w-[80px]">
+              {speedOptions.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSpeedChange(s)}
+                  className={`w-full px-3 py-2 text-sm text-left hover:bg-accent ${
+                    s === speed ? 'bg-accent font-semibold' : ''
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
-    </Button>
+    </div>
   );
 };
