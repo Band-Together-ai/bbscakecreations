@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Volume2, Loader2 } from "lucide-react";
+import { Mic, MicOff, Volume2, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -110,10 +110,27 @@ export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Cleanup audio on unmount or when navigating away
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+  };
+
   const playAudio = async () => {
     if (isPlaying) {
-      audioRef.current?.pause();
-      setIsPlaying(false);
+      stopAudio();
       return;
     }
 
@@ -137,28 +154,37 @@ export const VoicePlayback = ({ text, voice = "nova" }: VoicePlaybackProps) => {
         
         audio.onended = () => {
           setIsPlaying(false);
+          audioRef.current = null;
           URL.revokeObjectURL(audioUrl);
         };
-        
+
+        audio.onerror = () => {
+          setIsPlaying(false);
+          audioRef.current = null;
+          URL.revokeObjectURL(audioUrl);
+          toast.error("Error playing audio");
+        };
+
         await audio.play();
       }
     } catch (error) {
-      console.error('Playback error:', error);
-      toast.error("Failed to play audio");
+      console.error('TTS error:', error);
+      toast.error("Failed to generate speech");
       setIsPlaying(false);
     }
   };
 
   return (
     <Button
-      type="button"
+      variant={isPlaying ? "destructive" : "ghost"}
       size="icon"
-      variant="ghost"
       onClick={playAudio}
-      className="ml-2"
+      disabled={!text}
+      className="h-8 w-8"
+      title={isPlaying ? "Stop speaking" : "Listen to response"}
     >
       {isPlaying ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <X className="w-4 h-4" />
       ) : (
         <Volume2 className="w-4 h-4" />
       )}
