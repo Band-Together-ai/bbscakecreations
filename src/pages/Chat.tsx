@@ -20,6 +20,7 @@ import { SashaOnboarding } from "@/components/SashaOnboarding";
 import { WelcomeWizard } from "@/components/WelcomeWizard";
 import { AuthModal } from "@/components/AuthModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { VoicePlayback } from "@/components/VoiceRecorder";
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const Chat = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [voiceReply, setVoiceReply] = useState(true); // Default to enabled
+  const [currentlySpeaking, setCurrentlySpeaking] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -340,44 +342,7 @@ const Chat = () => {
   };
 
   const speak = async (text: string) => {
-    try {
-      const selectedVoice = userProfile?.voice_preference || 'nova';
-      console.log('🔊 Calling text-to-speech with voice:', selectedVoice, 'for:', text.substring(0, 50) + '...');
-      
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text, voice: selectedVoice }
-      });
-      
-      if (error) {
-        console.error('❌ TTS error:', error);
-        toast.error('Voice playback failed: ' + error.message);
-        return;
-      }
-      
-      if (data?.error) {
-        console.error('❌ TTS returned error:', data.error);
-        toast.error('Voice generation failed: ' + data.error);
-        return;
-      }
-      
-      if (data?.audioContent) {
-        console.log('✅ Playing audio, length:', data.audioContent.length);
-        const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
-        audio.onloadeddata = () => console.log('🎵 Audio loaded successfully');
-        audio.onerror = (e) => {
-          console.error('❌ Audio playback error:', e);
-          toast.error('Could not play audio');
-        };
-        await audio.play();
-        toast.success('🔊 Playing voice response');
-      } else {
-        console.error('❌ No audio content in response');
-        toast.error('No audio received from server');
-      }
-    } catch (err) {
-      console.error('❌ TTS exception:', err);
-      toast.error('Voice failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
+    setCurrentlySpeaking(text);
   };
 
   const sendMessageWithContent = async (content: string) => {
@@ -648,8 +613,19 @@ const Chat = () => {
                 />
               )}
               
+              {/* Stop Speaking Button - Always visible when speaking */}
+              {currentlySpeaking && (
+                <div className="flex items-center justify-center p-2 bg-ocean-foam rounded-lg border-2 border-ocean-wave">
+                  <span className="text-sm text-ocean-deep mr-2">Sasha is speaking...</span>
+                  <VoicePlayback 
+                    text={currentlySpeaking} 
+                    voice={userProfile?.voice_preference || 'nova'}
+                  />
+                </div>
+              )}
+
               <div className="flex flex-col items-center gap-2">
-                <div className="flex gap-2 justify-center">
+                <div className="flex gap-2 justify-center flex-wrap">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -667,18 +643,19 @@ const Chat = () => {
                     Photo
                   </Button>
                   <Button 
-                    variant="outline" 
+                    variant="default" 
                     size="sm" 
-                    className="gap-2"
+                    className="gap-2 bg-gradient-to-r from-ocean-wave to-sunset-coral text-white font-semibold"
                     onClick={() => {
                       const recipeLink = prompt("Paste your recipe link:");
                       if (recipeLink && recipeLink.trim()) {
                         setMessage(recipeLink.trim());
+                        toast.success("Recipe link added! Now send your message with any modifications.");
                       }
                     }}
                   >
                     <LinkIcon className="w-4 h-4" />
-                    Recipe Link
+                    Add Recipe from Link
                   </Button>
                   <Button 
                     variant="outline" 
