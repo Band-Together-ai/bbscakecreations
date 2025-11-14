@@ -666,7 +666,17 @@ const Chat = () => {
                     <Upload className="w-4 h-4" />
                     Photo
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => {
+                      const recipeLink = prompt("Paste your recipe link:");
+                      if (recipeLink && recipeLink.trim()) {
+                        setMessage(recipeLink.trim());
+                      }
+                    }}
+                  >
                     <LinkIcon className="w-4 h-4" />
                     Recipe Link
                   </Button>
