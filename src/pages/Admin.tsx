@@ -25,6 +25,7 @@ import { InspirationTab } from "@/components/admin/InspirationTab";
 import { ProfilePhotoEditor } from "@/components/admin/ProfilePhotoEditor";
 import { ViewAsTab } from "@/components/admin/ViewAsTab";
 import { CoffeeClicksTab } from "@/components/admin/CoffeeClicksTab";
+import { RecipeTypeSelector } from "@/components/admin/RecipeTypeSelector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1006,10 +1007,11 @@ const Admin = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {uploadedPhotos.length > 0 && (
+                  {/* Photo Selection - Optional */}
+                  {uploadedPhotos.length > 0 ? (
                     <div className="space-y-2">
-                      <Label>1. Select Photos for This Recipe</Label>
-                      <p className="text-xs text-muted-foreground">Click to select multiple photos</p>
+                      <Label>1. Select Photos for This Recipe (Optional)</Label>
+                      <p className="text-xs text-muted-foreground">Click to select multiple photos. You can add photos later too.</p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto p-2 border rounded-lg">
                         {uploadedPhotos.map((photo) => (
                           <div
@@ -1042,240 +1044,246 @@ const Admin = () => {
                         </p>
                       )}
                     </div>
-                  )}
-
-                  {!uploadedPhotos.length && (
-                    <div className="p-8 border-2 border-dashed rounded-lg text-center">
-                      <p className="text-muted-foreground">
-                        Upload photos in the "Photos" tab first, then come back here to add recipes.
+                  ) : (
+                    <div className="p-4 border border-dashed rounded-lg bg-muted/30">
+                      <p className="text-sm text-muted-foreground">
+                        📸 No photos uploaded yet. <button onClick={() => setActiveTab('photos')} className="text-ocean-wave hover:underline font-medium">Upload photos</button> or add them later.
                       </p>
                     </div>
                   )}
 
-                  {(selectedPhotos.length > 0 || editingRecipe) && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="recipe-title">2. Recipe Title</Label>
-                        <Input
-                          id="recipe-title"
-                          placeholder="e.g., Ocean Ombre Lavender Dream"
-                          value={recipeTitle}
-                          onChange={(e) => setRecipeTitle(e.target.value)}
-                        />
-                      </div>
+                  {/* Recipe Form - Always visible */}
+                  <div className="space-y-2">
+                    <Label htmlFor="recipe-title">Recipe Title</Label>
+                    <Input
+                      id="recipe-title"
+                      placeholder="e.g., Carrot Cake with Cream Cheese Frosting"
+                      value={recipeTitle}
+                      onChange={(e) => setRecipeTitle(e.target.value)}
+                    />
+                  </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="recipe-desc">3. Description (The Vibe)</Label>
-                        <Textarea
-                          id="recipe-desc"
-                          placeholder="Velvety vanilla waves with a hidden mint surprise and real herb crown..."
-                          value={recipeDescription}
-                          onChange={(e) => setRecipeDescription(e.target.value)}
-                          rows={3}
-                        />
-                        <Button 
-                          type="button"
-                          variant={isRecording ? "destructive" : "outline"} 
-                          size="sm" 
-                          className="gap-2"
-                          onClick={handleVoiceRecording}
-                        >
-                          {isRecording ? (
-                            <>
-                              <Square className="w-4 h-4" />
-                              Stop Recording
-                            </>
-                          ) : (
-                            <>
-                              <Mic className="w-4 h-4" />
-                              Dictate
-                            </>
-                          )}
-                        </Button>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="recipe-link">4. Base Recipe Link (Optional)</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="recipe-link"
-                            placeholder="https://allrecipes.com/..."
-                            value={recipeLink}
-                            onChange={(e) => setRecipeLink(e.target.value)}
-                            className="flex-1"
-                          />
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={handleParseRecipe}
-                            disabled={!recipeLink.trim() || isParsingRecipe}
-                          >
-                            {isParsingRecipe ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                Parsing...
-                              </>
-                            ) : (
-                              "Parse"
-                            )}
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Paste a recipe URL and click Parse to auto-fill ingredients & instructions
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="recipe-instructions">5. Instructions / My Twist</Label>
-                        <Textarea
-                          id="recipe-instructions"
-                          placeholder="Swap oil for browned butter, double the cocoa, add a whisper of sea salt..."
-                          value={recipeInstructions}
-                          onChange={(e) => setRecipeInstructions(e.target.value)}
-                          rows={6}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="recipe-category">Category</Label>
-                          <Input
-                            id="recipe-category"
-                            placeholder="e.g., Wedding, Birthday"
-                            value={recipeCategory}
-                            onChange={(e) => setRecipeCategory(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="recipe-tags">Tags</Label>
-                          <Input
-                            id="recipe-tags"
-                            placeholder="chocolate, vanilla"
-                            value={recipeTags}
-                            onChange={(e) => setRecipeTags(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-8 p-4 bg-muted rounded-lg flex-wrap">
-                          <div className="flex items-center gap-3">
-                            <Switch
-                              checked={isGlutenFree}
-                              onCheckedChange={setIsGlutenFree}
-                              id="gluten-free"
-                            />
-                            <Label htmlFor="gluten-free" className="cursor-pointer">
-                              Gluten-Free
-                            </Label>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Switch
-                              checked={isPublic}
-                              onCheckedChange={setIsPublic}
-                              id="public-recipe"
-                            />
-                            <Label htmlFor="public-recipe" className="cursor-pointer">
-                              Public
-                            </Label>
-                          </div>
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={isFeatured}
-                            onCheckedChange={setIsFeatured}
-                            id="featured-recipe"
-                          />
-                          <Label htmlFor="featured-recipe" className="cursor-pointer">
-                            Featured
-                          </Label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={brandiaPick}
-                            onCheckedChange={setBrandiaPick}
-                            id="brandia-pick"
-                          />
-                          <Label htmlFor="brandia-pick" className="cursor-pointer">
-                            Brandia's Go-To
-                          </Label>
-                        </div>
-                      </div>
-
-                      {brandiaPick && (
-                        <div className="space-y-2">
-                          <Label htmlFor="why-she-loves-it">Why She Loves It</Label>
-                          <Textarea
-                            id="why-she-loves-it"
-                            value={whySheLovesIt}
-                            onChange={(e) => setWhySheLovesIt(e.target.value)}
-                            placeholder="e.g., This is my go-to base for every celebration!"
-                          />
-                        </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="recipe-desc">Description (The Vibe)</Label>
+                    <Textarea
+                      id="recipe-desc"
+                      placeholder="Velvety vanilla waves with a hidden mint surprise and real herb crown..."
+                      value={recipeDescription}
+                      onChange={(e) => setRecipeDescription(e.target.value)}
+                      rows={3}
+                    />
+                    <Button 
+                      type="button"
+                      variant={isRecording ? "destructive" : "outline"} 
+                      size="sm" 
+                      className="gap-2"
+                      onClick={handleVoiceRecording}
+                    >
+                      {isRecording ? (
+                        <>
+                          <Square className="w-4 h-4" />
+                          Stop Recording
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="w-4 h-4" />
+                          Dictate
+                        </>
                       )}
+                    </Button>
+                  </div>
 
-                        <div className="space-y-2">
-                          <Label>Landing Page Position</Label>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="w-full justify-between">
-                                {featuredPosition 
-                                  ? featuredPosition === 1 
-                                    ? "Position 1 - Featured Cake ✨"
-                                    : `Position ${featuredPosition}`
-                                  : "Not on landing page"}
-                                <Star className="ml-2 h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-full">
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(null)}>
-                                Not on landing page
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(1)}>
-                                Position 1 - Featured Cake ✨
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(2)}>
-                                Position 2
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(3)}>
-                                Position 3
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(4)}>
-                                Position 4
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(5)}>
-                                Position 5
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFeaturedPosition(6)}>
-                                Position 6
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                          <p className="text-xs text-muted-foreground">
-                            Position 1 is the special "Featured Cake" spot on the homepage
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={handleSaveRecipe}
-                          className="flex-1 gradient-ocean text-primary-foreground"
-                          size="lg"
-                        >
-                          {editingRecipe ? "Update Recipe" : "Save Recipe"}
-                        </Button>
-                        {editingRecipe && (
-                          <Button
-                            onClick={clearRecipeForm}
-                            variant="outline"
-                            size="lg"
-                          >
-                            Cancel
-                          </Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="recipe-link">Base Recipe Link (Optional)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="recipe-link"
+                        placeholder="https://allrecipes.com/..."
+                        value={recipeLink}
+                        onChange={(e) => setRecipeLink(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleParseRecipe}
+                        disabled={!recipeLink.trim() || isParsingRecipe}
+                      >
+                        {isParsingRecipe ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            Parsing...
+                          </>
+                        ) : (
+                          "Parse"
                         )}
-                      </div>
-                    </>
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Paste a recipe URL and click Parse to auto-fill ingredients & instructions
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="recipe-instructions">Instructions / My Twist</Label>
+                    <Textarea
+                      id="recipe-instructions"
+                      placeholder="Swap oil for browned butter, double the cocoa, add a whisper of sea salt..."
+                      value={recipeInstructions}
+                      onChange={(e) => setRecipeInstructions(e.target.value)}
+                      rows={6}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="recipe-category">Category</Label>
+                      <Input
+                        id="recipe-category"
+                        placeholder="e.g., Wedding, Birthday"
+                        value={recipeCategory}
+                        onChange={(e) => setRecipeCategory(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="recipe-tags">Tags</Label>
+                      <Input
+                        id="recipe-tags"
+                        placeholder="e.g., chocolate, birthday"
+                        value={recipeTags}
+                        onChange={(e) => setRecipeTags(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <RecipeTypeSelector
+                    recipeType={recipeType}
+                    onRecipeTypeChange={(value) => setRecipeType(value as 'complete' | 'base_cake' | 'frosting' | 'variant')}
+                    isFeaturedBase={isFeaturedBase}
+                    onFeaturedBaseChange={setIsFeaturedBase}
+                    baseName={baseName}
+                    onBaseNameChange={setBaseName}
+                    baseRecipeId={baseRecipeId}
+                    onBaseRecipeIdChange={setBaseRecipeId}
+                    frostingRecipeId={frostingRecipeId}
+                    onFrostingRecipeIdChange={setFrostingRecipeId}
+                    variantNotes={variantNotes}
+                    onVariantNotesChange={setVariantNotes}
+                    assemblyInstructions={assemblyInstructions}
+                    onAssemblyInstructionsChange={setAssemblyInstructions}
+                  />
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="gluten-free">Gluten-Free Recipe</Label>
+                      <Switch
+                        id="gluten-free"
+                        checked={isGlutenFree}
+                        onCheckedChange={setIsGlutenFree}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="recipe-public">Make Recipe Public</Label>
+                      <Switch
+                        id="recipe-public"
+                        checked={isPublic}
+                        onCheckedChange={setIsPublic}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="recipe-featured">Mark as Featured</Label>
+                      <Switch
+                        id="recipe-featured"
+                        checked={isFeatured}
+                        onCheckedChange={setIsFeatured}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="brandia-pick">Brandia's Pick</Label>
+                      <Switch
+                        id="brandia-pick"
+                        checked={brandiaPick}
+                        onCheckedChange={setBrandiaPick}
+                      />
+                    </div>
+                  </div>
+
+                  {brandiaPick && (
+                    <div className="space-y-2">
+                      <Label htmlFor="why-she-loves-it">Why She Loves It</Label>
+                      <Textarea
+                        id="why-she-loves-it"
+                        value={whySheLovesIt}
+                        onChange={(e) => setWhySheLovesIt(e.target.value)}
+                        placeholder="e.g., This is my go-to base for every celebration!"
+                      />
+                    </div>
                   )}
+
+                  <div className="space-y-2">
+                    <Label>Landing Page Position</Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                          {featuredPosition 
+                            ? featuredPosition === 1 
+                              ? "Position 1 - Featured Cake ✨"
+                              : `Position ${featuredPosition}`
+                            : "Not on landing page"}
+                          <Star className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full">
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(null)}>
+                          Not on landing page
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(1)}>
+                          Position 1 - Featured Cake ✨
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(2)}>
+                          Position 2
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(3)}>
+                          Position 3
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(4)}>
+                          Position 4
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(5)}>
+                          Position 5
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setFeaturedPosition(6)}>
+                          Position 6
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <p className="text-xs text-muted-foreground">
+                      Position 1 is the special "Featured Cake" spot on the homepage
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleSaveRecipe}
+                      className="flex-1 gradient-ocean text-primary-foreground"
+                      size="lg"
+                      disabled={!recipeTitle.trim()}
+                    >
+                      {editingRecipe ? "Update Recipe" : "Save Recipe"}
+                    </Button>
+                    {editingRecipe && (
+                      <Button
+                        onClick={clearRecipeForm}
+                        variant="outline"
+                        size="lg"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
