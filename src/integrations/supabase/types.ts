@@ -818,6 +818,7 @@ export type Database = {
           is_admin: boolean | null
           is_collaborator: boolean | null
           is_lifetime_patron: boolean | null
+          playback_speed: number | null
           updated_at: string | null
           voice_preference: string | null
         }
@@ -829,6 +830,7 @@ export type Database = {
           is_admin?: boolean | null
           is_collaborator?: boolean | null
           is_lifetime_patron?: boolean | null
+          playback_speed?: number | null
           updated_at?: string | null
           voice_preference?: string | null
         }
@@ -840,6 +842,7 @@ export type Database = {
           is_admin?: boolean | null
           is_collaborator?: boolean | null
           is_lifetime_patron?: boolean | null
+          playback_speed?: number | null
           updated_at?: string | null
           voice_preference?: string | null
         }
