@@ -136,18 +136,7 @@ const Index = () => {
   };
 
   const fetchFeaturedRecipes = async () => {
-    // Step 1: Get the single Featured Cake (position 1)
-    const { data: featuredData } = await supabase
-      .from("recipes")
-      .select(`
-        *,
-        recipe_photos(photo_url, is_headline)
-      `)
-      .eq("featured_position", 1)
-      .eq("is_public", true)
-      .maybeSingle();
-
-    // Step 2: Get public recipes (excluding the featured one)
+    // Get all public recipes ordered by featured_position (nulls last), then by creation date
     const { data: publicData } = await supabase
       .from("recipes")
       .select(`
@@ -155,8 +144,9 @@ const Index = () => {
         recipe_photos(photo_url, is_headline)
       `)
       .eq("is_public", true)
+      .order("featured_position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(6);
+      .limit(7); // Get up to 7 recipes for the gallery
 
     const mapRecipe = (recipe: any) => {
       let image = recipe.image_url;
@@ -182,24 +172,9 @@ const Index = () => {
       };
     };
 
-    // Step 3: Build the 6-tile list: [featured, then up to 5 public]
-    const cakesArray: any[] = [];
-    
-    if (featuredData) {
-      cakesArray.push(mapRecipe(featuredData));
-    }
-
-    if (publicData) {
-      // Add public recipes, excluding featured if it was found
-      const publicRecipes = publicData
-        .filter(r => !featuredData || r.id !== featuredData.id)
-        .slice(0, featuredData ? 5 : 6)
-        .map(mapRecipe);
-      
-      cakesArray.push(...publicRecipes);
-    }
-
-    if (cakesArray.length > 0) {
+    // Map all public recipes (already ordered by featured_position, then created_at)
+    if (publicData && publicData.length > 0) {
+      const cakesArray = publicData.map(mapRecipe);
       setFeaturedCakes(cakesArray);
     }
   };
