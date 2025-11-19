@@ -23,7 +23,7 @@ export default function RecipeDetailV2() {
   const { id } = useParams();
   const [isSaved, setIsSaved] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { isAuthenticated } = useUserRole();
+  const { isAuthenticated, isAdmin, isCollaborator, isPaid } = useUserRole();
 
   // Fetch recipe
   const { data: recipe, isLoading } = useQuery({
@@ -74,6 +74,10 @@ export default function RecipeDetailV2() {
       return data;
     },
   });
+
+  // Featured recipes (positions 1-10) are free for everyone to view
+  const isBetaFree = recipe?.is_featured || (recipe?.featured_position !== null && recipe?.featured_position !== undefined);
+  const canViewFullRecipe = isAdmin || isCollaborator || isPaid || isBetaFree;
 
   // Fetch related variants that use the same base (if this is a variant)
   const { data: relatedVariants } = useQuery({
@@ -237,8 +241,8 @@ export default function RecipeDetailV2() {
           </Button>
         </div>
 
-        {/* Instructions Lock Overlay for Non-Authenticated Users */}
-        {!isAuthenticated ? (
+        {/* Instructions Lock Overlay for Non-Authenticated Users (unless featured) */}
+        {!canViewFullRecipe ? (
           <div className="relative">
             {/* Show ingredients publicly */}
             <div className="mb-6">
