@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
 import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
 import TrainSasha from "./pages/admin/TrainSasha";
@@ -62,6 +63,7 @@ const AppContent = () => {
       <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/chat" element={<Chat />} />
       <Route path="/admin" element={
         <AdminRoute>
