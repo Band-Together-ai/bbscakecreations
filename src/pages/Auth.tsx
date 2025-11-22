@@ -22,27 +22,33 @@ const Auth = () => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     
-    if (type === 'invite') {
+    const isRecovery = type === 'recovery';
+    const isInvite = type === 'invite';
+    
+    if (isInvite) {
       setIsInvitedUser(true);
       setIsSignUp(true);
       toast.info("Please set your password to complete registration");
-    } else if (type === 'recovery') {
+    } else if (isRecovery) {
       setIsPasswordReset(true);
       toast.info("Please enter your new password");
     }
 
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
-      }
-    });
+    // Check if user is already logged in (but not during password reset or invite)
+    if (!isRecovery && !isInvite) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          navigate("/");
+        }
+      });
+    }
 
     // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
+      // Only redirect on sign in if we're NOT in recovery or invite mode
+      if (event === "SIGNED_IN" && session && !isRecovery && !isInvite) {
         toast.success("Welcome! Your account is ready.");
         navigate("/");
       }
@@ -63,7 +69,10 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success(isPasswordReset ? "Password updated successfully!" : "Password set successfully! You're all set.");
-        // The onAuthStateChange listener will handle navigation
+        // Redirect after successful password update
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
