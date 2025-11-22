@@ -11,11 +11,22 @@ import WaveBackground from "@/components/WaveBackground";
 const Auth = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isInvitedUser, setIsInvitedUser] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Check for invitation token in URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    
+    if (type === 'invite') {
+      setIsInvitedUser(true);
+      setIsSignUp(true);
+      toast.info("Please set your password to complete registration");
+    }
+
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -28,6 +39,7 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
+        toast.success("Welcome! Your account is ready.");
         navigate("/");
       }
     });
@@ -40,7 +52,15 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isInvitedUser) {
+        // For invited users, update their password
+        const { error } = await supabase.auth.updateUser({
+          password,
+        });
+        if (error) throw error;
+        toast.success("Password set successfully! You're all set.");
+        // The onAuthStateChange listener will handle navigation
+      } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -81,27 +101,33 @@ const Auth = () => {
             BBs Cake Creations
           </CardTitle>
           <CardDescription className="text-dolphin">
-            {isSignUp
+            {isInvitedUser
+              ? "Set your password to get started"
+              : isSignUp
               ? "Join our whimsical baking community"
               : "Welcome back, let's bake some magic"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
+            {!isInvitedUser && (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="transition-smooth"
+                />
+              </div>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="transition-smooth"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">
+                {isInvitedUser ? "Set Your Password" : "Password"}
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -118,21 +144,29 @@ const Auth = () => {
               className="w-full gradient-ocean text-primary-foreground shadow-wave transition-bounce hover:scale-105"
               disabled={loading}
             >
-              {loading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
+              {loading 
+                ? "Loading..." 
+                : isInvitedUser 
+                ? "Set Password & Continue" 
+                : isSignUp 
+                ? "Create Account" 
+                : "Sign In"}
             </Button>
           </form>
           
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-ocean-deep hover:text-ocean-wave transition-smooth underline"
-            >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "Need an account? Sign up"}
-            </button>
-          </div>
+          {!isInvitedUser && (
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-ocean-deep hover:text-ocean-wave transition-smooth underline"
+              >
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Need an account? Sign up"}
+              </button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
