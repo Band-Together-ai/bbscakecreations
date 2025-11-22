@@ -12,12 +12,13 @@ const Auth = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isInvitedUser, setIsInvitedUser] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check for invitation token in URL
+    // Check for invitation or recovery token in URL
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     
@@ -25,6 +26,9 @@ const Auth = () => {
       setIsInvitedUser(true);
       setIsSignUp(true);
       toast.info("Please set your password to complete registration");
+    } else if (type === 'recovery') {
+      setIsPasswordReset(true);
+      toast.info("Please enter your new password");
     }
 
     // Check if user is already logged in
@@ -52,13 +56,13 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isInvitedUser) {
-        // For invited users, update their password
+      if (isInvitedUser || isPasswordReset) {
+        // For invited users or password reset, update their password
         const { error } = await supabase.auth.updateUser({
           password,
         });
         if (error) throw error;
-        toast.success("Password set successfully! You're all set.");
+        toast.success(isPasswordReset ? "Password updated successfully!" : "Password set successfully! You're all set.");
         // The onAuthStateChange listener will handle navigation
       } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
@@ -103,6 +107,8 @@ const Auth = () => {
           <CardDescription className="text-dolphin">
             {isInvitedUser
               ? "Set your password to get started"
+              : isPasswordReset
+              ? "Enter your new password below"
               : isSignUp
               ? "Join our whimsical baking community"
               : "Welcome back, let's bake some magic"}
@@ -110,7 +116,7 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
-            {!isInvitedUser && (
+            {!isInvitedUser && !isPasswordReset && (
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -126,7 +132,7 @@ const Auth = () => {
             )}
             <div className="space-y-2">
               <Label htmlFor="password">
-                {isInvitedUser ? "Set Your Password" : "Password"}
+                {isInvitedUser || isPasswordReset ? "Set Your Password" : "Password"}
               </Label>
               <Input
                 id="password"
@@ -146,7 +152,7 @@ const Auth = () => {
             >
               {loading 
                 ? "Loading..." 
-                : isInvitedUser 
+                : isInvitedUser || isPasswordReset
                 ? "Set Password & Continue" 
                 : isSignUp 
                 ? "Create Account" 
@@ -154,7 +160,7 @@ const Auth = () => {
             </Button>
           </form>
           
-          {!isInvitedUser && (
+          {!isInvitedUser && !isPasswordReset && (
             <div className="mt-4 space-y-2 text-center">
               <button
                 type="button"
