@@ -60,18 +60,7 @@ serve(async (req) => {
       );
     }
 
-    // Generate password recovery link using Supabase Admin API
-    const redirectTo = `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'https://app.bbscakecreations.com'}/auth`;
-    
-    const { data: resetData, error: resetError } = await supabaseClient.auth.admin.generateLink({
-      type: 'recovery',
-      email: '', // We'll get the email from the user record
-      options: {
-        redirectTo,
-      },
-    });
-
-    // First, get the user's email
+    // Get the user's email
     const { data: userData, error: getUserError } = await supabaseClient.auth.admin.getUserById(userId);
     
     if (getUserError || !userData?.user?.email) {
@@ -82,34 +71,31 @@ serve(async (req) => {
       );
     }
 
-    // Generate recovery link for the specific user
-    const { data: recoveryData, error: recoveryError } = await supabaseClient.auth.admin.generateLink({
-      type: 'recovery',
-      email: userData.user.email,
-      options: {
+    // Use resetPasswordForEmail to actually send the recovery email
+    const redirectTo = `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'https://app.bbscakecreations.com'}/auth`;
+    
+    const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(
+      userData.user.email,
+      {
         redirectTo,
-      },
-    });
+      }
+    );
 
-    if (recoveryError) {
-      console.error('Error generating recovery link:', recoveryError);
+    if (resetError) {
+      console.error('Error sending recovery email:', resetError);
       return new Response(
-        JSON.stringify({ error: 'Failed to generate recovery link' }),
+        JSON.stringify({ error: 'Failed to send recovery email' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Password reset link generated for:', userData.user.email);
+    console.log('Password reset email sent to:', userData.user.email);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Password reset email sent',
-        email: userData.user.email,
-        // In development, you might want to return the link, but not in production
-        ...(Deno.env.get('ENVIRONMENT') === 'development' && { 
-          resetLink: recoveryData.properties?.action_link 
-        })
+        email: userData.user.email
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
