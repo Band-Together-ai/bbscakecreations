@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MoreVertical, Eye, Ban, Trash2, Star } from "lucide-react";
+import { MoreVertical, Eye, Ban, Trash2, Star, KeyRound } from "lucide-react";
 
 interface User {
   id: string;
@@ -230,6 +230,27 @@ export const UsersTab = () => {
     }
   };
 
+  const handleResetPassword = async (userId: string, email: string) => {
+    if (!confirm(`Send password reset email to ${email}?`)) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: { userId }
+      });
+
+      if (error) {
+        console.error('Error resetting password:', error);
+        toast.error('Failed to send password reset');
+        return;
+      }
+
+      toast.success(`Password reset email sent to ${email}`);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast.error('Failed to send password reset');
+    }
+  };
+
   const handleDeleteUser = async (userId: string, email: string) => {
     if (!confirm(`Are you sure you want to delete user ${email}? This cannot be undone.`)) return;
 
@@ -389,6 +410,10 @@ export const UsersTab = () => {
                           <DropdownMenuItem onClick={() => handleViewActivity(user)}>
                             <Eye className="w-4 h-4 mr-2" />
                             View Activity
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleResetPassword(user.id, user.email)}>
+                            <KeyRound className="w-4 h-4 mr-2" />
+                            Reset Password
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleChangeRole(user.id, 'admin')}>
                             Make Admin
