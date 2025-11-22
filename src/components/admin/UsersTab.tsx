@@ -207,13 +207,24 @@ export const UsersTab = () => {
     const days = grantDays ? parseInt(grantDays) : 0;
 
     try {
+      const requestBody: {
+        targetUserId: string;
+        promoType: string;
+        days?: number;
+        notes: string | null;
+      } = {
+        targetUserId: grantUserId,
+        promoType: days > 0 ? 'admin_grant' : 'early_bird_lifetime',
+        notes: grantNotes || null,
+      };
+
+      // Only include days if it's greater than 0
+      if (days > 0) {
+        requestBody.days = days;
+      }
+
       const { data, error } = await supabase.functions.invoke('grant-promo-access', {
-        body: {
-          targetUserId: grantUserId,
-          promoType: days > 0 ? 'admin_grant' : 'early_bird_lifetime',
-          days: days > 0 ? days : null,
-          notes: grantNotes || null,
-        },
+        body: requestBody,
       });
 
       if (error) throw error;
