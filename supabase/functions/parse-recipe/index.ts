@@ -13,6 +13,7 @@ serve(async (req) => {
 
   try {
     const { url, pasted_text } = await req.json();
+    console.log('parse-recipe invoked with URL:', url);
 
     // Auth check
     const authHeader = req.headers.get('Authorization')!;
@@ -24,6 +25,7 @@ serve(async (req) => {
 
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     if (authError || !user) {
+      console.error('Auth error:', authError);
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -35,6 +37,7 @@ serve(async (req) => {
     // If URL provided and no pasted text, fetch content
     if (url && !pasted_text) {
       try {
+        console.log('Fetching URL content...');
         const response = await fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; BrandiaBot/1.0)',
@@ -42,9 +45,11 @@ serve(async (req) => {
         });
         
         if (!response.ok) {
+          console.error('Fetch failed with status:', response.status);
           throw new Error(`Failed to fetch URL: ${response.status}`);
         }
 
+        console.log('URL fetched successfully, parsing HTML...');
         const html = await response.text();
         // Basic HTML stripping - keep just text
         const scriptRegex = /<script[^>]*>[\s\S]*?<\/script>/gi;
@@ -59,6 +64,8 @@ serve(async (req) => {
           .replace(spaceRegex, ' ')
           .trim()
           .slice(0, 50000);
+        
+        console.log('Content extracted, length:', content.length);
       } catch (fetchError) {
         console.error('Fetch error:', fetchError);
         return new Response(JSON.stringify({ 
@@ -80,9 +87,11 @@ serve(async (req) => {
     // Call Lovable AI to extract recipe
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not configured');
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
+    console.log('Calling Lovable AI for recipe extraction...');
     const systemPrompt = `You are a recipe extraction assistant. Extract ingredients and instructions from the provided content, and intelligently detect if the recipe contains BOTH cake/baked good AND frosting/icing components.
 
 CRITICAL RULES:
@@ -144,11 +153,13 @@ If hasSeparation is false, put everything in cakePart and leave frostingPart emp
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI API error:', aiResponse.status, errorText);
-      throw new Error('AI extraction failed');
+      throw new Error(`AI extraction failed: ${aiResponse.status}`);
     }
 
+    console.log('AI response received, parsing...');
     const aiData = await aiResponse.json();
     const extractedText = aiData.choices?.[0]?.message?.content || '';
+    console.log('Extracted text length:', extractedText.length);
     
     // Parse JSON from response (handle markdown code blocks)
     let parsed;
@@ -159,8 +170,10 @@ If hasSeparation is false, put everything in cakePart and leave frostingPart emp
       } else {
         parsed = JSON.parse(extractedText);
       }
+      console.log('Successfully parsed recipe data');
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
+      console.error('Extracted text:', extractedText.substring(0, 500));
       return new Response(JSON.stringify({ 
         error: 'Could not parse recipe structure from content',
         raw: extractedText 
@@ -170,6 +183,7 @@ If hasSeparation is false, put everything in cakePart and leave frostingPart emp
       });
     }
 
+    console.log('Recipe parsing complete, returning data');
     return new Response(JSON.stringify({
       hasSeparation: parsed.hasSeparation || false,
       confidence: parsed.confidence || 0,
@@ -183,6 +197,7 @@ If hasSeparation is false, put everything in cakePart and leave frostingPart emp
 
   } catch (error) {
     console.error('parse-recipe error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return new Response(JSON.stringify({ 
       error: error instanceof Error ? error.message : 'Unknown error' 
     }), {

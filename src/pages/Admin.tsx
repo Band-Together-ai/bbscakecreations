@@ -257,14 +257,21 @@ const Admin = () => {
     }
 
     setIsParsingRecipe(true);
+    console.log('Starting recipe parse for URL:', recipeLink);
     try {
       const { data, error } = await supabase.functions.invoke('parse-recipe', {
         body: { url: recipeLink }
       });
 
-      if (error) throw error;
+      console.log('Parse recipe response:', { data, error });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
       if (data.error) {
+        console.error('Recipe parsing error:', data.error);
         toast.error(data.error);
         return;
       }
