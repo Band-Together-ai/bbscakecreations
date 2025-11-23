@@ -278,12 +278,15 @@ const Admin = () => {
 
       // Check if separation was detected
       if (data.hasSeparation && data.confidence > 0.3) {
+        console.log('Separation detected, showing modal');
         setParsedRecipeData(data);
         setShowSeparationModal(true);
+        toast.info("Recipe has cake & frosting sections - review before saving");
         return;
       }
 
       // No separation or low confidence - treat as complete recipe
+      console.log('No separation, populating form directly');
       setRecipeIngredients(data.cakePart?.ingredients || data.ingredients || []);
       const ingredientsText = (data.cakePart?.ingredients || data.ingredients || [])
         .map((ing: any) => {
@@ -300,12 +303,15 @@ const Admin = () => {
         .map((step: string, index: number) => `${index + 1}. ${step}`)
         .join('\n\n');
 
+      console.log('Setting instructions:', instructionsText.substring(0, 100));
+      console.log('Setting ingredients in description:', ingredientsText.substring(0, 100));
+      
       setRecipeInstructions(instructionsText);
       const currentDesc = recipeDescription.trim();
       const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
       setRecipeDescription(newDesc);
 
-      toast.success("Recipe parsed! Review and modify as needed.");
+      toast.success("Recipe parsed! Scroll down to review ingredients and instructions.");
     } catch (error) {
       console.error('Parse recipe error:', error);
       toast.error("Failed to parse recipe");
