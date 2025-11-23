@@ -257,36 +257,44 @@ const Admin = () => {
     }
 
     setIsParsingRecipe(true);
-    console.log('Starting recipe parse for URL:', recipeLink);
+    toast.info("Fetching recipe from URL...");
+    
     try {
       const { data, error } = await supabase.functions.invoke('parse-recipe', {
         body: { url: recipeLink }
       });
 
-      console.log('Parse recipe response:', { data, error });
-
       if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+        toast.error(`Connection error: ${error.message}`);
+        return;
       }
 
       if (data.error) {
-        console.error('Recipe parsing error:', data.error);
-        toast.error(data.error);
+        toast.error(`Parse error: ${data.error}`);
         return;
       }
 
+      // Show what we got back
+      const ingredientCount = (data.cakePart?.ingredients || data.ingredients || []).length;
+      const stepCount = (data.cakePart?.instructions || data.instructions || []).length;
+      
       // Check if separation was detected
       if (data.hasSeparation && data.confidence > 0.3) {
+        toast.info(`Found ${ingredientCount} cake ingredients + ${data.frostingPart?.ingredients?.length || 0} frosting ingredients - review split`);
         setParsedRecipeData(data);
         setShowSeparationModal(true);
-        toast.info("Recipe has cake & frosting sections - review before saving");
         return;
       }
 
-      // No separation or low confidence - treat as complete recipe
-      setRecipeIngredients(data.cakePart?.ingredients || data.ingredients || []);
-      const ingredientsText = (data.cakePart?.ingredients || data.ingredients || [])
+      // No separation - populate form directly
+      if (ingredientCount === 0 || stepCount === 0) {
+        toast.error(`Parsing incomplete: ${ingredientCount} ingredients, ${stepCount} steps found. Try a different recipe URL.`);
+        return;
+      }
+
+      // Build ingredients text
+      const ingredients = data.cakePart?.ingredients || data.ingredients || [];
+      const ingredientsText = ingredients
         .map((ing: any) => {
           const parts = [];
           if (ing.amount) parts.push(ing.amount);
@@ -297,24 +305,30 @@ const Admin = () => {
         })
         .join('\n');
 
-      const instructionsText = (data.cakePart?.instructions || data.instructions || [])
+      // Build instructions text
+      const instructions = data.cakePart?.instructions || data.instructions || [];
+      const instructionsText = instructions
         .map((step: string, index: number) => `${index + 1}. ${step}`)
         .join('\n\n');
       
+      // Update form fields
+      setRecipeIngredients(ingredients);
       setRecipeInstructions(instructionsText);
+      
+      // Add ingredients to description
       const currentDesc = recipeDescription.trim();
       const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
       setRecipeDescription(newDesc);
 
-      // Show success with summary
-      const ingredientCount = (data.cakePart?.ingredients || data.ingredients || []).length;
-      const stepCount = (data.cakePart?.instructions || data.instructions || []).length;
-      toast.success(`✓ Parsed ${ingredientCount} ingredients and ${stepCount} steps! Check Description and Instructions fields below.`, {
-        duration: 8000,
+      // Success with clear feedback
+      toast.success(`✓ SUCCESS! Parsed ${ingredientCount} ingredients and ${stepCount} steps. Scroll down to see Description and Instructions fields.`, {
+        duration: 10000,
       });
     } catch (error) {
-      console.error('Parse recipe error:', error);
-      toast.error("Failed to parse recipe");
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to parse recipe: ${errorMsg}. Try again or use a different recipe URL.`, {
+        duration: 8000,
+      });
     } finally {
       setIsParsingRecipe(false);
     }
