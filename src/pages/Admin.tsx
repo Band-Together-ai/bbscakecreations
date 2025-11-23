@@ -266,11 +266,13 @@ const Admin = () => {
 
       if (error) {
         toast.error(`Connection error: ${error.message}`);
+        setIsParsingRecipe(false);
         return;
       }
 
       if (data.error) {
         toast.error(`Parse error: ${data.error}`);
+        setIsParsingRecipe(false);
         return;
       }
 
@@ -289,6 +291,7 @@ const Admin = () => {
       // No separation - populate form directly
       if (ingredientCount === 0 || stepCount === 0) {
         toast.error(`Parsing incomplete: ${ingredientCount} ingredients, ${stepCount} steps found. Try a different recipe URL.`);
+        setIsParsingRecipe(false);
         return;
       }
 
