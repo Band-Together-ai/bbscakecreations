@@ -38,11 +38,20 @@ serve(async (req) => {
     if (url && !pasted_text) {
       try {
         console.log('Fetching URL content...');
+        
+        // Add timeout to fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const response = await fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; BrandiaBot/1.0)',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           },
+          signal: controller.signal,
         });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
           console.error('Fetch failed with status:', response.status);
@@ -51,6 +60,8 @@ serve(async (req) => {
 
         console.log('URL fetched successfully, parsing HTML...');
         const html = await response.text();
+        console.log('HTML length:', html.length);
+        
         // Basic HTML stripping - keep just text
         const scriptRegex = /<script[^>]*>[\s\S]*?<\/script>/gi;
         const styleRegex = /<style[^>]*>[\s\S]*?<\/style>/gi;
@@ -68,6 +79,18 @@ serve(async (req) => {
         console.log('Content extracted, length:', content.length);
       } catch (fetchError) {
         console.error('Fetch error:', fetchError);
+        console.error('Error type:', fetchError instanceof Error ? fetchError.name : 'Unknown');
+        console.error('Error message:', fetchError instanceof Error ? fetchError.message : String(fetchError));
+        
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          return new Response(JSON.stringify({ 
+            error: 'Request timed out while fetching the recipe URL. Please try pasting the recipe text instead.' 
+          }), {
+            status: 408,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        
         return new Response(JSON.stringify({ 
           error: 'Could not fetch URL. Please paste the recipe text instead.' 
         }), {
