@@ -2155,30 +2155,33 @@ const Admin = () => {
           parsedRecipe={parsedRecipeData}
           onApprove={(data) => {
             // User approved the split - populate form with combined data
-            if (data.createSeparate) {
-              const allIngredients = [
-                ...data.cakePart.ingredients,
-                ...data.frostingPart.ingredients
-              ];
-              const allInstructions = [
-                ...data.cakePart.instructions,
-                ...data.frostingPart.instructions,
-                data.assemblyInstructions
-              ].filter(Boolean).join('\n\n');
-              
-              setRecipeIngredients(allIngredients);
-              setRecipeInstructions(allInstructions);
-              toast.success(`Merged ${allIngredients.length} ingredients. Scroll down to review and save.`);
-            }
+            const allIngredients = [
+              ...data.cakePart.ingredients,
+              ...data.frostingPart.ingredients
+            ];
+            const allInstructions = [
+              ...data.cakePart.instructions,
+              ...data.frostingPart.instructions,
+              data.assemblyInstructions
+            ].filter(Boolean).join('\n\n');
+            
+            setRecipeIngredients(allIngredients);
+            setRecipeInstructions(allInstructions);
+            toast.success(`Merged ${allIngredients.length} ingredients. Scroll down to review and save.`);
             setShowSeparationModal(false);
             setIsParsingRecipe(false);
           }}
           onKeepTogether={() => {
-            // User rejected the split - populate form with all data combined
-            const allIngredients = parsedRecipeData.cakePart.ingredients;
-            const allInstructions = parsedRecipeData.cakePart.instructions
-              .map((step: string, index: number) => `${index + 1}. ${step}`)
-              .join('\n\n');
+            // User chose to keep together - combine ALL parts (cake + frosting)
+            const allIngredients = [
+              ...parsedRecipeData.cakePart.ingredients,
+              ...parsedRecipeData.frostingPart.ingredients
+            ];
+            const allInstructions = [
+              ...parsedRecipeData.cakePart.instructions,
+              ...parsedRecipeData.frostingPart.instructions,
+              parsedRecipeData.assemblyInstructions
+            ].filter(Boolean).join('\n\n');
             
             setRecipeIngredients(allIngredients);
             setRecipeInstructions(allInstructions);
