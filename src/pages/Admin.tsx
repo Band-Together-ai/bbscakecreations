@@ -276,14 +276,8 @@ const Admin = () => {
         return;
       }
 
-      console.log('Full parsed data structure:', JSON.stringify(data, null, 2));
-      console.log('Has separation?', data.hasSeparation, 'Confidence:', data.confidence);
-      console.log('Cake ingredients:', data.cakePart?.ingredients);
-      console.log('Cake instructions:', data.cakePart?.instructions);
-
       // Check if separation was detected
       if (data.hasSeparation && data.confidence > 0.3) {
-        console.log('Separation detected, showing modal');
         setParsedRecipeData(data);
         setShowSeparationModal(true);
         toast.info("Recipe has cake & frosting sections - review before saving");
@@ -291,7 +285,6 @@ const Admin = () => {
       }
 
       // No separation or low confidence - treat as complete recipe
-      console.log('No separation, populating form directly');
       setRecipeIngredients(data.cakePart?.ingredients || data.ingredients || []);
       const ingredientsText = (data.cakePart?.ingredients || data.ingredients || [])
         .map((ing: any) => {
@@ -307,16 +300,18 @@ const Admin = () => {
       const instructionsText = (data.cakePart?.instructions || data.instructions || [])
         .map((step: string, index: number) => `${index + 1}. ${step}`)
         .join('\n\n');
-
-      console.log('Setting instructions:', instructionsText.substring(0, 100));
-      console.log('Setting ingredients in description:', ingredientsText.substring(0, 100));
       
       setRecipeInstructions(instructionsText);
       const currentDesc = recipeDescription.trim();
       const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
       setRecipeDescription(newDesc);
 
-      toast.success("Recipe parsed! Scroll down to review ingredients and instructions.");
+      // Show success with summary
+      const ingredientCount = (data.cakePart?.ingredients || data.ingredients || []).length;
+      const stepCount = (data.cakePart?.instructions || data.instructions || []).length;
+      toast.success(`✓ Parsed ${ingredientCount} ingredients and ${stepCount} steps! Check Description and Instructions fields below.`, {
+        duration: 8000,
+      });
     } catch (error) {
       console.error('Parse recipe error:', error);
       toast.error("Failed to parse recipe");
