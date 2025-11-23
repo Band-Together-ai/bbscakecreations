@@ -276,6 +276,11 @@ const Admin = () => {
         return;
       }
 
+      console.log('Full parsed data structure:', JSON.stringify(data, null, 2));
+      console.log('Has separation?', data.hasSeparation, 'Confidence:', data.confidence);
+      console.log('Cake ingredients:', data.cakePart?.ingredients);
+      console.log('Cake instructions:', data.cakePart?.instructions);
+
       // Check if separation was detected
       if (data.hasSeparation && data.confidence > 0.3) {
         console.log('Separation detected, showing modal');
