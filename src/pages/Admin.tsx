@@ -314,17 +314,15 @@ const Admin = () => {
         .map((step: string, index: number) => `${index + 1}. ${step}`)
         .join('\n\n');
       
-      // Update form fields
+      // Update form fields - ingredients stay as JSON array for proper database storage
       setRecipeIngredients(ingredients);
       setRecipeInstructions(instructionsText);
       
-      // Add ingredients to description
-      const currentDesc = recipeDescription.trim();
-      const newDesc = `INGREDIENTS:\n${ingredientsText}${currentDesc ? '\n\n' + currentDesc : ''}`;
-      setRecipeDescription(newDesc);
+      // DO NOT put ingredients in description - they belong in the ingredients JSON field
+      // Leave description empty for user to add their own story/notes
 
       // Success with clear feedback
-      toast.success(`✓ SUCCESS! Parsed ${ingredientCount} ingredients and ${stepCount} steps. Scroll down to see Description and Instructions fields.`, {
+      toast.success(`✓ SUCCESS! Parsed ${ingredientCount} ingredients and ${stepCount} steps. Scroll down to review and click Save Recipe.`, {
         duration: 10000,
       });
     } catch (error) {
@@ -1298,9 +1296,15 @@ const Admin = () => {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <p className="text-xs text-muted-foreground">
-                      Position 1 is the special "Featured Cake" spot on the homepage
-                    </p>
+                    {!isFeatured && featuredPosition ? (
+                      <p className="text-xs text-amber-600 font-medium">
+                        ⚠️ Check "Mark as Featured" above to save this position
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Position 1 is the special "Featured Cake" spot on the homepage
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex gap-3">
