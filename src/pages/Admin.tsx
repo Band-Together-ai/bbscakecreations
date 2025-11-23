@@ -336,7 +336,7 @@ const Admin = () => {
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
       is_featured: isFeatured,
-      featured_position: featuredPosition,
+      featured_position: isFeatured && featuredPosition ? featuredPosition : null,
       brandia_pick: brandiaPick,
       why_she_loves_it: whySheLovesIt || null,
     };
