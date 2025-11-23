@@ -357,7 +357,7 @@ const Admin = () => {
       is_gluten_free: isGlutenFree,
       is_public: isPublic,
       is_featured: isFeatured,
-      featured_position: isFeatured && featuredPosition ? featuredPosition : null,
+      featured_position: featuredPosition || null,
       brandia_pick: brandiaPick,
       why_she_loves_it: whySheLovesIt || null,
     };
@@ -1296,15 +1296,9 @@ const Admin = () => {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    {!isFeatured && featuredPosition ? (
-                      <p className="text-xs text-amber-600 font-medium">
-                        ⚠️ Check "Mark as Featured" above to save this position
-                      </p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Position 1 is the special "Featured Cake" spot on the homepage
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Set a position and other recipes will automatically slide down
+                    </p>
                   </div>
 
                   <div className="flex gap-3">
