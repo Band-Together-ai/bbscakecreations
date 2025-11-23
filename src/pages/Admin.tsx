@@ -283,9 +283,15 @@ const Admin = () => {
       
       // Check if separation was detected
       if (data.hasSeparation && data.confidence > 0.3) {
+        console.log('🔍 Separation detected:', {
+          cakeIngredients: data.cakePart?.ingredients?.length,
+          frostingIngredients: data.frostingPart?.ingredients?.length,
+          confidence: data.confidence
+        });
         toast.info(`Found ${ingredientCount} cake ingredients + ${data.frostingPart?.ingredients?.length || 0} frosting ingredients - review split`);
         setParsedRecipeData(data);
         setShowSeparationModal(true);
+        setIsParsingRecipe(false); // CRITICAL: Reset parsing state
         return;
       }
 
@@ -363,7 +369,9 @@ const Admin = () => {
       why_she_loves_it: whySheLovesIt || null,
     };
 
-    console.log('Saving recipe with data:', recipeData);
+    console.log('💾 Saving recipe with data:', recipeData);
+    console.log('💾 Ingredients count:', recipeIngredients.length);
+    console.log('💾 Featured position:', featuredPosition);
 
     let recipeId = editingRecipe?.id;
 
@@ -2165,11 +2173,12 @@ const Admin = () => {
               data.assemblyInstructions
             ].filter(Boolean).join('\n\n');
             
+            console.log('✅ Approve clicked - Setting ingredients:', allIngredients.length);
+            console.log('✅ Ingredients data:', allIngredients);
             setRecipeIngredients(allIngredients);
             setRecipeInstructions(allInstructions);
             toast.success(`Merged ${allIngredients.length} ingredients. Scroll down to review and save.`);
             setShowSeparationModal(false);
-            setIsParsingRecipe(false);
           }}
           onKeepTogether={() => {
             // User chose to keep together - combine ALL parts (cake + frosting)
@@ -2183,6 +2192,8 @@ const Admin = () => {
               parsedRecipeData.assemblyInstructions
             ].filter(Boolean).join('\n\n');
             
+            console.log('✅ Keep Together clicked - Setting ingredients:', allIngredients.length);
+            console.log('✅ Ingredients data:', allIngredients);
             setRecipeIngredients(allIngredients);
             setRecipeInstructions(allInstructions);
             toast.success(`Loaded ${allIngredients.length} ingredients as single recipe. Scroll down to review.`);
