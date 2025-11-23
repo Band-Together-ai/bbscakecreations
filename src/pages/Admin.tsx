@@ -341,50 +341,58 @@ const Admin = () => {
       why_she_loves_it: whySheLovesIt || null,
     };
 
-    console.log('Saving recipe with ingredients:', recipeIngredients);
-    console.log('Recipe data:', recipeData);
+    console.log('Saving recipe with data:', recipeData);
 
     let recipeId = editingRecipe?.id;
 
-    if (editingRecipe) {
-      const { error } = await supabase.from("recipes").update(recipeData).eq("id", editingRecipe.id);
-      if (error) {
-        toast.error("Failed to update recipe");
-        console.error(error);
-        return;
+    try {
+      if (editingRecipe) {
+        console.log('Updating recipe:', editingRecipe.id);
+        const { error } = await supabase.from("recipes").update(recipeData).eq("id", editingRecipe.id);
+        if (error) {
+          console.error('Update error:', error);
+          toast.error(`Failed to update recipe: ${error.message}`);
+          return;
+        }
+      } else {
+        console.log('Inserting new recipe');
+        const { data, error } = await supabase.from("recipes").insert(recipeData).select().single();
+        if (error) {
+          console.error('Insert error:', error);
+          toast.error(`Failed to save recipe: ${error.message}`);
+          return;
+        }
+        recipeId = data.id;
+        console.log('Recipe created with ID:', recipeId);
       }
-    } else {
-      const { data, error } = await supabase.from("recipes").insert(recipeData).select().single();
-      if (error) {
-        toast.error("Failed to save recipe");
-        console.error(error);
-        return;
+
+      // Add new photos to recipe_photos table
+      if (selectedPhotos.length > 0 && recipeId) {
+        console.log('Adding photos to recipe:', recipeId);
+        const existingPhotos = recipePhotos.filter(p => p.recipe_id === recipeId);
+        const isFirstPhoto = existingPhotos.length === 0;
+
+        const photosData = selectedPhotos.map((photo, index) => ({
+          recipe_id: recipeId,
+          photo_url: photo.url,
+          is_headline: isFirstPhoto && index === 0,
+        }));
+
+        const { error: photosError } = await supabase.from("recipe_photos").insert(photosData);
+        if (photosError) {
+          console.error('Photos error:', photosError);
+          toast.error("Recipe saved but failed to add photos");
+        }
       }
-      recipeId = data.id;
+
+      toast.success(editingRecipe ? "Recipe updated!" : "Recipe saved successfully!");
+      clearRecipeForm();
+      fetchRecipes();
+      fetchRecipePhotos();
+    } catch (error) {
+      console.error('Unexpected error saving recipe:', error);
+      toast.error("An unexpected error occurred while saving the recipe");
     }
-
-    // Add new photos to recipe_photos table
-    if (selectedPhotos.length > 0 && recipeId) {
-      const existingPhotos = recipePhotos.filter(p => p.recipe_id === recipeId);
-      const isFirstPhoto = existingPhotos.length === 0;
-
-      const photosData = selectedPhotos.map((photo, index) => ({
-        recipe_id: recipeId,
-        photo_url: photo.url,
-        is_headline: isFirstPhoto && index === 0, // First photo is headline by default
-      }));
-
-      const { error: photosError } = await supabase.from("recipe_photos").insert(photosData);
-      if (photosError) {
-        toast.error("Recipe saved but failed to add photos");
-        console.error(photosError);
-      }
-    }
-
-    toast.success(editingRecipe ? "Recipe updated!" : "Recipe saved successfully!");
-    clearRecipeForm();
-    fetchRecipes();
-    fetchRecipePhotos();
   };
 
   const clearRecipeForm = () => {
