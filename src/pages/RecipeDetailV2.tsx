@@ -247,9 +247,23 @@ export default function RecipeDetailV2() {
             {/* Show ingredients publicly */}
             <div className="mb-6">
               <h2 className="text-2xl font-fredoka text-ocean-deep mb-4">Ingredients</h2>
-              <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-wrap">{String(recipe.ingredients || '')}</p>
-              </div>
+              <ul id="ingredients-section" role="list" className="space-y-2">
+                {Array.isArray(recipe.ingredients) ? (
+                  recipe.ingredients.map((ingredient: any, index: number) => {
+                    const displayText = typeof ingredient === "string"
+                      ? ingredient
+                      : `${ingredient.amount || ""} ${ingredient.unit || ""} ${ingredient.ingredient || ingredient.item || ""}${ingredient.notes ? ` (${ingredient.notes})` : ""}`.trim();
+                    
+                    return (
+                      <li key={index} className="text-sm text-muted-foreground">
+                        • {displayText}
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li className="text-sm text-muted-foreground">No ingredients available</li>
+                )}
+              </ul>
             </div>
 
             {/* Locked Instructions */}
