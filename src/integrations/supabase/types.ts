@@ -1726,6 +1726,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      slide_featured_positions: {
+        Args: { exclude_recipe_id: string; new_position: number }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "collaborator" | "paid" | "free"

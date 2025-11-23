@@ -367,6 +367,22 @@ const Admin = () => {
     let recipeId = editingRecipe?.id;
 
     try {
+      // FIRST: Handle position sliding BEFORE updating the recipe
+      if (featuredPosition) {
+        console.log('Sliding recipes at position', featuredPosition, 'and above');
+        // Slide down all recipes at or after this position (excluding current recipe)
+        const { error: slideError } = await supabase.rpc('slide_featured_positions', {
+          new_position: featuredPosition,
+          exclude_recipe_id: editingRecipe?.id || '00000000-0000-0000-0000-000000000000'
+        });
+        
+        if (slideError) {
+          console.error('Slide error:', slideError);
+          // Continue anyway - this is not critical
+        }
+      }
+
+      // THEN: Update or insert the recipe
       if (editingRecipe) {
         console.log('Updating recipe:', editingRecipe.id);
         const { error } = await supabase.from("recipes").update(recipeData).eq("id", editingRecipe.id);
