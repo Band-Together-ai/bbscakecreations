@@ -65,7 +65,7 @@ const Admin = () => {
   const [recipeCategory, setRecipeCategory] = useState("");
   const [recipeTags, setRecipeTags] = useState("");
   const [isGlutenFree, setIsGlutenFree] = useState(false);
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [featuredPosition, setFeaturedPosition] = useState<number | null>(null);
   const [brandiaPick, setBrandiaPick] = useState(false);
