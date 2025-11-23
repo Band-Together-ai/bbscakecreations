@@ -26,6 +26,7 @@ import { ProfilePhotoEditor } from "@/components/admin/ProfilePhotoEditor";
 import { ViewAsTab } from "@/components/admin/ViewAsTab";
 import { CoffeeClicksTab } from "@/components/admin/CoffeeClicksTab";
 import { RecipeTypeSelector } from "@/components/admin/RecipeTypeSelector";
+import { RecipeSeparationApproval } from "@/components/admin/RecipeSeparationApproval";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -2145,6 +2146,48 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Recipe Separation Modal */}
+      {parsedRecipeData && (
+        <RecipeSeparationApproval
+          open={showSeparationModal}
+          onOpenChange={setShowSeparationModal}
+          parsedRecipe={parsedRecipeData}
+          onApprove={(data) => {
+            // User approved the split - populate form with combined data
+            if (data.createSeparate) {
+              const allIngredients = [
+                ...data.cakePart.ingredients,
+                ...data.frostingPart.ingredients
+              ];
+              const allInstructions = [
+                ...data.cakePart.instructions,
+                ...data.frostingPart.instructions,
+                data.assemblyInstructions
+              ].filter(Boolean).join('\n\n');
+              
+              setRecipeIngredients(allIngredients);
+              setRecipeInstructions(allInstructions);
+              toast.success(`Merged ${allIngredients.length} ingredients. Scroll down to review and save.`);
+            }
+            setShowSeparationModal(false);
+            setIsParsingRecipe(false);
+          }}
+          onKeepTogether={() => {
+            // User rejected the split - populate form with all data combined
+            const allIngredients = parsedRecipeData.cakePart.ingredients;
+            const allInstructions = parsedRecipeData.cakePart.instructions
+              .map((step: string, index: number) => `${index + 1}. ${step}`)
+              .join('\n\n');
+            
+            setRecipeIngredients(allIngredients);
+            setRecipeInstructions(allInstructions);
+            toast.success(`Loaded ${allIngredients.length} ingredients as single recipe. Scroll down to review.`);
+            setShowSeparationModal(false);
+            setIsParsingRecipe(false);
+          }}
+        />
+      )}
     </div>
   );
 };
