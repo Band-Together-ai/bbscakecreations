@@ -71,8 +71,12 @@ const Recipes = () => {
       .select(`
         *,
         recipe_photos(photo_url, is_headline)
-      `)
-      .eq("is_public", true);
+      `);
+
+    // Admins and collaborators see all recipes, others see only public
+    if (!isAdmin && !isCollaborator) {
+      query = query.eq("is_public", true);
+    }
 
     // Apply filter based on recipe type
     if (recipeFilter === 'base_cakes') {
@@ -286,6 +290,12 @@ const Recipes = () => {
                   )}
                 <CardHeader>
                   <div className="flex flex-wrap gap-2 mb-2">
+                    {!recipe.is_public && (isAdmin || isCollaborator) && (
+                      <div className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-fredoka w-fit">
+                        <Lock className="w-3 h-3" />
+                        Private
+                      </div>
+                    )}
                     {isBetaFree && (
                       <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-fredoka w-fit">
                         Free (Beta)
